@@ -1,4 +1,5 @@
 package com.jexis.jexis_backend.account.domain.entities;
+
 import jakarta.persistence.*;
 
 @Entity

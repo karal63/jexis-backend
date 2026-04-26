@@ -9,7 +9,7 @@ import com.jexis.jexis_backend.account.infrastructure.AccountRepository;
 @Service
 public class CreateAccountUseCase {
     private final AccountRepository repo;
-    
+
     public CreateAccountUseCase(AccountRepository repo) {
         this.repo = repo;
     }
