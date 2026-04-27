@@ -14,9 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 /**
  * Name: AccountController
  * Description: This class is responsible for handling HTTP requests related to
- * account management,
- * such as creating, deleting, and editing accounts. It uses the
- * CreateAccountUseCase to execute
+ * account management, such as creating, deleting, and editing accounts. It uses
+ * the CreateAccountUseCase to execute
  * the business logic for creating accounts.
  * Author: Leo
  */

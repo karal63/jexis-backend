@@ -15,8 +15,7 @@ public class CreateAccountUseCase {
     }
 
     public Account execute(CreateAccountDto body) {
-        Account account = new Account();
-        account.setName(body.getName());
+        Account account = new Account(body.getName(), body.getOwnerId());
         return repo.save(account);
     }
 }
