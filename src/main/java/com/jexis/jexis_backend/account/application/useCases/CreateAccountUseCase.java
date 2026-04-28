@@ -1,11 +1,10 @@
 package com.jexis.jexis_backend.account.application.useCases;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.jexis.jexis_backend.account.application.dto.CreateAccountDto;
 import com.jexis.jexis_backend.account.domain.entities.Account;
+import com.jexis.jexis_backend.account.domain.exception.NameExistsException;
 import com.jexis.jexis_backend.account.infrastructure.AccountRepository;
 
 /**
@@ -39,9 +38,7 @@ public class CreateAccountUseCase {
     public Account execute(CreateAccountDto body) {
         Account existingAccount = repo.findByName(body.getName());
         if (existingAccount != null) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Account already exists"); // LogCode.A009
+            throw new NameExistsException(body.getName());
         }
 
         Account account = new Account(body.getName(), body.getOwnerId());
