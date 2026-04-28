@@ -12,11 +12,19 @@ import com.jexis.jexis_backend.account.domain.entities.Account;
 import org.springframework.web.bind.annotation.RequestBody;
 
 /**
- * Name: AccountController
- * Description: This class is responsible for handling HTTP requests related to
- * account management, such as creating, deleting, and editing accounts. It uses
- * the CreateAccountUseCase to execute
- * the business logic for creating accounts.
+ * AccountController
+ *
+ * REST controller in the presentation layer responsible for exposing
+ * account-related HTTP endpoints.
+ *
+ * It handles request routing, input validation, and response mapping,
+ * delegating all business logic execution to dedicated account use case
+ * services (application layer).
+ *
+ * This class does not contain domain logic; its role is limited to
+ * orchestrating request/response flow between the client and the
+ * application layer.
+ *
  * Author: Leo
  */
 @RestController
@@ -29,13 +37,15 @@ public class AccountController {
     }
 
     /**
-     * Name: create
-     * Parameters: CreateAccountDto body - The data transfer object containing the
-     * information needed to create an account.
-     * Description: This method handles POST requests to the /account/create
-     * endpoint. It takes a CreateAccountDto object
-     * as input, which contains the necessary information to create a new account.
-     * Author: Leo
+     * Handles account creation requests.
+     *
+     * Accepts a {@link CreateAccountDto} payload, delegates execution to the
+     * createAccountUseCase, and returns the created {@link Account}.
+     *
+     * Endpoint: POST /account/create
+     *
+     * @param body request payload containing account creation data
+     * @return the newly created account
      */
     @PostMapping("/create")
     public Account create(@RequestBody CreateAccountDto body) {
