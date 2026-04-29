@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jexis.jexis_backend.account.application.dto.CreateAccountDto;
+import com.jexis.jexis_backend.account.application.dto.EditAccountDto;
 import com.jexis.jexis_backend.account.application.useCases.CreateAccountUseCase;
 import com.jexis.jexis_backend.account.application.useCases.DeleteAccountUseCase;
+import com.jexis.jexis_backend.account.application.useCases.EditAccountUseCase;
 import com.jexis.jexis_backend.account.application.useCases.GetAccountUseCase;
 import com.jexis.jexis_backend.account.application.useCases.GetAccountsUseCase;
 import com.jexis.jexis_backend.account.domain.entities.Account;
@@ -43,16 +45,19 @@ public class AccountController {
     private final DeleteAccountUseCase deleteAccountUseCase;
     private final GetAccountsUseCase getAccountsUseCase;
     private final GetAccountUseCase getAccountUseCase;
+    private final EditAccountUseCase editAccountUseCase;
 
     public AccountController(
             CreateAccountUseCase createAccount,
             DeleteAccountUseCase deleteAccount,
             GetAccountsUseCase getAccounts,
-            GetAccountUseCase getAccount) {
+            GetAccountUseCase getAccount,
+            EditAccountUseCase editAccount) {
         this.createAccountUseCase = createAccount;
         this.deleteAccountUseCase = deleteAccount;
         this.getAccountsUseCase = getAccounts;
         this.getAccountUseCase = getAccount;
+        this.editAccountUseCase = editAccount;
     }
 
     /**
@@ -119,8 +124,20 @@ public class AccountController {
         return "Account with ID " + id + " has been deleted.";
     }
 
-    @PatchMapping("/edit")
-    public String edit() {
-        return "Edit account endpoint";
+    /**
+     * Handles account editing requests.
+     *
+     * Accepts a {@link id} in the path, delegates execution to the
+     * editAccountUseCase, and returns the updated {@link Account}.
+     *
+     * Endpoint: PATCH /account/edit/{id}
+     *
+     * @param id   the ID of the account to edit
+     * @param body payload with updated values for the account
+     * @return retuers updated account
+     */
+    @PatchMapping("/edit/{id}")
+    public Optional<Account> edit(@PathVariable UUID id, @RequestBody EditAccountDto body) {
+        return editAccountUseCase.execute(id, body);
     }
 }

@@ -24,6 +24,14 @@ public class GetAccountsUseCase {
         this.repo = repo;
     }
 
+    /**
+     * Handles fetching all accounts.
+     *
+     * Calls the repository to fetch all accounts and returns the list of
+     * accounts.
+     *
+     * @return list of all accounts
+     */
     public List<Account> execute() {
         return repo.findAll();
     }

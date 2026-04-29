@@ -3,15 +3,15 @@ package com.jexis.jexis_backend.account.application.dto;
 import java.util.UUID;
 
 /**
- * CreateAccountDto
+ * EditAccountDto
  *
- * Data Transfer Object used for account creation requests. It encapsulates the
- * necessary data required to create a new account, such as the account name and
- * owner ID.
+ * Data Transfer Object used for account editing requests. It encapsulates the
+ * necessary data required to edit an existing account, such as the account ID
+ * and updated account details.
  *
  * Author: Leo
  */
-public class CreateAccountDto {
+public class EditAccountDto {
     private String name;
     private UUID ownerId;
 

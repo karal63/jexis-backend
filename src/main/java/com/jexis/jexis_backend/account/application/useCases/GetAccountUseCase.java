@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.jexis.jexis_backend.account.domain.entities.Account;
+import com.jexis.jexis_backend.account.domain.exception.AccountNotFoundException;
 import com.jexis.jexis_backend.account.infrastructure.AccountRepository;
 
 /**
@@ -26,11 +27,18 @@ public class GetAccountUseCase {
         this.repo = repo;
     }
 
+    /**
+     * Handles fetching a specific account.
+     *
+     * Calls the repository to fetch the account and returns the account.
+     *
+     * @param id the ID of the account to fetch
+     * @return the fetched account
+     */
     public Optional<Account> execute(UUID id) {
-
         Optional<Account> account = repo.findById(id);
-        if (account == null) {
-            throw new IllegalArgumentException("Account not found");
+        if (account.isEmpty()) {
+            throw new AccountNotFoundException(id);
         }
         return account;
     }

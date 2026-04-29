@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.jexis.jexis_backend.account.application.dto.CreateAccountDto;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.account.domain.exception.AccountNotFoundException;
 import com.jexis.jexis_backend.account.infrastructure.AccountRepository;
@@ -27,9 +28,19 @@ public class DeleteAccountUseCase {
         this.repo = repo;
     }
 
+    /**
+     * Handles account deletion.
+     *
+     * Accepts a {@link UUID} payload from controller, looks for
+     * the account, calls the repository to delete the account, and returns
+     * nothing.
+     *
+     * @param body passed by controller payload containing account creation data
+     * @return the newly created account
+     */
     public void execute(UUID id) {
         Optional<Account> existingAccount = repo.findById(id);
-        if (existingAccount == null) {
+        if (existingAccount.isEmpty()) {
             throw new AccountNotFoundException(id);
         }
 
