@@ -1,6 +1,7 @@
 package com.jexis.jexis_backend.account.presentation;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.jexis.jexis_backend.account.application.dto.CreateAccountDto;
 import com.jexis.jexis_backend.account.application.useCases.CreateAccountUseCase;
 import com.jexis.jexis_backend.account.application.useCases.DeleteAccountUseCase;
+import com.jexis.jexis_backend.account.application.useCases.GetAccountUseCase;
 import com.jexis.jexis_backend.account.application.useCases.GetAccountsUseCase;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,15 +42,17 @@ public class AccountController {
     private final CreateAccountUseCase createAccountUseCase;
     private final DeleteAccountUseCase deleteAccountUseCase;
     private final GetAccountsUseCase getAccountsUseCase;
+    private final GetAccountUseCase getAccountUseCase;
 
     public AccountController(
             CreateAccountUseCase createAccount,
             DeleteAccountUseCase deleteAccount,
-            GetAccountsUseCase getAccounts) {
-
+            GetAccountsUseCase getAccounts,
+            GetAccountUseCase getAccount) {
         this.createAccountUseCase = createAccount;
         this.deleteAccountUseCase = deleteAccount;
         this.getAccountsUseCase = getAccounts;
+        this.getAccountUseCase = getAccount;
     }
 
     /**
@@ -62,8 +66,24 @@ public class AccountController {
      * @return list of all accounts
      */
     @GetMapping("/list")
-    public List<Account> get() {
+    public List<Account> getAll() {
         return getAccountsUseCase.execute();
+    }
+
+    /**
+     * Return a specific account.
+     *
+     * This endpoint retrieves a specific account by delegating to the
+     * getAccountsUseCase, which interacts with the repository to fetch the data.
+     *
+     * Endpoint: GET /account/{id}
+     *
+     * @param id the ID of the account to retrieve
+     * @return the account with the specified ID
+     */
+    @GetMapping("/{id}")
+    public Optional<Account> get(@PathVariable UUID id) {
+        return getAccountUseCase.execute(id);
     }
 
     /**
