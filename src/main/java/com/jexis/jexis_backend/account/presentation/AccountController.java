@@ -1,13 +1,17 @@
 package com.jexis.jexis_backend.account.presentation;
 
+import java.util.UUID;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jexis.jexis_backend.account.application.dto.CreateAccountDto;
 import com.jexis.jexis_backend.account.application.useCases.CreateAccountUseCase;
+import com.jexis.jexis_backend.account.application.useCases.DeleteAccountUseCase;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -31,9 +35,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping("/account")
 public class AccountController {
     private final CreateAccountUseCase createAccountUseCase;
+    private final DeleteAccountUseCase deleteAccountUseCase;
 
-    public AccountController(CreateAccountUseCase createAccount) {
+    public AccountController(CreateAccountUseCase createAccount, DeleteAccountUseCase deleteAccount) {
         this.createAccountUseCase = createAccount;
+        this.deleteAccountUseCase = deleteAccount;
     }
 
     /**
@@ -52,9 +58,10 @@ public class AccountController {
         return createAccountUseCase.execute(body);
     }
 
-    @DeleteMapping("/delete")
-    public String delete() {
-        return "Delete account endpoint";
+    @DeleteMapping("/delete/{id}")
+    public String delete(@PathVariable UUID id) {
+        deleteAccountUseCase.execute(id);
+        return "Account with ID " + id + " has been deleted.";
     }
 
     @PatchMapping("/edit")
