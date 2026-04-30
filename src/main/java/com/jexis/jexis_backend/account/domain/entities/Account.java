@@ -78,4 +78,12 @@ public class Account {
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setOwnerId(UUID ownerId) {
+        this.ownerId = ownerId;
+    }
 }
