@@ -36,7 +36,6 @@ public class DeleteAccountUseCase {
      * nothing.
      *
      * @param body passed by controller payload containing account creation data
-     * @return the newly created account
      */
     public void execute(UUID id) {
         Optional<Account> existingAccount = repo.findById(id);
