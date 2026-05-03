@@ -1,13 +1,24 @@
 package com.jexis.jexis_backend.user.presentation;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.jexis.jexis_backend.user.application.dto.CreateDto;
+import com.jexis.jexis_backend.user.application.dto.EditDto;
+import com.jexis.jexis_backend.user.application.useCases.CreateUserUseCase;
+import com.jexis.jexis_backend.user.application.useCases.DeleteUserUseCase;
+import com.jexis.jexis_backend.user.application.useCases.EditUserUseCase;
 import com.jexis.jexis_backend.user.application.useCases.GetUsersUseCase;
 import com.jexis.jexis_backend.user.domain.entities.User;
 
@@ -32,9 +43,16 @@ import com.jexis.jexis_backend.user.domain.entities.User;
 public class UserController {
 
     GetUsersUseCase getUsersUseCase;
+    CreateUserUseCase createUserUseCase;
+    DeleteUserUseCase deleteUserUseCase;
+    EditUserUseCase editUserUseCase;
 
-    public UserController(GetUsersUseCase getUsersUseCase) {
+    public UserController(GetUsersUseCase getUsersUseCase, CreateUserUseCase createUserUseCase,
+            DeleteUserUseCase deleteUserUseCase, EditUserUseCase editUserUseCase) {
         this.getUsersUseCase = getUsersUseCase;
+        this.createUserUseCase = createUserUseCase;
+        this.deleteUserUseCase = deleteUserUseCase;
+        this.editUserUseCase = editUserUseCase;
     }
 
     /**
@@ -52,18 +70,20 @@ public class UserController {
         return getUsersUseCase.execute();
     }
 
-    @GetMapping("/create")
-    public List<User> createUsers() {
-        return getUsersUseCase.execute();
+    @PostMapping("/create")
+    public User createUsers(@RequestBody CreateDto createDto) {
+        return createUserUseCase.execute(createDto);
     }
 
     @DeleteMapping("/delete/{id}")
-    public List<User> deleteUser() {
-        return getUsersUseCase.execute();
+    public String deleteUser(@PathVariable UUID id) {
+        deleteUserUseCase.execute(id);
+        return "User deleted successfully";
     }
 
     @PatchMapping("/edit/{id}")
-    public List<User> editwUser() {
-        return getUsersUseCase.execute();
+    public Optional<User> editUser(@RequestBody EditDto editDto, @PathVariable UUID id) {
+        System.out.println("Received edit request for user ID: " + id);
+        return editUserUseCase.execute(id, editDto);
     }
 }
