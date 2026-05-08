@@ -1,0 +1,11 @@
+package com.jexis.jexis_backend.user.domain.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+import com.jexis.jexis_backend.common.web.error.DomainException;
+
+public class EmailExistsException extends DomainException {
+    public EmailExistsException() {
+        super(HttpStatus.CONFLICT.value(), "EMAIL_EXISTS", "Email already exists");
+    }
+}
