@@ -18,11 +18,12 @@ public class JwtUtil {
     private final long atExpirationMs = 86400000; // 1 day
     private final long rtExpirationMs = 86400000 * 30;
 
-    public TokenPair generateTokens(UUID id, String name, String email) {
+    public TokenPair generateTokens(UUID id, String name, String email, Boolean isActivated) {
         String accessToken = Jwts.builder()
                 .setSubject(id.toString())
                 .claim("name", name)
                 .claim("email", email)
+                .claim("isActivated", isActivated)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + atExpirationMs))
                 .signWith(ACCESS_TOKEN)
@@ -32,6 +33,7 @@ public class JwtUtil {
                 .setSubject(id.toString())
                 .claim("name", name)
                 .claim("email", email)
+                .claim("isActivated", isActivated)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + rtExpirationMs))
                 .signWith(REFRESH_TOKEN)
