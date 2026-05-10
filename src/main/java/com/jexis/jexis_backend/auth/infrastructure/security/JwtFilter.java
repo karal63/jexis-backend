@@ -52,8 +52,9 @@ public class JwtFilter extends OncePerRequestFilter {
                     UUID id = UUID.fromString(claims.getSubject());
                     String name = claims.get("name", String.class);
                     String email = claims.get("email", String.class);
+                    Boolean isActivated = claims.get("isActivated", Boolean.class);
 
-                    AuthUser user = new AuthUser(id, name, email);
+                    AuthUser user = new AuthUser(id, name, email, isActivated);
 
                     var auth = new UsernamePasswordAuthenticationToken(
                             user, null, List.of());
@@ -62,7 +63,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 }
             }
 
-            filterChain.doFilter(request, response);
         }
+        filterChain.doFilter(request, response);
     }
 }
