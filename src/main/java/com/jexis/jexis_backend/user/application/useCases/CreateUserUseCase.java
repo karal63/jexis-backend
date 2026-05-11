@@ -1,5 +1,7 @@
 package com.jexis.jexis_backend.user.application.useCases;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import com.jexis.jexis_backend.user.application.dto.CreateDto;
@@ -16,8 +18,8 @@ public class CreateUserUseCase {
     }
 
     public User execute(CreateDto body) {
-        User existingUser = repo.findByEmail(body.getEmail());
-        if (existingUser != null) {
+        Optional<User> existingUser = repo.findByEmail(body.getEmail());
+        if (existingUser.isPresent()) {
             throw new EmailExistsException();
         }
 
