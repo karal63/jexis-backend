@@ -22,14 +22,12 @@ public class LoginUseCase {
 
     public LoginResult execute(LoginDto body) {
         User user = userRepo.findByEmail(body.email());
-        TokenPair tokens = jwtUtil.generateTokens(user.getId(), user.getName(), user.getEmail(), user.getIsActivated());
 
         if (!user.getPassword().equals(body.password())) {
-            System.out.println(user.getPassword());
-            System.out.println(body.password());
             throw new Error();
         }
 
+        TokenPair tokens = jwtUtil.generateTokens(user.getId(), user.getName(), user.getEmail(), user.getIsActivated());
         AuthUser authUser = new AuthUser(user.getId(), user.getName(), user.getEmail(), user.getIsActivated());
 
         return new LoginResult(authUser, tokens);
