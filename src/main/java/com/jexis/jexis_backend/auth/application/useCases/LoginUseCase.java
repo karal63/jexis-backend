@@ -8,6 +8,7 @@ import com.jexis.jexis_backend.auth.application.dto.LoginResult;
 import com.jexis.jexis_backend.auth.application.dto.TokenPair;
 import com.jexis.jexis_backend.auth.infrastructure.security.JwtUtil;
 import com.jexis.jexis_backend.user.domain.entities.User;
+import com.jexis.jexis_backend.user.domain.exceptions.UserNotFoundException;
 import com.jexis.jexis_backend.user.infrastructure.UserRepository;
 
 @Service
@@ -24,7 +25,7 @@ public class LoginUseCase {
         User user = userRepo.findByEmail(body.email());
 
         if (!user.getPassword().equals(body.password())) {
-            throw new Error();
+            throw new UserNotFoundException();
         }
 
         TokenPair tokens = jwtUtil.generateTokens(user.getId(), user.getName(), user.getEmail(), user.getIsActivated());
