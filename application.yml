@@ -17,3 +17,8 @@ server:
     port: 3000
     servlet:
         context-path: /api
+
+jwt:
+    secret:
+        access: acce-secret-key-here-at-least-32-chars-long
+        refresh: refr-secret-key-here-at-least-32-chars-long

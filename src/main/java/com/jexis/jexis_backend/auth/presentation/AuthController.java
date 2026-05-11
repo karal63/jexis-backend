@@ -5,17 +5,21 @@ import java.time.Duration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.jexis.jexis_backend.auth.application.dto.AuthUser;
 import com.jexis.jexis_backend.auth.application.dto.LoginDto;
 import com.jexis.jexis_backend.auth.application.dto.LoginResult;
 import com.jexis.jexis_backend.auth.application.dto.SignupResult;
 import com.jexis.jexis_backend.auth.application.dto.TokenPair;
 import com.jexis.jexis_backend.auth.application.useCases.LoginUseCase;
+import com.jexis.jexis_backend.auth.application.useCases.RefreshTokensUseCase;
 import com.jexis.jexis_backend.auth.application.useCases.SignupUseCase;
 import com.jexis.jexis_backend.user.application.dto.CreateDto;
 
@@ -25,10 +29,13 @@ public class AuthController {
 
     public SignupUseCase signupUseCase;
     public LoginUseCase loginUseCase;
+    public RefreshTokensUseCase refreshTokensUseCase;
 
-    public AuthController(SignupUseCase signupUseCase, LoginUseCase loginUseCase) {
+    public AuthController(SignupUseCase signupUseCase, LoginUseCase loginUseCase,
+            RefreshTokensUseCase refreshTokensUseCase) {
         this.signupUseCase = signupUseCase;
         this.loginUseCase = loginUseCase;
+        this.refreshTokensUseCase = refreshTokensUseCase;
     }
 
     @PostMapping("/signup")
@@ -47,8 +54,8 @@ public class AuthController {
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", tokens.getRefreshToken())
                 .httpOnly(true)
                 .secure(true)
-                .path("/auth/refresh")
-                .maxAge(Duration.ofDays(7))
+                .path("/")
+                .maxAge(Duration.ofDays(30))
                 .sameSite("Strict")
                 .build();
 
@@ -71,7 +78,7 @@ public class AuthController {
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", "")
                 .httpOnly(true)
                 .secure(true)
-                .path("/auth/refresh") // MUST match original path
+                .path("/") // MUST match original path
                 .maxAge(0)
                 .sameSite("Strict")
                 .build();
@@ -91,6 +98,34 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
+                .maxAge(Duration.ofMinutes(1))
+                .sameSite("Strict")
+                .build();
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", tokens.getRefreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(Duration.ofDays(30))
+                .sameSite("Strict")
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .body(result.user());
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(@CookieValue(name = "refresh_token") String refreshToken) {
+        // @AuthenticationPrincipal AuthUser user
+        LoginResult result = refreshTokensUseCase.execute(refreshToken);
+        TokenPair tokens = result.tokens();
+
+        ResponseCookie accessCookie = ResponseCookie.from("access_token", tokens.getAccessToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
                 .maxAge(Duration.ofMinutes(15))
                 .sameSite("Strict")
                 .build();
@@ -98,8 +133,8 @@ public class AuthController {
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", tokens.getRefreshToken())
                 .httpOnly(true)
                 .secure(true)
-                .path("/auth/refresh")
-                .maxAge(Duration.ofDays(7))
+                .path("/")
+                .maxAge(Duration.ofDays(30))
                 .sameSite("Strict")
                 .build();
 

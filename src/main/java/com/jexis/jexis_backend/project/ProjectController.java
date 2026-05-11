@@ -12,7 +12,6 @@ import com.jexis.jexis_backend.project.dto.CreateProjectDto;
 public class ProjectController {
     @PostMapping("/create")
     public String create(@RequestBody CreateProjectDto body) {
-        System.out.println(body.getName());
         return "Create project";
     }
 }

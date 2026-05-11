@@ -2,6 +2,8 @@ package com.jexis.jexis_backend.auth.infrastructure.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.jexis.jexis_backend.auth.application.dto.TokenPair;
@@ -9,18 +11,25 @@ import com.jexis.jexis_backend.auth.application.dto.TokenPair;
 import java.security.Key;
 import java.util.Date;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class JwtUtil {
 
-    private final Key ACCESS_TOKEN = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    private final Key REFRESH_TOKEN = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    private final long atExpirationMs = 86400000; // 1 day
-    private final long rtExpirationMs = 86400000 * 30;
+    private final Key ACCESS_TOKEN;
+    private final Key REFRESH_TOKEN;
+    private final long atExpirationMs = TimeUnit.MINUTES.toMillis(15);
+    private final long rtExpirationMs = TimeUnit.DAYS.toMillis(30);
+
+    public JwtUtil(@Value("${jwt.secret.access}") String accessSecret,
+            @Value("${jwt.secret.refresh}") String refreshSecret) {
+        this.ACCESS_TOKEN = Keys.hmacShaKeyFor(accessSecret.getBytes());
+        this.REFRESH_TOKEN = Keys.hmacShaKeyFor(refreshSecret.getBytes());
+    }
 
     public TokenPair generateTokens(UUID id, String name, String email, Boolean isActivated) {
         String accessToken = Jwts.builder()
-                .setSubject(id.toString())
+                .claim("id", id.toString())
                 .claim("name", name)
                 .claim("email", email)
                 .claim("isActivated", isActivated)
@@ -30,7 +39,7 @@ public class JwtUtil {
                 .compact();
 
         String refreshToken = Jwts.builder()
-                .setSubject(id.toString())
+                .claim("id", id.toString())
                 .claim("name", name)
                 .claim("email", email)
                 .claim("isActivated", isActivated)
@@ -42,18 +51,36 @@ public class JwtUtil {
         return new TokenPair(accessToken, refreshToken);
     }
 
-    public boolean validateToken(String token) {
+    public boolean validateAccessToken(String token) {
         try {
-            extractClaims(token);
+            extractClaimsAt(token);
             return true;
         } catch (JwtException e) {
             return false;
         }
     }
 
-    public Claims extractClaims(String token) {
+    public boolean validateRefreshToken(String token) {
+        try {
+            extractClaimsRt(token);
+            return true;
+        } catch (JwtException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public Claims extractClaimsAt(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(ACCESS_TOKEN)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    public Claims extractClaimsRt(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(REFRESH_TOKEN)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();

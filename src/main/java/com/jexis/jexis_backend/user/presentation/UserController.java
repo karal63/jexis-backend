@@ -83,7 +83,6 @@ public class UserController {
 
     @PatchMapping("/edit/{id}")
     public Optional<User> editUser(@RequestBody EditDto editDto, @PathVariable UUID id) {
-        System.out.println("Received edit request for user ID: " + id);
         return editUserUseCase.execute(id, editDto);
     }
 }

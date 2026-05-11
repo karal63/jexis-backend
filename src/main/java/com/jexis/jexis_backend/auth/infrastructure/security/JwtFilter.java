@@ -46,10 +46,10 @@ public class JwtFilter extends OncePerRequestFilter {
             if (accessToken != null) {
                 String tokenValue = accessToken.getValue();
 
-                if (jwtUtil.validateToken(tokenValue)) {
-                    Claims claims = jwtUtil.extractClaims(tokenValue);
+                if (jwtUtil.validateAccessToken(tokenValue)) {
+                    Claims claims = jwtUtil.extractClaimsAt(tokenValue);
 
-                    UUID id = UUID.fromString(claims.getSubject());
+                    UUID id = UUID.fromString(claims.get("id", String.class));
                     String name = claims.get("name", String.class);
                     String email = claims.get("email", String.class);
                     Boolean isActivated = claims.get("isActivated", Boolean.class);

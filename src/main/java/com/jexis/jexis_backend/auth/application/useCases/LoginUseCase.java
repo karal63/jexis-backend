@@ -1,5 +1,7 @@
 package com.jexis.jexis_backend.auth.application.useCases;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import com.jexis.jexis_backend.auth.application.dto.AuthUser;
@@ -8,6 +10,7 @@ import com.jexis.jexis_backend.auth.application.dto.LoginResult;
 import com.jexis.jexis_backend.auth.application.dto.TokenPair;
 import com.jexis.jexis_backend.auth.infrastructure.security.JwtUtil;
 import com.jexis.jexis_backend.user.domain.entities.User;
+import com.jexis.jexis_backend.user.domain.exceptions.UserNotFoundException;
 import com.jexis.jexis_backend.user.infrastructure.UserRepository;
 
 @Service
@@ -21,16 +24,20 @@ public class LoginUseCase {
     }
 
     public LoginResult execute(LoginDto body) {
-        User user = userRepo.findByEmail(body.email());
-        TokenPair tokens = jwtUtil.generateTokens(user.getId(), user.getName(), user.getEmail(), user.getIsActivated());
+        Optional<User> user = userRepo.findByEmail(body.email());
 
-        if (!user.getPassword().equals(body.password())) {
-            System.out.println(user.getPassword());
-            System.out.println(body.password());
-            throw new Error();
+        if (!user.isPresent()) {
+            throw new UserNotFoundException();
         }
 
-        AuthUser authUser = new AuthUser(user.getId(), user.getName(), user.getEmail(), user.getIsActivated());
+        if (!user.get().getPassword().equals(body.password())) {
+            throw new UserNotFoundException();
+        }
+
+        TokenPair tokens = jwtUtil.generateTokens(user.get().getId(), user.get().getName(), user.get().getEmail(),
+                user.get().getIsActivated());
+        AuthUser authUser = new AuthUser(user.get().getId(), user.get().getName(), user.get().getEmail(),
+                user.get().getIsActivated());
 
         return new LoginResult(authUser, tokens);
     }
