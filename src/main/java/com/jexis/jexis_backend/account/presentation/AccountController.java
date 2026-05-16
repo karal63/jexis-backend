@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -20,6 +21,8 @@ import com.jexis.jexis_backend.account.application.useCases.EditAccountUseCase;
 import com.jexis.jexis_backend.account.application.useCases.GetAccountUseCase;
 import com.jexis.jexis_backend.account.application.useCases.GetAccountsUseCase;
 import com.jexis.jexis_backend.account.domain.entities.Account;
+import com.jexis.jexis_backend.auth.application.dto.AuthUser;
+
 import org.springframework.web.bind.annotation.RequestBody;
 
 /**
@@ -103,8 +106,8 @@ public class AccountController {
      * @return the newly created account
      */
     @PostMapping("/create")
-    public Account create(@RequestBody CreateAccountDto body) {
-        return createAccountUseCase.execute(body);
+    public Account create(@RequestBody CreateAccountDto body, @AuthenticationPrincipal AuthUser user) {
+        return createAccountUseCase.execute(body, user.id());
     }
 
     /**
