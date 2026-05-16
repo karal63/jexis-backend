@@ -90,7 +90,7 @@ public class AccountController {
      * @return the account with the specified ID
      */
     @GetMapping("/{id}")
-    public Optional<Account> get(@PathVariable UUID id) {
+    public Account get(@PathVariable UUID id) {
         return getAccountUseCase.execute(id);
     }
 

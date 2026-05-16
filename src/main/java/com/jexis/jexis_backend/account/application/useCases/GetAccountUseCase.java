@@ -35,11 +35,11 @@ public class GetAccountUseCase {
      * @param id the ID of the account to fetch
      * @return the fetched account
      */
-    public Optional<Account> execute(UUID id) {
+    public Account execute(UUID id) {
         Optional<Account> account = repo.findById(id);
         if (account.isEmpty()) {
             throw new AccountNotFoundException(id);
         }
-        return account;
+        return account.get();
     }
 }

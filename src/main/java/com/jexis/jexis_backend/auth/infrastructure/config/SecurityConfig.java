@@ -23,8 +23,8 @@ public class SecurityConfig {
 
         JwtFilter jwtFilter = new JwtFilter(jwtUtil);
 
-        // http
-        // .csrf(csrf -> csrf.disable())
+        http
+                .csrf(csrf -> csrf.disable());
         // .authorizeHttpRequests(auth -> auth
         // .requestMatchers("/auth/**").permitAll()
         // .anyRequest().authenticated())
