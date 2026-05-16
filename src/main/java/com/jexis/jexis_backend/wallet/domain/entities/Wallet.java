@@ -37,6 +37,9 @@ public class Wallet {
 
     private LocalDateTime deletedAt;
 
+    Wallet() {
+    }
+
     public Wallet(Account account) {
         this.account = account;
     }
