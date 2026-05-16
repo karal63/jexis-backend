@@ -52,6 +52,10 @@ public class Wallet {
         return availableBalance;
     }
 
+    public void setAvailableBalance(BigDecimal availableBalance) {
+        this.availableBalance = availableBalance;
+    }
+
     public Account getAccount() {
         return account;
     }
@@ -68,8 +72,16 @@ public class Wallet {
         return isDeleted;
     }
 
+    public void setIsDeleted(Boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
     public LocalDateTime getDeletedAt() {
         return deletedAt;
+    }
+
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
     }
 
 }

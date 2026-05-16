@@ -18,14 +18,10 @@ public class GetWalletUseCase {
     }
 
     public Wallet execute(UUID id) {
-        System.out.println("works");
         Optional<Wallet> wallet = repo.findById(id);
         if (wallet.isEmpty()) {
-            System.out.println("error");
             throw new WalletNotFoundException();
-
         }
-        System.out.println("hi");
 
         return wallet.get();
     }

@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.jexis.jexis_backend.account.application.useCases.GetAccountUseCase;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.wallet.application.dto.CreateWalletDto;
+import com.jexis.jexis_backend.wallet.application.dto.EditWalletDto;
 import com.jexis.jexis_backend.wallet.application.useCases.CreateWalletUseCase;
+import com.jexis.jexis_backend.wallet.application.useCases.EditWalletUseCase;
 import com.jexis.jexis_backend.wallet.application.useCases.GetAllWalletsUseCase;
 import com.jexis.jexis_backend.wallet.application.useCases.GetWalletUseCase;
 import com.jexis.jexis_backend.wallet.domain.entities.Wallet;
@@ -29,13 +31,16 @@ public class WalletController {
     GetAccountUseCase getAccountUseCase;
     CreateWalletUseCase createWalletUseCase;
     GetWalletUseCase getWalletUseCase;
+    EditWalletUseCase editWalletUseCase;
 
     public WalletController(GetAllWalletsUseCase getAllWalletsUseCase, GetAccountUseCase getAccountUseCase,
-            CreateWalletUseCase createWalletUseCase, GetWalletUseCase getWalletUseCase) {
+            CreateWalletUseCase createWalletUseCase, GetWalletUseCase getWalletUseCase,
+            EditWalletUseCase editWalletUseCase) {
         this.getAllWalletsUseCase = getAllWalletsUseCase;
         this.getAccountUseCase = getAccountUseCase;
         this.createWalletUseCase = createWalletUseCase;
         this.getWalletUseCase = getWalletUseCase;
+        this.editWalletUseCase = editWalletUseCase;
     }
 
     @GetMapping("/list")
@@ -55,12 +60,12 @@ public class WalletController {
     }
 
     @PatchMapping("/edit/{id}")
-    public String edit(@PathVariable String id) {
-        return "Edit project";
+    public Wallet edit(@PathVariable UUID id, @RequestBody EditWalletDto body) {
+        return editWalletUseCase.execute(id, body);
     }
 
     @PostMapping("/delete/{id}")
-    public String delete(@PathVariable String id) {
+    public String delete(@PathVariable UUID id) {
         return "Delete project";
     }
 }
