@@ -1,5 +1,6 @@
-package com.jexis.jexis_backend.project.domain.entities;
+package com.jexis.jexis_backend.wallet.domain.entities;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -21,7 +22,8 @@ public class Wallet {
     @JoinColumn(name = "account_id", referencedColumnName = "id", nullable = false)
     private Account account;
 
-    private int availableBalance = 0;
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal availableBalance = BigDecimal.ZERO;
 
     @Column(nullable = false)
     @CreationTimestamp
@@ -34,5 +36,37 @@ public class Wallet {
     private Boolean isDeleted = false;
 
     private LocalDateTime deletedAt;
+
+    public Wallet(Account account) {
+        this.account = account;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public BigDecimal getAvailableBalance() {
+        return availableBalance;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public Boolean getIsDeleted() {
+        return isDeleted;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
 
 }
