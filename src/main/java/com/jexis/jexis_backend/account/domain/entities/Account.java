@@ -6,6 +6,8 @@ import java.util.UUID;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.jexis.jexis_backend.user.domain.entities.User;
+
 import jakarta.persistence.*;
 
 /**
@@ -20,6 +22,7 @@ import jakarta.persistence.*;
  * Author: Leo
  */
 @Entity
+@Table(name = "accounts")
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -28,8 +31,9 @@ public class Account {
     @Column(nullable = false, unique = true)
     private String name;
 
-    @Column(nullable = false)
-    private UUID ownerId;
+    @ManyToOne
+    @JoinColumn(name = "owner_id", referencedColumnName = "id", nullable = false)
+    private User owner;
 
     @Column(nullable = false)
     @CreationTimestamp
@@ -46,17 +50,17 @@ public class Account {
     Account() {
     }
 
-    public Account(String name, UUID ownerId) {
+    public Account(String name, User owner) {
         this.name = name;
-        this.ownerId = ownerId;
+        this.owner = owner;
     }
 
     public String getName() {
         return name;
     }
 
-    public UUID getOwnerId() {
-        return ownerId;
+    public User getOwner() {
+        return owner;
     }
 
     public UUID getId() {
@@ -83,7 +87,7 @@ public class Account {
         this.name = name;
     }
 
-    public void setOwnerId(UUID ownerId) {
-        this.ownerId = ownerId;
+    public void setOwner(User owner) {
+        this.owner = owner;
     }
 }

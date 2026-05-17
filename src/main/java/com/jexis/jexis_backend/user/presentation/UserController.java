@@ -19,6 +19,7 @@ import com.jexis.jexis_backend.user.application.dto.EditDto;
 import com.jexis.jexis_backend.user.application.useCases.CreateUserUseCase;
 import com.jexis.jexis_backend.user.application.useCases.DeleteUserUseCase;
 import com.jexis.jexis_backend.user.application.useCases.EditUserUseCase;
+import com.jexis.jexis_backend.user.application.useCases.GetUserUseCase;
 import com.jexis.jexis_backend.user.application.useCases.GetUsersUseCase;
 import com.jexis.jexis_backend.user.domain.entities.User;
 
@@ -46,13 +47,15 @@ public class UserController {
     CreateUserUseCase createUserUseCase;
     DeleteUserUseCase deleteUserUseCase;
     EditUserUseCase editUserUseCase;
+    private final GetUserUseCase getUserUseCase;
 
     public UserController(GetUsersUseCase getUsersUseCase, CreateUserUseCase createUserUseCase,
-            DeleteUserUseCase deleteUserUseCase, EditUserUseCase editUserUseCase) {
+            DeleteUserUseCase deleteUserUseCase, EditUserUseCase editUserUseCase, GetUserUseCase getUserUseCase) {
         this.getUsersUseCase = getUsersUseCase;
         this.createUserUseCase = createUserUseCase;
         this.deleteUserUseCase = deleteUserUseCase;
         this.editUserUseCase = editUserUseCase;
+        this.getUserUseCase = getUserUseCase;
     }
 
     /**
@@ -68,6 +71,11 @@ public class UserController {
     @GetMapping("/list")
     public List<User> getUsers() {
         return getUsersUseCase.execute();
+    }
+
+    @GetMapping("/list/{id}")
+    public User getUser(@PathVariable UUID id) {
+        return getUserUseCase.execute(id);
     }
 
     @PostMapping("/create")

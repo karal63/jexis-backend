@@ -5,11 +5,12 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.jexis.jexis_backend.account.application.dto.CreateAccountDto;
 import com.jexis.jexis_backend.account.application.dto.EditAccountDto;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.account.domain.exception.AccountNotFoundException;
 import com.jexis.jexis_backend.account.infrastructure.AccountRepository;
+import com.jexis.jexis_backend.user.domain.entities.User;
+import com.jexis.jexis_backend.user.infrastructure.UserRepository;
 
 /**
  * EditAccountUseCase
@@ -23,10 +24,12 @@ import com.jexis.jexis_backend.account.infrastructure.AccountRepository;
  */
 @Service
 public class EditAccountUseCase {
-    AccountRepository repo;
+    AccountRepository accountRepo;
+    UserRepository userRepo;
 
-    public EditAccountUseCase(AccountRepository repo) {
-        this.repo = repo;
+    public EditAccountUseCase(AccountRepository accountRepo, UserRepository userRepo) {
+        this.accountRepo = accountRepo;
+        this.userRepo = userRepo;
     }
 
     /**
@@ -42,7 +45,7 @@ public class EditAccountUseCase {
      * @return the updated account
      */
     public Optional<Account> execute(UUID id, EditAccountDto body) {
-        Optional<Account> account = repo.findById(id);
+        Optional<Account> account = accountRepo.findById(id);
 
         if (account.isEmpty()) {
             throw new AccountNotFoundException(id);
@@ -53,9 +56,10 @@ public class EditAccountUseCase {
                 existingAccount.setName(body.getName());
             }
             if (body.getOwnerId() != null) {
-                existingAccount.setOwnerId(body.getOwnerId());
+                Optional<User> newOwner = userRepo.findById(body.getOwnerId());
+                existingAccount.setOwner(newOwner.get());
             }
-            return repo.save(existingAccount);
+            return accountRepo.save(existingAccount);
         });
 
         return account;

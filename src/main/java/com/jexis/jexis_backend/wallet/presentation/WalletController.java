@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,9 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jexis.jexis_backend.account.application.useCases.GetAccountUseCase;
 import com.jexis.jexis_backend.account.domain.entities.Account;
+import com.jexis.jexis_backend.auth.application.dto.AuthUser;
 import com.jexis.jexis_backend.wallet.application.dto.CreateWalletDto;
 import com.jexis.jexis_backend.wallet.application.dto.EditWalletDto;
 import com.jexis.jexis_backend.wallet.application.useCases.CreateWalletUseCase;
+import com.jexis.jexis_backend.wallet.application.useCases.DeleteWalletUseCase;
 import com.jexis.jexis_backend.wallet.application.useCases.EditWalletUseCase;
 import com.jexis.jexis_backend.wallet.application.useCases.GetAllWalletsUseCase;
 import com.jexis.jexis_backend.wallet.application.useCases.GetWalletUseCase;
@@ -32,15 +35,17 @@ public class WalletController {
     CreateWalletUseCase createWalletUseCase;
     GetWalletUseCase getWalletUseCase;
     EditWalletUseCase editWalletUseCase;
+    DeleteWalletUseCase deleteWalletUseCase;
 
     public WalletController(GetAllWalletsUseCase getAllWalletsUseCase, GetAccountUseCase getAccountUseCase,
             CreateWalletUseCase createWalletUseCase, GetWalletUseCase getWalletUseCase,
-            EditWalletUseCase editWalletUseCase) {
+            EditWalletUseCase editWalletUseCase, DeleteWalletUseCase deleteWalletUseCase) {
         this.getAllWalletsUseCase = getAllWalletsUseCase;
         this.getAccountUseCase = getAccountUseCase;
         this.createWalletUseCase = createWalletUseCase;
         this.getWalletUseCase = getWalletUseCase;
         this.editWalletUseCase = editWalletUseCase;
+        this.deleteWalletUseCase = deleteWalletUseCase;
     }
 
     @GetMapping("/list")
@@ -65,7 +70,7 @@ public class WalletController {
     }
 
     @PostMapping("/delete/{id}")
-    public String delete(@PathVariable UUID id) {
-        return "Delete project";
+    public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID id) {
+        deleteWalletUseCase.execute(user, id);
     }
 }

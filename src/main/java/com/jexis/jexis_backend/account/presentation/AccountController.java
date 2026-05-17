@@ -22,6 +22,8 @@ import com.jexis.jexis_backend.account.application.useCases.GetAccountUseCase;
 import com.jexis.jexis_backend.account.application.useCases.GetAccountsUseCase;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.auth.application.dto.AuthUser;
+import com.jexis.jexis_backend.user.application.useCases.GetUserUseCase;
+import com.jexis.jexis_backend.user.domain.entities.User;
 
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -49,18 +51,20 @@ public class AccountController {
     private final GetAccountsUseCase getAccountsUseCase;
     private final GetAccountUseCase getAccountUseCase;
     private final EditAccountUseCase editAccountUseCase;
+    private final GetUserUseCase getUserUseCase;
 
     public AccountController(
             CreateAccountUseCase createAccount,
             DeleteAccountUseCase deleteAccount,
             GetAccountsUseCase getAccounts,
             GetAccountUseCase getAccount,
-            EditAccountUseCase editAccount) {
+            EditAccountUseCase editAccount, GetUserUseCase getUserUseCase) {
         this.createAccountUseCase = createAccount;
         this.deleteAccountUseCase = deleteAccount;
         this.getAccountsUseCase = getAccounts;
         this.getAccountUseCase = getAccount;
         this.editAccountUseCase = editAccount;
+        this.getUserUseCase = getUserUseCase;
     }
 
     /**
@@ -107,7 +111,8 @@ public class AccountController {
      */
     @PostMapping("/create")
     public Account create(@RequestBody CreateAccountDto body, @AuthenticationPrincipal AuthUser user) {
-        return createAccountUseCase.execute(body, user.id());
+        User foundUser = getUserUseCase.execute(user.id());
+        return createAccountUseCase.execute(body, foundUser);
     }
 
     /**
