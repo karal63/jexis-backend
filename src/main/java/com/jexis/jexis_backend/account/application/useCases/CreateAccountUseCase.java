@@ -1,11 +1,14 @@
 package com.jexis.jexis_backend.account.application.useCases;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import com.jexis.jexis_backend.account.application.dto.CreateAccountDto;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.account.domain.exception.NameExistsException;
 import com.jexis.jexis_backend.account.infrastructure.AccountRepository;
+import com.jexis.jexis_backend.user.domain.entities.User;
 
 /**
  * CreateAccountUseCase
@@ -35,13 +38,13 @@ public class CreateAccountUseCase {
      * @param body passed by controller payload containing account creation data
      * @return the newly created account
      */
-    public Account execute(CreateAccountDto body) {
-        Account existingAccount = repo.findByName(body.getName());
-        if (existingAccount != null) {
+    public Account execute(CreateAccountDto body, User owner) {
+        Optional<Account> existingAccount = repo.findByName(body.getName());
+        if (existingAccount.isPresent()) {
             throw new NameExistsException(body.getName());
         }
 
-        Account account = new Account(body.getName(), body.getOwnerId());
+        Account account = new Account(body.getName(), owner);
         return repo.save(account);
     }
 }

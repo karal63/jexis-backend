@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -20,6 +21,10 @@ import com.jexis.jexis_backend.account.application.useCases.EditAccountUseCase;
 import com.jexis.jexis_backend.account.application.useCases.GetAccountUseCase;
 import com.jexis.jexis_backend.account.application.useCases.GetAccountsUseCase;
 import com.jexis.jexis_backend.account.domain.entities.Account;
+import com.jexis.jexis_backend.auth.application.dto.AuthUser;
+import com.jexis.jexis_backend.user.application.useCases.GetUserUseCase;
+import com.jexis.jexis_backend.user.domain.entities.User;
+
 import org.springframework.web.bind.annotation.RequestBody;
 
 /**
@@ -46,18 +51,20 @@ public class AccountController {
     private final GetAccountsUseCase getAccountsUseCase;
     private final GetAccountUseCase getAccountUseCase;
     private final EditAccountUseCase editAccountUseCase;
+    private final GetUserUseCase getUserUseCase;
 
     public AccountController(
             CreateAccountUseCase createAccount,
             DeleteAccountUseCase deleteAccount,
             GetAccountsUseCase getAccounts,
             GetAccountUseCase getAccount,
-            EditAccountUseCase editAccount) {
+            EditAccountUseCase editAccount, GetUserUseCase getUserUseCase) {
         this.createAccountUseCase = createAccount;
         this.deleteAccountUseCase = deleteAccount;
         this.getAccountsUseCase = getAccounts;
         this.getAccountUseCase = getAccount;
         this.editAccountUseCase = editAccount;
+        this.getUserUseCase = getUserUseCase;
     }
 
     /**
@@ -87,7 +94,7 @@ public class AccountController {
      * @return the account with the specified ID
      */
     @GetMapping("/{id}")
-    public Optional<Account> get(@PathVariable UUID id) {
+    public Account get(@PathVariable UUID id) {
         return getAccountUseCase.execute(id);
     }
 
@@ -103,8 +110,9 @@ public class AccountController {
      * @return the newly created account
      */
     @PostMapping("/create")
-    public Account create(@RequestBody CreateAccountDto body) {
-        return createAccountUseCase.execute(body);
+    public Account create(@RequestBody CreateAccountDto body, @AuthenticationPrincipal AuthUser user) {
+        User foundUser = getUserUseCase.execute(user.id());
+        return createAccountUseCase.execute(body, foundUser);
     }
 
     /**
