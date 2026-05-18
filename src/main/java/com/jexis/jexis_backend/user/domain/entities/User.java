@@ -26,7 +26,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String name;
 
     @Column(nullable = false, unique = true)
@@ -56,7 +56,7 @@ public class User {
         this.name = name;
         this.email = email;
         this.password = password;
-        this.isActivated = true;
+        this.isActivated = false;
     }
 
     public UUID getId() {
