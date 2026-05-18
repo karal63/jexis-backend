@@ -2,6 +2,7 @@ package com.jexis.jexis_backend.auth.application.useCases;
 
 import java.util.Optional;
 
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.jexis.jexis_backend.auth.application.dto.AuthUser;
@@ -17,8 +18,10 @@ import com.jexis.jexis_backend.user.infrastructure.UserRepository;
 public class LoginUseCase {
     JwtUtil jwtUtil;
     UserRepository userRepo;
+    private final Argon2PasswordEncoder argon = new Argon2PasswordEncoder(16, 32, 1, 60000, 10);
 
-    public LoginUseCase(JwtUtil jwtUtil, UserRepository userRepo) {
+    public LoginUseCase(
+            JwtUtil jwtUtil, UserRepository userRepo) {
         this.jwtUtil = jwtUtil;
         this.userRepo = userRepo;
     }
@@ -30,7 +33,7 @@ public class LoginUseCase {
             throw new UserNotFoundException();
         }
 
-        if (!user.get().getPassword().equals(body.password())) {
+        if (!argon.matches(body.password(), user.get().getPassword())) {
             throw new UserNotFoundException();
         }
 

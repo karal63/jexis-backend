@@ -22,10 +22,11 @@ public class SignupUseCase {
 
     public SignupResult execute(CreateDto body) {
         User user = createUserUseCase.execute(body);
+
         TokenPair tokens = jwtUtil.generateTokens(
                 user.getId(), user.getName(), user.getEmail(), user.getIsActivated());
-        AuthUser authUser = new AuthUser(user.getId(), user.getName(), user.getEmail(), user.getIsActivated());
 
+        AuthUser authUser = new AuthUser(user.getId(), user.getName(), user.getEmail(), user.getIsActivated());
         return new SignupResult(authUser, tokens);
     }
 }
