@@ -56,7 +56,7 @@ public class User {
         this.name = name;
         this.email = email;
         this.password = password;
-        this.isActivated = true;
+        this.isActivated = false;
     }
 
     public UUID getId() {
