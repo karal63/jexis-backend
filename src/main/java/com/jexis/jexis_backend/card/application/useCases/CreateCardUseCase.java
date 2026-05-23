@@ -14,8 +14,9 @@ public class CreateCardUseCase {
         this.repo = repo;
     }
 
-    public Card execute(User user, String last4, String status, java.math.BigDecimal limit) {
-        Card card = new Card(user, last4, status, limit);
+    public Card execute(User user, String last4, String status, java.math.BigDecimal limit, String brand, String type,
+            String currency, Integer expYear) {
+        Card card = new Card(user, last4, status, limit, brand, type, currency, expYear);
         return repo.save(card);
     }
 }

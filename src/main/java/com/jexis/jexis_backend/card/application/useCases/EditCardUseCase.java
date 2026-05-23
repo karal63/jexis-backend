@@ -34,6 +34,18 @@ public class EditCardUseCase {
             if (dto.getLimit() != null) {
                 foundCard.setLimit(dto.getLimit());
             }
+            if (dto.getBrand() != null) {
+                foundCard.setBrand(dto.getBrand());
+            }
+            if (dto.getType() != null) {
+                foundCard.setType(dto.getType());
+            }
+            if (dto.getCurrency() != null) {
+                foundCard.setCurrency(dto.getCurrency());
+            }
+            if (dto.getExpYear() != null) {
+                foundCard.setExpYear(dto.getExpYear());
+            }
             repo.save(foundCard);
         });
 

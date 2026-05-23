@@ -62,7 +62,8 @@ public class CardController {
     @PostMapping("/create")
     public Card create(@RequestBody CreateCardDto body) {
         User user = getUserUseCase.execute(body.getUserId());
-        return createCardUseCase.execute(user, body.getLast4(), body.getStatus(), body.getLimit());
+        return createCardUseCase.execute(user, body.getLast4(), body.getStatus(), body.getLimit(), body.getBrand(),
+                body.getType(), body.getCurrency(), body.getExpYear());
     }
 
     @PatchMapping("/edit/{id}")
