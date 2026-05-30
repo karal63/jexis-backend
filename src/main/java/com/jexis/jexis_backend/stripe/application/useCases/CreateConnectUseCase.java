@@ -1,0 +1,64 @@
+package com.jexis.jexis_backend.stripe.application.useCases;
+
+import org.springframework.stereotype.Service;
+
+import com.stripe.StripeClient;
+import com.stripe.exception.StripeException;
+import com.stripe.model.v2.core.Account;
+import com.stripe.param.v2.core.AccountCreateParams;
+
+@Service
+public class CreateConnectUseCase {
+    private final StripeClient stripe;
+
+    public CreateConnectUseCase(StripeClient stripe) {
+        this.stripe = stripe;
+    }
+
+    public Account execute(String email) throws StripeException {
+        AccountCreateParams params = AccountCreateParams.builder()
+                .setContactEmail(email)
+                .setDisplayName(email)
+                .setIdentity(
+                        AccountCreateParams.Identity.builder()
+                                .setCountry("US")
+                                .setEntityType(AccountCreateParams.Identity.EntityType.COMPANY)
+                                .build())
+                .setConfiguration(
+                        AccountCreateParams.Configuration.builder()
+                                .setRecipient(
+                                        AccountCreateParams.Configuration.Recipient
+                                                .builder()
+                                                .setCapabilities(
+                                                        AccountCreateParams.Configuration.Recipient.Capabilities
+                                                                .builder()
+                                                                .setStripeBalance(
+                                                                        AccountCreateParams.Configuration.Recipient.Capabilities.StripeBalance
+                                                                                .builder()
+                                                                                .setStripeTransfers(
+                                                                                        AccountCreateParams.Configuration.Recipient.Capabilities.StripeBalance.StripeTransfers
+                                                                                                .builder()
+                                                                                                .setRequested(true)
+                                                                                                .build())
+                                                                                .build())
+                                                                .build())
+                                                .build())
+                                .build())
+                .setDefaults(
+                        AccountCreateParams.Defaults.builder()
+                                .setResponsibilities(
+                                        AccountCreateParams.Defaults.Responsibilities
+                                                .builder()
+                                                .setFeesCollector(
+                                                        AccountCreateParams.Defaults.Responsibilities.FeesCollector.APPLICATION)
+                                                .setLossesCollector(
+                                                        AccountCreateParams.Defaults.Responsibilities.LossesCollector.APPLICATION)
+                                                .build())
+                                .build())
+                .setDashboard(AccountCreateParams.Dashboard.EXPRESS)
+                .build();
+
+        Account account = stripe.v2().core().accounts().create(params);
+        return account;
+    }
+}
