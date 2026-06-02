@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.jexis.jexis_backend.account.application.dto.CreateAccountDto;
+import com.jexis.jexis_backend.common.logging.AsyncLogger;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.account.domain.exception.NameExistsException;
 import com.jexis.jexis_backend.account.infrastructure.AccountRepository;
@@ -23,9 +24,11 @@ import com.jexis.jexis_backend.user.domain.entities.User;
 @Service
 public class CreateAccountUseCase {
     private final AccountRepository repo;
+    private final AsyncLogger logger;
 
-    public CreateAccountUseCase(AccountRepository repo) {
+    public CreateAccountUseCase(AccountRepository repo, AsyncLogger logger) {
         this.repo = repo;
+        this.logger = logger;
     }
 
     /**
@@ -39,12 +42,17 @@ public class CreateAccountUseCase {
      * @return the newly created account
      */
     public Account execute(CreateAccountDto body, User owner) {
+        logger.info("ACCOUNT", "Creating account named: " + body.getName());
+
         Optional<Account> existingAccount = repo.findByName(body.getName());
         if (existingAccount.isPresent()) {
+            logger.info("ACCOUNT", "Account creation failed: name already exists " + body.getName());
             throw new NameExistsException(body.getName());
         }
 
         Account account = new Account(body.getName(), owner);
-        return repo.save(account);
+        Account saved = repo.save(account);
+        logger.info("ACCOUNT", "Account created successfully: " + saved.getName());
+        return saved;
     }
 }

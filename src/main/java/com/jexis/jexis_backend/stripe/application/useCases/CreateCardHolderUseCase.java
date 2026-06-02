@@ -2,6 +2,7 @@ package com.jexis.jexis_backend.stripe.application.useCases;
 
 import org.springframework.stereotype.Service;
 
+import com.jexis.jexis_backend.common.logging.AsyncLogger;
 import com.stripe.StripeClient;
 import com.stripe.exception.StripeException;
 import com.stripe.model.issuing.Cardholder;
@@ -11,12 +12,16 @@ import com.stripe.param.issuing.CardholderCreateParams;
 @Service
 public class CreateCardHolderUseCase {
     private final StripeClient stripe;
+    private final AsyncLogger logger;
 
-    public CreateCardHolderUseCase(StripeClient stripe) {
+    public CreateCardHolderUseCase(StripeClient stripe, AsyncLogger logger) {
         this.stripe = stripe;
+        this.logger = logger;
     }
 
     public Cardholder execute(String connectedAccountId) throws StripeException {
+        logger.info("STRIPE", "Starting cardholder creation for account: " + connectedAccountId);
+
         CardholderCreateParams params = CardholderCreateParams.builder()
                 .setType(CardholderCreateParams.Type.INDIVIDUAL)
                 .setName("Jenny Rosen")
@@ -39,6 +44,9 @@ public class CreateCardHolderUseCase {
                 .setStripeAccount(connectedAccountId)
                 .build();
 
-        return stripe.v1().issuing().cardholders().create(params, options);
+        Cardholder cardholder = stripe.v1().issuing().cardholders().create(params, options);
+        logger.info("STRIPE", "Cardholder created successfully with id: " + cardholder.getId());
+
+        return cardholder;
     }
 }

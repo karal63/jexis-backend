@@ -2,6 +2,7 @@ package com.jexis.jexis_backend.stripe.application.useCases;
 
 import org.springframework.stereotype.Service;
 
+import com.jexis.jexis_backend.common.logging.AsyncLogger;
 import com.stripe.StripeClient;
 import com.stripe.exception.StripeException;
 import com.stripe.model.v2.core.Account;
@@ -10,12 +11,16 @@ import com.stripe.param.v2.core.AccountCreateParams;
 @Service
 public class CreateConnectUseCase {
     private final StripeClient stripe;
+    private final AsyncLogger logger;
 
-    public CreateConnectUseCase(StripeClient stripe) {
+    public CreateConnectUseCase(StripeClient stripe, AsyncLogger logger) {
         this.stripe = stripe;
+        this.logger = logger;
     }
 
     public Account execute(String email) throws StripeException {
+        logger.info("STRIPE", "Starting connect account creation for email: " + email);
+
         AccountCreateParams params = AccountCreateParams.builder()
                 .setContactEmail(email)
                 .setDisplayName(email)
@@ -59,6 +64,8 @@ public class CreateConnectUseCase {
                 .build();
 
         Account account = stripe.v2().core().accounts().create(params);
+        logger.info("STRIPE", "Connect account created successfully with id: " + account.getId());
+
         return account;
     }
 }

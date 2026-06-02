@@ -6,6 +6,7 @@ import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.jexis.jexis_backend.auth.application.dto.AuthUser;
+import com.jexis.jexis_backend.common.logging.AsyncLogger;
 import com.jexis.jexis_backend.auth.application.dto.LoginDto;
 import com.jexis.jexis_backend.auth.application.dto.LoginResult;
 import com.jexis.jexis_backend.auth.application.dto.TokenPair;
@@ -18,22 +19,28 @@ import com.jexis.jexis_backend.user.infrastructure.UserRepository;
 public class LoginUseCase {
     JwtUtil jwtUtil;
     UserRepository userRepo;
+    private final AsyncLogger logger;
     private final Argon2PasswordEncoder argon = new Argon2PasswordEncoder(16, 32, 1, 60000, 10);
 
     public LoginUseCase(
-            JwtUtil jwtUtil, UserRepository userRepo) {
+            JwtUtil jwtUtil, UserRepository userRepo, AsyncLogger logger) {
         this.jwtUtil = jwtUtil;
         this.userRepo = userRepo;
+        this.logger = logger;
     }
 
     public LoginResult execute(LoginDto body) {
+        logger.info("AUTH", "Login attempt for email: " + body.email());
+
         Optional<User> user = userRepo.findByEmail(body.email());
 
         if (!user.isPresent()) {
+            logger.info("AUTH", "Login failed: user not found for email " + body.email());
             throw new UserNotFoundException();
         }
 
         if (!argon.matches(body.password(), user.get().getPassword())) {
+            logger.info("AUTH", "Login failed: invalid password for email " + body.email());
             throw new UserNotFoundException();
         }
 
@@ -42,6 +49,7 @@ public class LoginUseCase {
         AuthUser authUser = new AuthUser(user.get().getId(), user.get().getName(), user.get().getEmail(),
                 user.get().getIsActivated());
 
+        logger.info("AUTH", "Login succeeded for user: " + user.get().getEmail());
         return new LoginResult(authUser, tokens);
     }
 }
