@@ -2,6 +2,14 @@ package com.jexis.jexis_backend.card.application.dto;
 
 import java.math.BigDecimal;
 
+/**
+ * EditCardDto
+ *
+ * Data Transfer Object used for card editing requests. It encapsulates the
+ * necessary data required to edit an existing card, such as the card details.
+ *
+ * Author: Leo
+ */
 public class EditCardDto {
     private String last4;
     private String status;

@@ -3,6 +3,15 @@ package com.jexis.jexis_backend.card.application.dto;
 import java.math.BigDecimal;
 import java.util.UUID;
 
+/**
+ * CreateCardDto
+ *
+ * Data Transfer Object used for card creation requests. It encapsulates the
+ * necessary data required to create a new card, such as the card details and
+ * user ID.
+ *
+ * Author: Leo
+ */
 public class CreateCardDto {
     private UUID userId;
     private String last4;

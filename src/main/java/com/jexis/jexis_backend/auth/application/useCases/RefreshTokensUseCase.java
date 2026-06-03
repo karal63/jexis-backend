@@ -16,6 +16,16 @@ import com.jexis.jexis_backend.user.infrastructure.UserRepository;
 
 import io.jsonwebtoken.Claims;
 
+/**
+ * RefreshTokensUseCase
+ *
+ * This service class implements the use case for refreshing authentication
+ * tokens.
+ * It contains only the business logic related to token refresh, such as
+ * validating the refresh token and generating new access and refresh tokens.
+ *
+ * Author: Leo
+ */
 @Service
 public class RefreshTokensUseCase {
     JwtUtil jwtUtil;
@@ -26,6 +36,17 @@ public class RefreshTokensUseCase {
         this.repo = repo;
     }
 
+    /*
+     * Refreshes authentication tokens
+     *
+     * Accepts a refresh token from the client, validates it, and generates
+     * new access and refresh tokens.
+     *
+     * @param token the refresh token
+     * 
+     * @return a {@link LoginResult} containing the authenticated user and token
+     * pair
+     */
     public LoginResult execute(String token) {
         if (!jwtUtil.validateRefreshToken(token)) {
             throw new InvalidRtException();

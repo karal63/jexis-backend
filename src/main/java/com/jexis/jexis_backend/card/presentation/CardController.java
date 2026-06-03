@@ -24,6 +24,22 @@ import com.jexis.jexis_backend.card.domain.entities.Card;
 import com.jexis.jexis_backend.user.application.useCases.GetUserUseCase;
 import com.jexis.jexis_backend.user.domain.entities.User;
 
+/**
+ * CardController
+ *
+ * REST controller in the presentation layer responsible for exposing
+ * card-related HTTP endpoints.
+ *
+ * It handles request routing, input validation, and response mapping,
+ * delegating all business logic execution to dedicated card use case
+ * services (application layer).
+ *
+ * This class does not contain domain logic; its role is limited to
+ * orchestrating request/response flow between the client and the
+ * application layer.
+ *
+ * Author: Leo
+ */
 @RestController
 @RequestMapping("/card")
 public class CardController {
@@ -49,16 +65,39 @@ public class CardController {
         this.getUserUseCase = getUserUseCase;
     }
 
+    /**
+     * Retrieves all cards available in the system.
+     *
+     * Endpoint: GET /card/list
+     *
+     * @return a list of all card entities
+     */
     @GetMapping("/list")
     public List<Card> list() {
         return getAllCardsUseCase.execute();
     }
 
+    /**
+     * Retrieves a single card by its identifier.
+     *
+     * Endpoint: GET /card/list/{id}
+     *
+     * @param id the unique identifier of the card to retrieve
+     * @return the matching card entity
+     */
     @GetMapping("/list/{id}")
     public Card find(@PathVariable UUID id) {
         return getCardUseCase.execute(id);
     }
 
+    /**
+     * Creates a new card for the specified user.
+     *
+     * Endpoint: POST /card/create
+     *
+     * @param body the request payload containing card details and user information
+     * @return the newly created card entity
+     */
     @PostMapping("/create")
     public Card create(@RequestBody CreateCardDto body) {
         User user = getUserUseCase.execute(body.getUserId());
@@ -66,11 +105,28 @@ public class CardController {
                 body.getType(), body.getCurrency(), body.getExpYear());
     }
 
+    /**
+     * Updates an existing card with the provided changes.
+     *
+     * Endpoint: PATCH /card/edit/{id}
+     *
+     * @param id   the unique identifier of the card to update
+     * @param body the card update payload
+     * @return the updated card entity
+     */
     @PatchMapping("/edit/{id}")
     public Card edit(@PathVariable UUID id, @RequestBody EditCardDto body) {
         return editCardUseCase.execute(id, body);
     }
 
+    /**
+     * Deletes a card owned by the authenticated user.
+     *
+     * Endpoint: POST /card/delete/{id}
+     *
+     * @param user the authenticated user making the request
+     * @param id   the unique identifier of the card to delete
+     */
     @PostMapping("/delete/{id}")
     public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID id) {
         deleteCardUseCase.execute(user, id);

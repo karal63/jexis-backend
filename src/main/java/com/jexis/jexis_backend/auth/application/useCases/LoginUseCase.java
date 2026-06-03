@@ -15,6 +15,16 @@ import com.jexis.jexis_backend.user.domain.entities.User;
 import com.jexis.jexis_backend.user.domain.exceptions.UserNotFoundException;
 import com.jexis.jexis_backend.user.infrastructure.UserRepository;
 
+/**
+ * LoginUseCase
+ *
+ * This service class implements the use case for logging in a user.
+ * It contains only the business logic related to user authentication, such as
+ * validating input data and interacting with the repository to verify user
+ * credentials.
+ *
+ * Author: Leo
+ */
 @Service
 public class LoginUseCase {
     JwtUtil jwtUtil;
@@ -29,6 +39,18 @@ public class LoginUseCase {
         this.logger = logger;
     }
 
+    /*
+     * Logs user in
+     *
+     * Accepts a {@link LoginDto} payload from controller, looks for
+     * an account, validates credentials, generates tokens, and returns
+     * {@link Account} with tokens.
+     *
+     * @param body the login data transfer object containing email and password
+     * 
+     * @return a {@link LoginResult} containing the authenticated user and token
+     * pair
+     */
     public LoginResult execute(LoginDto body) {
         logger.info("AUTH", "Login attempt for email: " + body.email());
 

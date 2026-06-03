@@ -7,6 +7,16 @@ import com.jexis.jexis_backend.common.logging.AsyncLogger;
 import com.jexis.jexis_backend.card.infrastructure.CardRepository;
 import com.jexis.jexis_backend.user.domain.entities.User;
 
+/**
+ * CreateCardUseCase
+ *
+ * This service class implements the use case for creating a new card.
+ * It contains only the business logic related to card creation, such as
+ * validating input data and interacting with the repository to persist the new
+ * card.
+ *
+ * Author: Leo
+ */
 @Service
 public class CreateCardUseCase {
     private final CardRepository repo;
@@ -17,6 +27,17 @@ public class CreateCardUseCase {
         this.logger = logger;
     }
 
+    /*
+     * Creates a new card
+     *
+     * Accepts a {@link CreateDto} payload from controller, creates a new card,
+     * and returns the created card.
+     *
+     * @param user the owner of the card and card details such as last4, status,
+     * limit, brand, type, currency, and expYear
+     * 
+     * @return the created card entity
+     */
     public Card execute(User user, String last4, String status, java.math.BigDecimal limit, String brand, String type,
             String currency, Integer expYear) {
         logger.info("CARD", "Creating card for user: " + user.getId() + " | brand: " + brand);

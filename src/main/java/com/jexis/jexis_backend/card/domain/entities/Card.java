@@ -17,6 +17,17 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+/**
+ * Card entity mapped to the persistence layer.
+ *
+ * Represents a card record stored in the database and defines
+ * its persistence structure (table mapping, constraints, and identifiers).
+ *
+ * This class is managed by JPA and is used to persist and retrieve
+ * card data.
+ *
+ * Author: Leo
+ */
 @Entity
 @Table(name = "cards")
 public class Card {

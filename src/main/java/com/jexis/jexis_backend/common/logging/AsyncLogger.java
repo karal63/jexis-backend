@@ -6,9 +6,13 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
+ * AsyncLogger
+ *
  * Reusable asynchronous logger for the whole backend.
  * It uses a background thread to consume log messages from a queue,
  * which keeps the main application flow fast and decoupled.
+ *
+ * Author: Leo
  */
 @Component
 public class AsyncLogger {
@@ -31,14 +35,34 @@ public class AsyncLogger {
         loggerThread.start();
     }
 
+    /*
+     * info
+     *
+     * Accepts a message to log.
+     *
+     * @param message the message to log
+     */
     public void info(String message) {
         logQueue.offer(message);
     }
 
+    /*
+     * info
+     *
+     * Accepts a category and a message to log, allowing for better organization of
+     * logs.
+     *
+     * @param message the message to log
+     */
     public void info(String category, String message) {
         logQueue.offer("[" + category + "] " + message);
     }
 
+    /*
+     * shutdown
+     *
+     * Shuts down the logger thread gracefully
+     */
     public void shutdown() {
         loggerThread.interrupt();
     }

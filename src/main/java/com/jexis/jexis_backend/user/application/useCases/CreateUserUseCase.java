@@ -11,6 +11,16 @@ import com.jexis.jexis_backend.user.domain.entities.User;
 import com.jexis.jexis_backend.user.domain.exceptions.EmailExistsException;
 import com.jexis.jexis_backend.user.infrastructure.UserRepository;
 
+/**
+ * CreateUserUseCase
+ *
+ * This service class implements the use case for creating a new user.
+ * It contains only the business logic related to user creation, such as
+ * validating input data and interacting with the repository to persist the new
+ * user.
+ *
+ * Author: Leo
+ */
 @Service
 public class CreateUserUseCase {
     private final UserRepository repo;
@@ -22,6 +32,16 @@ public class CreateUserUseCase {
         this.logger = logger;
     }
 
+    /*
+     * Creates a new user
+     *
+     * Accepts a {@link CreateDto} payload from controller, creates a new user,
+     * and returns {@link User} with the new user.
+     *
+     * @param body the create data transfer object containing email and password
+     * 
+     * @return a {@link User} containing the new user
+     */
     public User execute(CreateDto body) {
         logger.info("USER", "Creating user for email: " + body.getEmail());
 
