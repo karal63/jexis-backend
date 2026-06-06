@@ -10,9 +10,9 @@ package com.jexis.jexis_backend.account.application.dto;
  * Author: Leo
  */
 public class CreateAccountDto {
-    private String name;
+    private String email;
 
-    public String getName() {
-        return name;
+    public String getEmail() {
+        return email;
     }
 }

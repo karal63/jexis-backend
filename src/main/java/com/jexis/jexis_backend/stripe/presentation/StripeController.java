@@ -41,53 +41,11 @@ import com.stripe.net.RequestOptions;
 @Controller
 @RequestMapping("")
 public class StripeController {
-    private final CreateConnectUseCase createConnectUseCase;
-    private final CreateLinkUseCase createLinkUseCase;
     private final CreateCardHolderUseCase createCardHolderUseCase;
-    private final StripeClient stripe;
 
     public StripeController(CreateConnectUseCase createConnectUseCase, CreateLinkUseCase createLinkUseCase,
-            CreateCardHolderUseCase createCardHolderUseCase, StripeClient stripe) {
-        this.createConnectUseCase = createConnectUseCase;
-        this.createLinkUseCase = createLinkUseCase;
+            CreateCardHolderUseCase createCardHolderUseCase) {
         this.createCardHolderUseCase = createCardHolderUseCase;
-        this.stripe = stripe;
-
-    }
-
-    /**
-     * Creates a Stripe connect account for the provided user email.
-     *
-     * Endpoint: POST /create-connect-account
-     *
-     * @param body the request payload containing the user email
-     * @return a response with the created account identifier
-     * @throws StripeException if the Stripe API call fails
-     */
-    @PostMapping("/create-connect-account")
-    public ResponseEntity<ConnectResponse> createConnectAccount(@RequestBody CreateConnectDto body)
-            throws StripeException {
-        String email = body.email();
-
-        Account account = createConnectUseCase.execute(email);
-        return ResponseEntity.ok(new ConnectResponse(account.getId()));
-    }
-
-    /**
-     * Creates a Stripe account link for the specified connected account.
-     *
-     * Endpoint: POST /create-account-link
-     *
-     * @param body the request payload containing the account identifier
-     * @return a response with the generated account link URL
-     * @throws StripeException if the Stripe API call fails
-     */
-    @PostMapping("/create-account-link")
-    public ResponseEntity<LinkResult> createAccountLink(@RequestBody CreateLinkDto body) throws StripeException {
-        String accountId = body.accountId();
-
-        AccountLink accountLink = createLinkUseCase.execute(accountId);
-        return ResponseEntity.ok(new LinkResult(accountLink.getUrl()));
     }
 
     /**
@@ -105,23 +63,4 @@ public class StripeController {
         return ResponseEntity.ok(cardHolder.getId());
     }
 
-    /**
-     * Retrieves the dashboard type information for a Stripe account.
-     *
-     * Endpoint: GET /get-type
-     *
-     * @return a response with the Stripe account dashboard details
-     * @throws StripeException if the Stripe API call fails
-     */
-    @GetMapping("/get-type")
-    public ResponseEntity<String> getType() throws StripeException {
-
-        RequestOptions options = RequestOptions.builder()
-                .setStripeContext("acct_1TcrbwLGRm3b2S1B")
-                .build();
-
-        Account account = stripe.v2().core().accounts().retrieve("acct_1TcrbwLGRm3b2S1B", options);
-
-        return ResponseEntity.ok(account.getDashboard().toString());
-    }
 }
