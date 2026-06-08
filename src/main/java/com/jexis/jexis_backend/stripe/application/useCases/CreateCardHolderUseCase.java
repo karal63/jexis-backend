@@ -3,6 +3,7 @@ package com.jexis.jexis_backend.stripe.application.useCases;
 import org.springframework.stereotype.Service;
 
 import com.jexis.jexis_backend.common.logging.AsyncLogger;
+import com.jexis.jexis_backend.stripe.application.dto.CreateCardHolderDto;
 import com.stripe.StripeClient;
 import com.stripe.exception.StripeException;
 import com.stripe.model.issuing.Cardholder;
@@ -21,53 +22,53 @@ import com.stripe.param.issuing.CardholderCreateParams;
  */
 @Service
 public class CreateCardHolderUseCase {
-        private final StripeClient stripe;
-        private final AsyncLogger logger;
+    private final StripeClient stripe;
+    private final AsyncLogger logger;
 
-        public CreateCardHolderUseCase(StripeClient stripe, AsyncLogger logger) {
-                this.stripe = stripe;
-                this.logger = logger;
-        }
+    public CreateCardHolderUseCase(StripeClient stripe, AsyncLogger logger) {
+        this.stripe = stripe;
+        this.logger = logger;
+    }
 
-        /*
-         * Creates a new cardholder
-         *
-         * Accepts connected account id from controller, creates a new
-         * cardholder, and returns the created cardholder.
-         *
-         * @param connectedAccountId the id of the connected account
-         * 
-         * @return the created cardholder
-         */
-        public Cardholder execute(String connectedAccountId) throws StripeException {
-                logger.info("STRIPE", "Starting cardholder creation for account: " + connectedAccountId);
+    /**
+     * Creates a new cardholder
+     *
+     * Accepts connected account id from controller, creates a new
+     * cardholder, and returns the created cardholder.
+     *
+     * @param connectedAccountId the id of the connected account
+     * 
+     * @return the created cardholder
+     */
+    public Cardholder execute(CreateCardHolderDto dto) throws StripeException {
+        logger.info("STRIPE", "Starting cardholder creation for account: " + dto.connectedAccountId());
 
-                CardholderCreateParams params = CardholderCreateParams.builder()
-                                .setType(CardholderCreateParams.Type.INDIVIDUAL)
-                                .setName("Jenny Rosen")
-                                .setEmail("jenny.rosen@example.com")
-                                .setPhoneNumber("+18888675309")
-                                .setBilling(
-                                                CardholderCreateParams.Billing.builder()
-                                                                .setAddress(
-                                                                                CardholderCreateParams.Billing.Address
-                                                                                                .builder()
-                                                                                                .setLine1("1234 Main Street")
-                                                                                                .setCity("San Francisco")
-                                                                                                .setState("CA")
-                                                                                                .setCountry("US")
-                                                                                                .setPostalCode("94111")
-                                                                                                .build())
-                                                                .build())
-                                .build();
+        CardholderCreateParams params = CardholderCreateParams.builder()
+                .setType(CardholderCreateParams.Type.INDIVIDUAL)
+                .setName(dto.name())
+                .setEmail(dto.email())
+                .setPhoneNumber(dto.phoneNumber())
+                .setBilling(
+                        CardholderCreateParams.Billing.builder()
+                                .setAddress(
+                                        CardholderCreateParams.Billing.Address
+                                                .builder()
+                                                .setLine1(dto.addressLine1())
+                                                .setCity(dto.city())
+                                                .setState(dto.state())
+                                                .setCountry(dto.country())
+                                                .setPostalCode(dto.postalCode())
+                                                .build())
+                                .build())
+                .build();
 
-                RequestOptions options = RequestOptions.builder()
-                                .setStripeAccount(connectedAccountId)
-                                .build();
+        RequestOptions options = RequestOptions.builder()
+                .setStripeAccount(dto.connectedAccountId())
+                .build();
 
-                Cardholder cardholder = stripe.v1().issuing().cardholders().create(params, options);
-                logger.info("STRIPE", "Cardholder created successfully with id: " + cardholder.getId());
+        Cardholder cardholder = stripe.v1().issuing().cardholders().create(params, options);
+        logger.info("STRIPE", "Cardholder created successfully with id: " + cardholder.getId());
 
-                return cardholder;
-        }
+        return cardholder;
+    }
 }

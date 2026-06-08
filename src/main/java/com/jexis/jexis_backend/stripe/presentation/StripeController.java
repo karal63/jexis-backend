@@ -59,7 +59,7 @@ public class StripeController {
      */
     @PostMapping("/create-card-holder")
     public ResponseEntity<String> createCardHolder(@RequestBody CreateCardHolderDto body) throws StripeException {
-        Cardholder cardHolder = createCardHolderUseCase.execute(body.connectedAccountId());
+        Cardholder cardHolder = createCardHolderUseCase.execute(body);
         return ResponseEntity.ok(cardHolder.getId());
     }
 

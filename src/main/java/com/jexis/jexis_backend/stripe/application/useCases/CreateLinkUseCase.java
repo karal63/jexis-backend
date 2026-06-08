@@ -4,7 +4,8 @@ import org.springframework.stereotype.Service;
 
 import com.stripe.StripeClient;
 import com.stripe.exception.StripeException;
-import com.stripe.model.v2.core.AccountLink;
+import com.stripe.model.AccountLink;
+import com.stripe.param.AccountLinkCreateParams;
 
 /**
  * CreateLinkUseCase
@@ -16,43 +17,31 @@ import com.stripe.model.v2.core.AccountLink;
  */
 @Service
 public class CreateLinkUseCase {
-        private final StripeClient stripe;
+    private final StripeClient stripe;
 
-        public CreateLinkUseCase(StripeClient stripe) {
-                this.stripe = stripe;
-        }
+    public CreateLinkUseCase(StripeClient stripe) {
+        this.stripe = stripe;
+    }
 
-        /*
-         * Creates a new account link
-         *
-         * Accepts an account ID from the controller, creates a new account link,
-         * and returns the created account link.
-         *
-         * @param accountId the ID of the account for which to create a link
-         * 
-         * @return the created account link
-         */
-        public AccountLink execute(String accountId) throws StripeException {
-                com.stripe.param.v2.core.AccountLinkCreateParams params = com.stripe.param.v2.core.AccountLinkCreateParams
-                                .builder()
-                                .setAccount(accountId)
-                                .setUseCase(
-                                                com.stripe.param.v2.core.AccountLinkCreateParams.UseCase.builder()
-                                                                .setType(
-                                                                                com.stripe.param.v2.core.AccountLinkCreateParams.UseCase.Type.ACCOUNT_ONBOARDING)
-                                                                .setAccountOnboarding(
-                                                                                com.stripe.param.v2.core.AccountLinkCreateParams.UseCase.AccountOnboarding
-                                                                                                .builder()
-                                                                                                .addConfiguration(
-                                                                                                                com.stripe.param.v2.core.AccountLinkCreateParams.UseCase.AccountOnboarding.Configuration.RECIPIENT)
-                                                                                                .setRefreshUrl("https://example.com")
-                                                                                                .setReturnUrl("https://example.com?accountId="
-                                                                                                                + accountId)
-                                                                                                .build())
-                                                                .build())
-                                .build();
+    /**
+     * Creates a new account link
+     *
+     * Accepts an account ID from the controller, creates a new account link,
+     * and returns the created account link.
+     *
+     * @param accountId the ID of the account for which to create a link
+     * 
+     * @return the created account link
+     */
+    public AccountLink execute(String accountId) throws StripeException {
+        AccountLinkCreateParams params = AccountLinkCreateParams.builder()
+                .setAccount(accountId)
+                .setRefreshUrl("https://example.com")
+                .setReturnUrl("https://example.com?accountId=" + accountId)
+                .setType(AccountLinkCreateParams.Type.ACCOUNT_ONBOARDING)
+                .build();
 
-                com.stripe.model.v2.core.AccountLink accountLink = stripe.v2().core().accountLinks().create(params);
-                return accountLink;
-        }
+        AccountLink accountLink = stripe.v1().accountLinks().create(params);
+        return accountLink;
+    }
 }

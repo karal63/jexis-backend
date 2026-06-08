@@ -10,11 +10,10 @@ import com.jexis.jexis_backend.stripe.application.useCases.CreateConnectUseCase;
 import com.jexis.jexis_backend.stripe.application.useCases.CreateLinkUseCase;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.account.domain.exception.EmailExistsException;
-import com.jexis.jexis_backend.account.domain.exception.NameExistsException;
 import com.jexis.jexis_backend.account.infrastructure.AccountRepository;
 import com.jexis.jexis_backend.user.domain.entities.User;
 import com.stripe.exception.StripeException;
-import com.stripe.model.v2.core.AccountLink;
+import com.stripe.model.AccountLink;
 
 /**
  * CreateAccountUseCase
@@ -60,7 +59,7 @@ public class CreateAccountUseCase {
             throw new EmailExistsException(body.getEmail());
         }
 
-        com.stripe.model.v2.core.Account connectAccount = createConnectUseCase.execute(body.getEmail());
+        com.stripe.model.Account connectAccount = createConnectUseCase.execute(body.getEmail());
         AccountLink link = createLinkUseCase.execute(connectAccount.getId());
 
         Account account = new Account(body.getEmail(), connectAccount.getId(), link.getUrl(), owner);
