@@ -3,7 +3,7 @@ package com.jexis.jexis_backend.stripe.application.useCases;
 import org.springframework.stereotype.Service;
 
 import com.jexis.jexis_backend.common.logging.AsyncLogger;
-import com.jexis.jexis_backend.stripe.application.dto.CreateCardHolderDto;
+import com.jexis.jexis_backend.stripe.application.dto.CreateStripeHolderDto;
 import com.stripe.StripeClient;
 import com.stripe.exception.StripeException;
 import com.stripe.model.issuing.Cardholder;
@@ -21,11 +21,11 @@ import com.stripe.param.issuing.CardholderCreateParams;
  * Author: Leo
  */
 @Service
-public class CreateCardHolderUseCase {
+public class CreateStripeHolderUseCase {
     private final StripeClient stripe;
     private final AsyncLogger logger;
 
-    public CreateCardHolderUseCase(StripeClient stripe, AsyncLogger logger) {
+    public CreateStripeHolderUseCase(StripeClient stripe, AsyncLogger logger) {
         this.stripe = stripe;
         this.logger = logger;
     }
@@ -40,7 +40,7 @@ public class CreateCardHolderUseCase {
      * 
      * @return the created cardholder
      */
-    public Cardholder execute(CreateCardHolderDto dto) throws StripeException {
+    public Cardholder execute(CreateStripeHolderDto dto) throws StripeException {
         logger.info("STRIPE", "Starting cardholder creation for account: " + dto.connectedAccountId());
 
         CardholderCreateParams params = CardholderCreateParams.builder()
@@ -57,7 +57,8 @@ public class CreateCardHolderUseCase {
                                                 .setCity(dto.city())
                                                 .setState(dto.state())
                                                 .setCountry(dto.country())
-                                                .setPostalCode(dto.postalCode())
+                                                .setPostalCode(dto
+                                                        .postalCode())
                                                 .build())
                                 .build())
                 .build();

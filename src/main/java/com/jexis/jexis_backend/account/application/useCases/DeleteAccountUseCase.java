@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.jexis.jexis_backend.account.application.dto.CreateAccountDto;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.account.domain.exception.AccountNotFoundException;
 import com.jexis.jexis_backend.account.infrastructure.AccountRepository;

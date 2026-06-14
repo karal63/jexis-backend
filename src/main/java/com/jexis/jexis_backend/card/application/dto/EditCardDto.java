@@ -1,6 +1,7 @@
 package com.jexis.jexis_backend.card.application.dto;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 /**
  * EditCardDto
@@ -11,6 +12,7 @@ import java.math.BigDecimal;
  * Author: Leo
  */
 public class EditCardDto {
+    private UUID cardHolderId;
     private String last4;
     private String status;
     private BigDecimal limit;
@@ -18,6 +20,14 @@ public class EditCardDto {
     private String type;
     private String currency;
     private Integer expYear;
+
+    public UUID getCardHolderId() {
+        return cardHolderId;
+    }
+
+    public void setCardHolderId(UUID cardHolderId) {
+        this.cardHolderId = cardHolderId;
+    }
 
     public String getLast4() {
         return last4;

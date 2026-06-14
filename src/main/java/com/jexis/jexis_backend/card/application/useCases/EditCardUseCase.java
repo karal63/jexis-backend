@@ -9,6 +9,7 @@ import com.jexis.jexis_backend.card.application.dto.EditCardDto;
 import com.jexis.jexis_backend.card.domain.entities.Card;
 import com.jexis.jexis_backend.card.domain.exceptions.CardNotFoundException;
 import com.jexis.jexis_backend.card.infrastructure.CardRepository;
+import com.jexis.jexis_backend.cardholder.application.useCases.GetCardHolderUseCase;
 
 /**
  * EditCardUseCase
@@ -22,9 +23,11 @@ import com.jexis.jexis_backend.card.infrastructure.CardRepository;
 @Service
 public class EditCardUseCase {
     private final CardRepository repo;
+    private final GetCardHolderUseCase getCardHolderUseCase;
 
-    public EditCardUseCase(CardRepository repo) {
+    public EditCardUseCase(CardRepository repo, GetCardHolderUseCase getCardHolderUseCase) {
         this.repo = repo;
+        this.getCardHolderUseCase = getCardHolderUseCase;
     }
 
     /*
@@ -53,6 +56,9 @@ public class EditCardUseCase {
             }
             if (dto.getLimit() != null) {
                 foundCard.setLimit(dto.getLimit());
+            }
+            if (dto.getCardHolderId() != null) {
+                foundCard.setCardHolder(getCardHolderUseCase.execute(dto.getCardHolderId()));
             }
             if (dto.getBrand() != null) {
                 foundCard.setBrand(dto.getBrand());

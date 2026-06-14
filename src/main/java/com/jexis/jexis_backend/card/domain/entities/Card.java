@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
 
-import com.jexis.jexis_backend.user.domain.entities.User;
+import com.jexis.jexis_backend.cardholder.domain.entities.CardHolder;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -36,8 +36,8 @@ public class Card {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
-    private User user;
+    @JoinColumn(name = "card_holder_id", referencedColumnName = "id", nullable = false)
+    private CardHolder cardHolder;
 
     @Column(nullable = false, length = 4)
     private String last4;
@@ -67,9 +67,9 @@ public class Card {
     public Card() {
     }
 
-    public Card(User user, String last4, String status, BigDecimal limit, String brand, String type, String currency,
-            Integer expYear) {
-        this.user = user;
+    public Card(CardHolder cardHolder, String last4, String status, BigDecimal limit, String brand, String type,
+            String currency, Integer expYear) {
+        this.cardHolder = cardHolder;
         this.last4 = last4;
         this.status = status;
         this.limit = limit;
@@ -83,8 +83,12 @@ public class Card {
         return id;
     }
 
-    public User getUser() {
-        return user;
+    public CardHolder getCardHolder() {
+        return cardHolder;
+    }
+
+    public void setCardHolder(CardHolder cardHolder) {
+        this.cardHolder = cardHolder;
     }
 
     public String getLast4() {

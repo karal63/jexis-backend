@@ -13,7 +13,7 @@ import java.util.UUID;
  * Author: Leo
  */
 public class CreateCardDto {
-    private UUID userId;
+    private UUID cardHolderId;
     private String last4;
     private String status;
     private BigDecimal limit;
@@ -22,12 +22,12 @@ public class CreateCardDto {
     private String currency;
     private Integer expYear;
 
-    public UUID getUserId() {
-        return userId;
+    public UUID getCardHolderId() {
+        return cardHolderId;
     }
 
-    public void setUserId(UUID userId) {
-        this.userId = userId;
+    public void setCardHolderId(UUID cardHolderId) {
+        this.cardHolderId = cardHolderId;
     }
 
     public String getLast4() {

@@ -21,8 +21,8 @@ import com.jexis.jexis_backend.card.application.useCases.EditCardUseCase;
 import com.jexis.jexis_backend.card.application.useCases.GetAllCardsUseCase;
 import com.jexis.jexis_backend.card.application.useCases.GetCardUseCase;
 import com.jexis.jexis_backend.card.domain.entities.Card;
-import com.jexis.jexis_backend.user.application.useCases.GetUserUseCase;
-import com.jexis.jexis_backend.user.domain.entities.User;
+import com.jexis.jexis_backend.cardholder.application.useCases.GetCardHolderUseCase;
+import com.jexis.jexis_backend.cardholder.domain.entities.CardHolder;
 
 /**
  * CardController
@@ -45,24 +45,24 @@ import com.jexis.jexis_backend.user.domain.entities.User;
 public class CardController {
     private final GetAllCardsUseCase getAllCardsUseCase;
     private final GetCardUseCase getCardUseCase;
+    private final GetCardHolderUseCase getCardHolderUseCase;
     private final CreateCardUseCase createCardUseCase;
     private final EditCardUseCase editCardUseCase;
     private final DeleteCardUseCase deleteCardUseCase;
-    private final GetUserUseCase getUserUseCase;
 
     public CardController(
             GetAllCardsUseCase getAllCardsUseCase,
             GetCardUseCase getCardUseCase,
+            GetCardHolderUseCase getCardHolderUseCase,
             CreateCardUseCase createCardUseCase,
             EditCardUseCase editCardUseCase,
-            DeleteCardUseCase deleteCardUseCase,
-            GetUserUseCase getUserUseCase) {
+            DeleteCardUseCase deleteCardUseCase) {
         this.getAllCardsUseCase = getAllCardsUseCase;
         this.getCardUseCase = getCardUseCase;
+        this.getCardHolderUseCase = getCardHolderUseCase;
         this.createCardUseCase = createCardUseCase;
         this.editCardUseCase = editCardUseCase;
         this.deleteCardUseCase = deleteCardUseCase;
-        this.getUserUseCase = getUserUseCase;
     }
 
     /**
@@ -91,17 +91,19 @@ public class CardController {
     }
 
     /**
-     * Creates a new card for the specified user.
+     * Creates a new card for the specified card holder.
      *
      * Endpoint: POST /card/create
      *
-     * @param body the request payload containing card details and user information
+     * @param body the request payload containing card details and card holder
+     *             information
      * @return the newly created card entity
      */
     @PostMapping("/create")
     public Card create(@RequestBody CreateCardDto body) {
-        User user = getUserUseCase.execute(body.getUserId());
-        return createCardUseCase.execute(user, body.getLast4(), body.getStatus(), body.getLimit(), body.getBrand(),
+        CardHolder cardHolder = getCardHolderUseCase.execute(body.getCardHolderId());
+        return createCardUseCase.execute(cardHolder, body.getLast4(), body.getStatus(), body.getLimit(),
+                body.getBrand(),
                 body.getType(), body.getCurrency(), body.getExpYear());
     }
 

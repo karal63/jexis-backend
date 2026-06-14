@@ -43,8 +43,7 @@ public class DeleteCardUseCase {
             throw new CardNotFoundException();
         }
 
-        // temporal solution
-        if (!card.get().getUser().getId().equals(user.id())) {
+        if (!card.get().getCardHolder().getAccount().getOwner().getId().equals(user.id())) {
             throw new ForbiddenException();
         }
 
