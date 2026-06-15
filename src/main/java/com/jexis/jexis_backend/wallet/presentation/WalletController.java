@@ -3,6 +3,7 @@ package com.jexis.jexis_backend.wallet.presentation;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.jexis.jexis_backend.account.application.useCases.GetAccountUseCase;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.auth.application.dto.AuthUser;
+import com.jexis.jexis_backend.stripe.application.dto.CreateTreasuryAccountDto;
 import com.jexis.jexis_backend.wallet.application.dto.CreateWalletDto;
 import com.jexis.jexis_backend.wallet.application.dto.EditWalletDto;
 import com.jexis.jexis_backend.wallet.application.useCases.CreateWalletUseCase;
@@ -23,6 +25,7 @@ import com.jexis.jexis_backend.wallet.application.useCases.EditWalletUseCase;
 import com.jexis.jexis_backend.wallet.application.useCases.GetAllWalletsUseCase;
 import com.jexis.jexis_backend.wallet.application.useCases.GetWalletUseCase;
 import com.jexis.jexis_backend.wallet.domain.entities.Wallet;
+import com.stripe.exception.StripeException;
 
 /**
  * WalletController
@@ -95,8 +98,8 @@ public class WalletController {
      * @param body the request payload containing the account identifier
      * @return the newly created wallet entity
      */
-    @PostMapping("/create")
-    public Wallet create(@RequestBody CreateWalletDto body) {
+    @PostMapping("/create-treasury-account")
+    public Wallet create(@RequestBody CreateWalletDto body) throws StripeException {
         Account account = getAccountUseCase.execute(body.getAccountId());
         return createWalletUseCase.execute(account);
     }
@@ -127,4 +130,15 @@ public class WalletController {
     public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID id) {
         deleteWalletUseCase.execute(user, id);
     }
+
+    // public ResponseEntity<String> createTreasuryAccount(@RequestBody
+    // CreateTreasuryAccountDto body)
+    // throws StripeException {
+    // try {
+    // return ResponseEntity.ok("Treasury account created");
+    // } catch (Exception e) {
+    // return ResponseEntity.status(500).body("Error creating treasury account: " +
+    // e.getMessage());
+    // }
+    // }
 }

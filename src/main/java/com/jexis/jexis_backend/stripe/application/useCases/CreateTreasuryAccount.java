@@ -17,7 +17,7 @@ public class CreateTreasuryAccount {
         this.client = client;
     }
 
-    public void execute(String connectAccountId) throws StripeException {
+    public FinancialAccount execute(String connectAccountId) throws StripeException {
         FinancialAccountCreateParams params = FinancialAccountCreateParams.builder()
                 .addSupportedCurrency("usd")
                 .setFeatures(
@@ -81,5 +81,7 @@ public class CreateTreasuryAccount {
         // For SDK versions 29.4.0 or lower, remove '.v1()' from the following line.
 
         FinancialAccount financialAccount = client.v1().treasury().financialAccounts().create(params, requestOptions);
+
+        return financialAccount;
     }
 }

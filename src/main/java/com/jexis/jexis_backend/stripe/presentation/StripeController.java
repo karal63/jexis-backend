@@ -96,14 +96,16 @@ public class StripeController {
     // return ResponseEntity.ok("Card holder created");
     // }
 
-    @PostMapping("/create-treasury-account")
-    public ResponseEntity<String> createTreasuryAccount(@RequestBody CreateTreasuryAccountDto body)
-            throws StripeException {
-        try {
-            createTreasuryAccount.execute(body.connectAccountId());
-            return ResponseEntity.ok("Treasury account created");
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error creating treasury account: " + e.getMessage());
-        }
-    }
+    // @PostMapping("/create-treasury-account")
+    // public ResponseEntity<String> createTreasuryAccount(@RequestBody
+    // CreateTreasuryAccountDto body)
+    // throws StripeException {
+    // try {
+    // createTreasuryAccount.execute(body.connectAccountId());
+    // return ResponseEntity.ok("Treasury account created");
+    // } catch (Exception e) {
+    // return ResponseEntity.status(500).body("Error creating treasury account: " +
+    // e.getMessage());
+    // }
+    // }
 }

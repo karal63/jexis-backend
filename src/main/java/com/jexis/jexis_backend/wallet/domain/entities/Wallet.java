@@ -29,6 +29,9 @@ public class Wallet {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(nullable = false)
+    private String stripeFinancialAccountId;
+
     @ManyToOne
     @JoinColumn(name = "account_id", referencedColumnName = "id", nullable = false)
     private Account account;
@@ -51,7 +54,8 @@ public class Wallet {
     Wallet() {
     }
 
-    public Wallet(Account account) {
+    public Wallet(String stripeFinancialAccountId, Account account) {
+        this.stripeFinancialAccountId = stripeFinancialAccountId;
         this.account = account;
     }
 
@@ -65,6 +69,10 @@ public class Wallet {
 
     public void setAvailableBalance(BigDecimal availableBalance) {
         this.availableBalance = availableBalance;
+    }
+
+    public String getStripeFinancialAccountId() {
+        return stripeFinancialAccountId;
     }
 
     public Account getAccount() {
@@ -93,6 +101,10 @@ public class Wallet {
 
     public void setDeletedAt(LocalDateTime deletedAt) {
         this.deletedAt = deletedAt;
+    }
+
+    public String setStripeFinancialAccountId() {
+        return stripeFinancialAccountId;
     }
 
 }
