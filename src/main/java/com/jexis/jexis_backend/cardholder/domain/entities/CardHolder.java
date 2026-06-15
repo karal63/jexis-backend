@@ -24,6 +24,9 @@ public class CardHolder {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(nullable = false)
+    private String stripeCardHolderId;
+
     @ManyToOne
     @JoinColumn(name = "account_id", referencedColumnName = "id", nullable = false)
     private Account account;
@@ -67,8 +70,10 @@ public class CardHolder {
     public CardHolder() {
     }
 
-    public CardHolder(Account account, String name, String email, String phoneNumber, String addressLine1, String city,
+    public CardHolder(String stripeCardHolderId, Account account, String name, String email, String phoneNumber,
+            String addressLine1, String city,
             String state, String country, String postalCode) {
+        this.stripeCardHolderId = stripeCardHolderId;
         this.account = account;
         this.name = name;
         this.email = email;
@@ -122,6 +127,10 @@ public class CardHolder {
 
     public void setAddressLine1(String addressLine1) {
         this.addressLine1 = addressLine1;
+    }
+
+    public void setStripeCardHolderId(String stripeCardHolderId) {
+        this.stripeCardHolderId = stripeCardHolderId;
     }
 
     public String getCity() {
@@ -178,5 +187,9 @@ public class CardHolder {
 
     public void setDeletedAt(LocalDateTime deletedAt) {
         this.deletedAt = deletedAt;
+    }
+
+    public String getStripeCardHolderId() {
+        return stripeCardHolderId;
     }
 }

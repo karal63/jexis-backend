@@ -53,11 +53,10 @@ public class CardHolderController {
         return getCardHolderUseCase.execute(id);
     }
 
-    // @PostMapping("/create")
-    // public CardHolder create(@RequestBody CreateCardHolderDto body) throws
-    // StripeException {
-    // return createCardHolderUseCase.execute(body);
-    // }
+    @PostMapping("/create")
+    public CardHolder create(@RequestBody CreateCardHolderDto body) throws StripeException {
+        return createCardHolderUseCase.execute(body);
+    }
 
     @PatchMapping("/edit/{id}")
     public CardHolder edit(@PathVariable UUID id, @RequestBody EditCardHolderDto body) {

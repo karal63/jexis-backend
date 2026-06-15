@@ -89,11 +89,12 @@ public class StripeController {
         return ResponseEntity.ok(accounts.toString());
     }
 
-    @PostMapping("/create-card-holder")
-    public ResponseEntity<String> createCardHolder(@RequestBody CreateStripeHolderDto body) throws StripeException {
-        createCardHolderUseCase.execute(body);
-        return ResponseEntity.ok("Card holder created");
-    }
+    // @PostMapping("/create-card-holder")
+    // public ResponseEntity<String> createCardHolder(@RequestBody
+    // CreateStripeHolderDto body) throws StripeException {
+    // createCardHolderUseCase.execute(body);
+    // return ResponseEntity.ok("Card holder created");
+    // }
 
     @PostMapping("/create-treasury-account")
     public ResponseEntity<String> createTreasuryAccount(@RequestBody CreateTreasuryAccountDto body)

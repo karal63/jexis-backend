@@ -14,6 +14,7 @@ import com.jexis.jexis_backend.common.logging.AsyncLogger;
 import com.jexis.jexis_backend.stripe.application.dto.CreateStripeHolderDto;
 import com.jexis.jexis_backend.stripe.application.useCases.CreateStripeHolderUseCase;
 import com.stripe.exception.StripeException;
+import com.stripe.model.issuing.Cardholder;
 
 @Service
 public class CreateCardHolderUseCase {
@@ -30,16 +31,16 @@ public class CreateCardHolderUseCase {
         this.logger = logger;
     }
 
-    public void execute(CreateStripeHolderDto body) throws StripeException {
-        // Account account = getAccountUseCase.execute(body.accountId());
-        // Optional<CardHolder> existingCardHolder = repo.findByEmail(body.email());
+    public CardHolder execute(CreateCardHolderDto body) throws StripeException {
+        Account account = getAccountUseCase.execute(body.accountId());
+        Optional<CardHolder> existingCardHolder = repo.findByEmail(body.email());
 
-        // if (existingCardHolder.isPresent()) {
-        // throw new CardHolderExistsException(body.email());
-        // }
+        if (existingCardHolder.isPresent()) {
+            throw new CardHolderExistsException(body.email());
+        }
 
-        createStripeHolder.execute(new CreateStripeHolderDto(
-                body.connectedAccountId(),
+        Cardholder stripeCardHolder = createStripeHolder.execute(new CreateStripeHolderDto(
+                account.getConnectAccountId(),
                 body.name(),
                 body.email(),
                 body.phoneNumber(),
@@ -49,10 +50,11 @@ public class CreateCardHolderUseCase {
                 body.country(),
                 body.postalCode()));
 
-        // CardHolder cardHolder = new CardHolder(account, body.name(), body.email(),
-        // body.phoneNumber(),
-        // body.addressLine1(), body.city(), body.state(), body.country(),
-        // body.postalCode());
-        // return repo.save(cardHolder);
+        CardHolder cardHolder = new CardHolder(stripeCardHolder.getId(), account, body.name(), body.email(),
+                body.phoneNumber(),
+                body.addressLine1(), body.city(), body.state(), body.country(),
+                body.postalCode());
+
+        return repo.save(cardHolder);
     }
 }
