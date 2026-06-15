@@ -23,6 +23,7 @@ import com.jexis.jexis_backend.card.application.useCases.GetCardUseCase;
 import com.jexis.jexis_backend.card.domain.entities.Card;
 import com.jexis.jexis_backend.cardholder.application.useCases.GetCardHolderUseCase;
 import com.jexis.jexis_backend.cardholder.domain.entities.CardHolder;
+import com.stripe.exception.StripeException;
 
 /**
  * CardController
@@ -100,11 +101,8 @@ public class CardController {
      * @return the newly created card entity
      */
     @PostMapping("/create")
-    public Card create(@RequestBody CreateCardDto body) {
-        CardHolder cardHolder = getCardHolderUseCase.execute(body.getCardHolderId());
-        return createCardUseCase.execute(cardHolder, body.getLast4(), body.getStatus(), body.getLimit(),
-                body.getBrand(),
-                body.getType(), body.getCurrency(), body.getExpYear());
+    public Card create(@RequestBody CreateCardDto body) throws StripeException {
+        return createCardUseCase.execute(body);
     }
 
     /**

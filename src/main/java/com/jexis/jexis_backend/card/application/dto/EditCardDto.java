@@ -19,7 +19,7 @@ public class EditCardDto {
     private String brand;
     private String type;
     private String currency;
-    private Integer expYear;
+    private Long expYear;
 
     public UUID getCardHolderId() {
         return cardHolderId;
@@ -77,11 +77,11 @@ public class EditCardDto {
         this.currency = currency;
     }
 
-    public Integer getExpYear() {
+    public Long getExpYear() {
         return expYear;
     }
 
-    public void setExpYear(Integer expYear) {
+    public void setExpYear(Long expYear) {
         this.expYear = expYear;
     }
 }

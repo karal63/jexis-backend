@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.jexis.jexis_backend.account.domain.entities.Account;
+import com.jexis.jexis_backend.user.domain.entities.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -30,6 +31,10 @@ public class CardHolder {
     @ManyToOne
     @JoinColumn(name = "account_id", referencedColumnName = "id", nullable = false)
     private Account account;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    private User user;
 
     @Column(nullable = false)
     private String name;
@@ -70,11 +75,11 @@ public class CardHolder {
     public CardHolder() {
     }
 
-    public CardHolder(String stripeCardHolderId, Account account, String name, String email, String phoneNumber,
-            String addressLine1, String city,
-            String state, String country, String postalCode) {
+    public CardHolder(String stripeCardHolderId, Account account, User user, String name, String email,
+            String phoneNumber, String addressLine1, String city, String state, String country, String postalCode) {
         this.stripeCardHolderId = stripeCardHolderId;
         this.account = account;
+        this.user = user;
         this.name = name;
         this.email = email;
         this.phoneNumber = phoneNumber;
@@ -191,5 +196,13 @@ public class CardHolder {
 
     public String getStripeCardHolderId() {
         return stripeCardHolderId;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public User getUser() {
+        return user;
     }
 }
