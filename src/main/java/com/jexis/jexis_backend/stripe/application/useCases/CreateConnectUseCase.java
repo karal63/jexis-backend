@@ -57,6 +57,11 @@ public class CreateConnectUseCase {
                                                 .builder()
                                                 .setRequested(true)
                                                 .build())
+                                .setTreasury(
+                                        AccountCreateParams.Capabilities.Treasury
+                                                .builder()
+                                                .setRequested(true)
+                                                .build())
                                 .build())
                 .setController(
                         AccountCreateParams.Controller.builder()
