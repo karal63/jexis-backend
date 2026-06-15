@@ -22,6 +22,7 @@ import com.jexis.jexis_backend.cardholder.application.useCases.EditCardHolderUse
 import com.jexis.jexis_backend.cardholder.application.useCases.GetAllCardHoldersUseCase;
 import com.jexis.jexis_backend.cardholder.application.useCases.GetCardHolderUseCase;
 import com.jexis.jexis_backend.cardholder.domain.entities.CardHolder;
+import com.stripe.exception.StripeException;
 
 @RestController
 @RequestMapping("/card-holder")
@@ -52,10 +53,11 @@ public class CardHolderController {
         return getCardHolderUseCase.execute(id);
     }
 
-    @PostMapping("/create")
-    public CardHolder create(@RequestBody CreateCardHolderDto body) {
-        return createCardHolderUseCase.execute(body);
-    }
+    // @PostMapping("/create")
+    // public CardHolder create(@RequestBody CreateCardHolderDto body) throws
+    // StripeException {
+    // return createCardHolderUseCase.execute(body);
+    // }
 
     @PatchMapping("/edit/{id}")
     public CardHolder edit(@PathVariable UUID id, @RequestBody EditCardHolderDto body) {
