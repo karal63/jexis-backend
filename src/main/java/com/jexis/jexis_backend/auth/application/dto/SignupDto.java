@@ -10,12 +10,22 @@ package com.jexis.jexis_backend.auth.application.dto;
  * Author: Leo
  */
 public class SignupDto {
-    private String name;
+    private String firstName;
+    private String lastName;
+    private String phoneNumber;
     private String email;
     private String password;
 
-    public String getName() {
-        return name;
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
 
     public String getEmail() {
