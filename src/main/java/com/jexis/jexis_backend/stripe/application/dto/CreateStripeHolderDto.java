@@ -16,6 +16,7 @@ import jakarta.validation.constraints.NotBlank;
 public record CreateStripeHolderDto(
         @NotBlank String connectedAccountId,
         @NotBlank String firstName,
+        @NotBlank String lastName,
         @NotBlank @Email String email,
         @NotBlank String phoneNumber,
         @NotBlank String addressLine1,

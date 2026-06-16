@@ -51,9 +51,9 @@ public class SignupUseCase {
         User user = createUserUseCase.execute(body);
 
         TokenPair tokens = jwtUtil.generateTokens(
-                user.getId(), user.getName(), user.getEmail(), user.getIsActivated());
+                user.getId(), user.getFirstName(), user.getEmail(), user.getIsActivated());
 
-        AuthUser authUser = new AuthUser(user.getId(), user.getName(), user.getEmail(), user.getIsActivated());
+        AuthUser authUser = new AuthUser(user.getId(), user.getFirstName(), user.getEmail(), user.getIsActivated());
         logger.info("AUTH", "Signup completed for user: " + user.getEmail());
         return new SignupResult(authUser, tokens);
     }

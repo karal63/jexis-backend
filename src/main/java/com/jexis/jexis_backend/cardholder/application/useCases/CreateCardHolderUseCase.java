@@ -47,7 +47,8 @@ public class CreateCardHolderUseCase {
         // TODO replace phone number when i add it to user entity
         Cardholder stripeCardHolder = createStripeHolder.execute(request, new CreateStripeHolderDto(
                 account.getConnectAccountId(),
-                user.getName(),
+                user.getFirstName(),
+                user.getLastName(),
                 user.getEmail(),
                 "+18888675309",
                 body.addressLine1(),
@@ -56,8 +57,8 @@ public class CreateCardHolderUseCase {
                 body.country(),
                 body.postalCode()));
 
-        // TODO remove user.getName because we have name in user object
-        CardHolder cardHolder = new CardHolder(stripeCardHolder.getId(), account, user, user.getName(), user.getEmail(),
+        CardHolder cardHolder = new CardHolder(stripeCardHolder.getId(), account, user, user.getFirstName(),
+                user.getEmail(),
                 "+18888675309",
                 body.addressLine1(), body.city(), body.state(), body.country(),
                 body.postalCode());

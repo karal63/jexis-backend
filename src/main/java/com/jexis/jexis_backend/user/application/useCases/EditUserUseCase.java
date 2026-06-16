@@ -51,8 +51,11 @@ public class EditUserUseCase {
         }
 
         foundUser.ifPresent(user -> {
-            if (body.getName() != null) {
-                user.setName(body.getName());
+            if (body.getFirstName() != null) {
+                user.setFirstName(body.getFirstName());
+            }
+            if (body.getLastName() != null) {
+                user.setLastName(body.getLastName());
             }
             if (body.getEmail() != null) {
                 user.setEmail(body.getEmail());

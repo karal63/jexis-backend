@@ -71,7 +71,7 @@ public class CreateStripeHolderUseCase {
                 .setIndividual(
                         CardholderCreateParams.Individual.builder()
                                 .setFirstName(dto.firstName())
-                                .setLastName("FOR NOW - STRIPE REQUIRES LAST NAME")
+                                .setLastName(dto.lastName())
                                 .setCardIssuing(
                                         CardholderCreateParams.Individual.CardIssuing.builder()
                                                 .setUserTermsAcceptance(

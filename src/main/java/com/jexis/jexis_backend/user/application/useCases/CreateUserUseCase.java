@@ -54,7 +54,8 @@ public class CreateUserUseCase {
 
         body.setPassword(argon.encode(body.getPassword()));
 
-        User savedUser = repo.save(new User(body.getName(), body.getEmail(), body.getPassword()));
+        User savedUser = repo
+                .save(new User(body.getFirstName(), body.getLastName(), body.getEmail(), body.getPassword()));
         logger.info("USER", "User created successfully: " + savedUser.getEmail());
         return savedUser;
     }

@@ -60,10 +60,11 @@ public class RefreshTokensUseCase {
             throw new UserNotFoundException();
         }
 
-        TokenPair tokens = jwtUtil.generateTokens(dbUser.get().getId(), dbUser.get().getName(), dbUser.get().getEmail(),
+        TokenPair tokens = jwtUtil.generateTokens(dbUser.get().getId(), dbUser.get().getFirstName(),
+                dbUser.get().getEmail(),
                 dbUser.get().getIsActivated());
 
-        AuthUser user = new AuthUser(dbUser.get().getId(), dbUser.get().getName(), dbUser.get().getEmail(),
+        AuthUser user = new AuthUser(dbUser.get().getId(), dbUser.get().getFirstName(), dbUser.get().getEmail(),
                 dbUser.get().getIsActivated());
 
         return new LoginResult(user, tokens);

@@ -66,9 +66,9 @@ public class LoginUseCase {
             throw new UserNotFoundException();
         }
 
-        TokenPair tokens = jwtUtil.generateTokens(user.get().getId(), user.get().getName(), user.get().getEmail(),
+        TokenPair tokens = jwtUtil.generateTokens(user.get().getId(), user.get().getFirstName(), user.get().getEmail(),
                 user.get().getIsActivated());
-        AuthUser authUser = new AuthUser(user.get().getId(), user.get().getName(), user.get().getEmail(),
+        AuthUser authUser = new AuthUser(user.get().getId(), user.get().getFirstName(), user.get().getEmail(),
                 user.get().getIsActivated());
 
         logger.info("AUTH", "Login succeeded for user: " + user.get().getEmail());

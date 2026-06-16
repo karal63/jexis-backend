@@ -10,12 +10,17 @@ package com.jexis.jexis_backend.user.application.dto;
  * Author: Leo
  */
 public class CreateDto {
-    private String name;
+    private String firstName;
+    private String lastName;
     private String email;
     private String password;
 
-    public String getName() {
-        return name;
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
     }
 
     public String getEmail() {
