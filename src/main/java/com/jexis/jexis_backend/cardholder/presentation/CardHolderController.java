@@ -24,6 +24,8 @@ import com.jexis.jexis_backend.cardholder.application.useCases.GetCardHolderUseC
 import com.jexis.jexis_backend.cardholder.domain.entities.CardHolder;
 import com.stripe.exception.StripeException;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestController
 @RequestMapping("/card-holder")
 public class CardHolderController {
@@ -54,8 +56,8 @@ public class CardHolderController {
     }
 
     @PostMapping("/create")
-    public CardHolder create(@RequestBody CreateCardHolderDto body) throws StripeException {
-        return createCardHolderUseCase.execute(body);
+    public CardHolder create(@RequestBody CreateCardHolderDto body, HttpServletRequest request) throws StripeException {
+        return createCardHolderUseCase.execute(body, request);
     }
 
     @PatchMapping("/edit/{id}")

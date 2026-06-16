@@ -1,5 +1,7 @@
 package com.jexis.jexis_backend.stripe.application.useCases;
 
+import java.time.Instant;
+
 import org.springframework.stereotype.Service;
 
 import com.jexis.jexis_backend.common.logging.AsyncLogger;
@@ -9,6 +11,8 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.issuing.Cardholder;
 import com.stripe.net.RequestOptions;
 import com.stripe.param.issuing.CardholderCreateParams;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * CreateCardHolderUseCase
@@ -40,12 +44,15 @@ public class CreateStripeHolderUseCase {
      * 
      * @return the created cardholder
      */
-    public Cardholder execute(CreateStripeHolderDto dto) throws StripeException {
+    public Cardholder execute(HttpServletRequest request, CreateStripeHolderDto dto) throws StripeException {
         logger.info("STRIPE", "Starting cardholder creation for account: " + dto.connectedAccountId());
+
+        String ip = extractClientIp(request);
+        long acceptanceTime = Instant.now().getEpochSecond();
 
         CardholderCreateParams params = CardholderCreateParams.builder()
                 .setType(CardholderCreateParams.Type.INDIVIDUAL)
-                .setName(dto.name())
+                .setName(dto.firstName())
                 .setEmail(dto.email())
                 .setPhoneNumber(dto.phoneNumber())
                 .setBilling(
@@ -61,6 +68,20 @@ public class CreateStripeHolderUseCase {
                                                         .postalCode())
                                                 .build())
                                 .build())
+                .setIndividual(
+                        CardholderCreateParams.Individual.builder()
+                                .setFirstName(dto.firstName())
+                                .setLastName("FOR NOW - STRIPE REQUIRES LAST NAME")
+                                .setCardIssuing(
+                                        CardholderCreateParams.Individual.CardIssuing.builder()
+                                                .setUserTermsAcceptance(
+                                                        CardholderCreateParams.Individual.CardIssuing.UserTermsAcceptance
+                                                                .builder()
+                                                                .setIp(ip)
+                                                                .setDate(acceptanceTime)
+                                                                .build())
+                                                .build())
+                                .build())
                 .build();
 
         RequestOptions options = RequestOptions.builder()
@@ -71,5 +92,16 @@ public class CreateStripeHolderUseCase {
         logger.info("STRIPE", "Cardholder created successfully with id: " + cardholder.getId());
 
         return cardholder;
+    }
+
+    private String extractClientIp(HttpServletRequest request) {
+        String forwarded = request.getHeader("X-Forwarded-For");
+
+        if (forwarded != null && !forwarded.isEmpty()) {
+            // first IP is original client
+            return forwarded.split(",")[0].trim();
+        }
+
+        return request.getRemoteAddr();
     }
 }
