@@ -28,8 +28,17 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, unique = true)
+    @Column
     private String name;
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(nullable = false, unique = true)
+    private String connectAccountId;
+
+    @Column(nullable = false, unique = true)
+    private String accountLink;
 
     @ManyToOne
     @JoinColumn(name = "owner_id", referencedColumnName = "id", nullable = false)
@@ -50,13 +59,23 @@ public class Account {
     Account() {
     }
 
-    public Account(String name, User owner) {
-        this.name = name;
+    public Account(String email, String connectAccountId, String accountLink, User owner) {
+        this.email = email;
+        this.connectAccountId = connectAccountId;
+        this.accountLink = accountLink;
         this.owner = owner;
     }
 
     public String getName() {
         return name;
+    }
+
+    public String getAccountLink() {
+        return accountLink;
+    }
+
+    public String getConnectAccountId() {
+        return connectAccountId;
     }
 
     public User getOwner() {
@@ -85,6 +104,14 @@ public class Account {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setAccountLink(String accountLink) {
+        this.accountLink = accountLink;
+    }
+
+    public void setConnectAccountId(String connectAccountId) {
+        this.connectAccountId = connectAccountId;
     }
 
     public void setOwner(User owner) {

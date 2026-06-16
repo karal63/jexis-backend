@@ -1,79 +1,124 @@
 package com.jexis.jexis_backend.card.application.dto;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
+/**
+ * CreateCardDto
+ *
+ * Data Transfer Object used for card creation requests. It encapsulates the
+ * necessary data required to create a new card, such as the card details and
+ * user ID.
+ *
+ * Author: Leo
+ */
 public class CreateCardDto {
+    private UUID accountId;
+    private UUID cardHolderId;
+    private UUID walletId;
     private UUID userId;
-    private String last4;
-    private String status;
-    private BigDecimal limit;
-    private String brand;
-    private String type;
-    private String currency;
-    private Integer expYear;
+
+    public UUID getAccountId() {
+        return accountId;
+    }
+
+    public UUID getCardHolderId() {
+        return cardHolderId;
+    }
+
+    public UUID getWalletId() {
+        return walletId;
+    }
 
     public UUID getUserId() {
         return userId;
+    }
+
+    public void setAccountId(UUID accountId) {
+        this.accountId = accountId;
+    }
+
+    public void setCardHolderId(UUID cardHolderId) {
+        this.cardHolderId = cardHolderId;
+    }
+
+    public void setWalletId(UUID walletId) {
+        this.walletId = walletId;
     }
 
     public void setUserId(UUID userId) {
         this.userId = userId;
     }
 
-    public String getLast4() {
-        return last4;
-    }
+    // private UUID cardHolderId;
+    // private String last4;
+    // private String status;
+    // private BigDecimal limit;
+    // private String brand;
+    // private String type;
+    // private String currency;
+    // private Integer expYear;
 
-    public void setLast4(String last4) {
-        this.last4 = last4;
-    }
+    // public UUID getCardHolderId() {
+    // return cardHolderId;
+    // }
 
-    public String getStatus() {
-        return status;
-    }
+    // public void setCardHolderId(UUID cardHolderId) {
+    // this.cardHolderId = cardHolderId;
+    // }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
+    // public String getLast4() {
+    // return last4;
+    // }
 
-    public BigDecimal getLimit() {
-        return limit;
-    }
+    // public void setLast4(String last4) {
+    // this.last4 = last4;
+    // }
 
-    public void setLimit(BigDecimal limit) {
-        this.limit = limit;
-    }
+    // public String getStatus() {
+    // return status;
+    // }
 
-    public String getBrand() {
-        return brand;
-    }
+    // public void setStatus(String status) {
+    // this.status = status;
+    // }
 
-    public void setBrand(String brand) {
-        this.brand = brand;
-    }
+    // public BigDecimal getLimit() {
+    // return limit;
+    // }
 
-    public String getType() {
-        return type;
-    }
+    // public void setLimit(BigDecimal limit) {
+    // this.limit = limit;
+    // }
 
-    public void setType(String type) {
-        this.type = type;
-    }
+    // public String getBrand() {
+    // return brand;
+    // }
 
-    public String getCurrency() {
-        return currency;
-    }
+    // public void setBrand(String brand) {
+    // this.brand = brand;
+    // }
 
-    public void setCurrency(String currency) {
-        this.currency = currency;
-    }
+    // public String getType() {
+    // return type;
+    // }
 
-    public Integer getExpYear() {
-        return expYear;
-    }
+    // public void setType(String type) {
+    // this.type = type;
+    // }
 
-    public void setExpYear(Integer expYear) {
-        this.expYear = expYear;
-    }
+    // public String getCurrency() {
+    // return currency;
+    // }
+
+    // public void setCurrency(String currency) {
+    // this.currency = currency;
+    // }
+
+    // public Integer getExpYear() {
+    // return expYear;
+    // }
+
+    // public void setExpYear(Integer expYear) {
+    // this.expYear = expYear;
+    // }
 }

@@ -1,6 +1,5 @@
 package com.jexis.jexis_backend.user.application.useCases;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 

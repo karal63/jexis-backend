@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jexis.jexis_backend.user.application.dto.CreateDto;
@@ -73,22 +72,55 @@ public class UserController {
         return getUsersUseCase.execute();
     }
 
+    /**
+     * Retrieves a single user by their identifier.
+     *
+     * Endpoint: GET /user/list/{id}
+     *
+     * @param id the unique identifier of the user to retrieve
+     * @return the matching user entity
+     */
     @GetMapping("/list/{id}")
     public User getUser(@PathVariable UUID id) {
         return getUserUseCase.execute(id);
     }
 
+    /**
+     * Creates a new user account.
+     *
+     * Endpoint: POST /user/create
+     *
+     * @param createDto the request payload containing user creation details
+     * @return the newly created user entity
+     */
     @PostMapping("/create")
     public User createUsers(@RequestBody CreateDto createDto) {
         return createUserUseCase.execute(createDto);
     }
 
+    /**
+     * Deletes a user by their identifier.
+     *
+     * Endpoint: DELETE /user/delete/{id}
+     *
+     * @param id the unique identifier of the user to delete
+     * @return a confirmation message after successful deletion
+     */
     @DeleteMapping("/delete/{id}")
     public String deleteUser(@PathVariable UUID id) {
         deleteUserUseCase.execute(id);
         return "User deleted successfully";
     }
 
+    /**
+     * Updates an existing user with the provided changes.
+     *
+     * Endpoint: PATCH /user/edit/{id}
+     *
+     * @param editDto the user update payload
+     * @param id      the unique identifier of the user to update
+     * @return an optional updated user entity
+     */
     @PatchMapping("/edit/{id}")
     public Optional<User> editUser(@RequestBody EditDto editDto, @PathVariable UUID id) {
         return editUserUseCase.execute(id, editDto);

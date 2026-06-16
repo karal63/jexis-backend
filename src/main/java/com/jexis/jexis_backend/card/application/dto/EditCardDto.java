@@ -1,15 +1,33 @@
 package com.jexis.jexis_backend.card.application.dto;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
+/**
+ * EditCardDto
+ *
+ * Data Transfer Object used for card editing requests. It encapsulates the
+ * necessary data required to edit an existing card, such as the card details.
+ *
+ * Author: Leo
+ */
 public class EditCardDto {
+    private UUID cardHolderId;
     private String last4;
     private String status;
     private BigDecimal limit;
     private String brand;
     private String type;
     private String currency;
-    private Integer expYear;
+    private Long expYear;
+
+    public UUID getCardHolderId() {
+        return cardHolderId;
+    }
+
+    public void setCardHolderId(UUID cardHolderId) {
+        this.cardHolderId = cardHolderId;
+    }
 
     public String getLast4() {
         return last4;
@@ -59,11 +77,11 @@ public class EditCardDto {
         this.currency = currency;
     }
 
-    public Integer getExpYear() {
+    public Long getExpYear() {
         return expYear;
     }
 
-    public void setExpYear(Integer expYear) {
+    public void setExpYear(Long expYear) {
         this.expYear = expYear;
     }
 }

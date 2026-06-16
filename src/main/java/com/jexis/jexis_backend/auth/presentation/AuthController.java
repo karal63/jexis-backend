@@ -21,123 +21,186 @@ import com.jexis.jexis_backend.auth.application.useCases.RefreshTokensUseCase;
 import com.jexis.jexis_backend.auth.application.useCases.SignupUseCase;
 import com.jexis.jexis_backend.user.application.dto.CreateDto;
 
+/**
+ * AuthController
+ *
+ * REST controller in the presentation layer responsible for exposing
+ * authentication-related HTTP endpoints.
+ *
+ * It handles request routing, input validation, and response mapping,
+ * delegating all business logic execution to dedicated authentication use case
+ * services (application layer).
+ *
+ * This class does not contain domain logic; its role is limited to
+ * orchestrating request/response flow between the client and the
+ * application layer.
+ *
+ * Author: Leo
+ */
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
-    public SignupUseCase signupUseCase;
-    public LoginUseCase loginUseCase;
-    public RefreshTokensUseCase refreshTokensUseCase;
+        public SignupUseCase signupUseCase;
+        public LoginUseCase loginUseCase;
+        public RefreshTokensUseCase refreshTokensUseCase;
 
-    public AuthController(SignupUseCase signupUseCase, LoginUseCase loginUseCase,
-            RefreshTokensUseCase refreshTokensUseCase) {
-        this.signupUseCase = signupUseCase;
-        this.loginUseCase = loginUseCase;
-        this.refreshTokensUseCase = refreshTokensUseCase;
-    }
+        public AuthController(SignupUseCase signupUseCase, LoginUseCase loginUseCase,
+                        RefreshTokensUseCase refreshTokensUseCase) {
+                this.signupUseCase = signupUseCase;
+                this.loginUseCase = loginUseCase;
+                this.refreshTokensUseCase = refreshTokensUseCase;
+        }
 
-    @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody CreateDto body) {
-        SignupResult result = signupUseCase.execute(body);
-        TokenPair tokens = result.tokens();
+        /**
+         * Endpoint to create a new account (signup).
+         *
+         * This endpoint accepts a JSON body with the necessary account details (e.g.,
+         * email, password). It deligates the account creation logic to the
+         * SignupUseCase, which handles all the necessary validations, password hashing,
+         * and persistence.
+         *
+         * Endpoint: POST /auth/signup
+         *
+         * @param body the request body containing the account details
+         * @return the created account and tokens
+         */
+        @PostMapping("/signup")
+        public ResponseEntity<?> signup(@RequestBody CreateDto body) {
+                SignupResult result = signupUseCase.execute(body);
+                TokenPair tokens = result.tokens();
 
-        ResponseCookie accessCookie = ResponseCookie.from("access_token", tokens.getAccessToken())
-                .httpOnly(true)
-                .secure(true) // set false only for local dev without HTTPS
-                .path("/")
-                .maxAge(Duration.ofMinutes(15))
-                .sameSite("Strict") // or "Lax" / "None"
-                .build();
+                ResponseCookie accessCookie = ResponseCookie.from("access_token", tokens.getAccessToken())
+                                .httpOnly(true)
+                                .secure(true) // set false only for local dev without HTTPS
+                                .path("/")
+                                .maxAge(Duration.ofMinutes(15))
+                                .sameSite("Strict") // or "Lax" / "None"
+                                .build();
 
-        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", tokens.getRefreshToken())
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(Duration.ofDays(30))
-                .sameSite("Strict")
-                .build();
+                ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", tokens.getRefreshToken())
+                                .httpOnly(true)
+                                .secure(true)
+                                .path("/")
+                                .maxAge(Duration.ofDays(30))
+                                .sameSite("Strict")
+                                .build();
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
-                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-                .body(result.user());
-    }
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+                                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                                .body(result.user());
+        }
 
-    @GetMapping("/logout")
-    public ResponseEntity<?> logout() {
-        ResponseCookie accessCookie = ResponseCookie.from("access_token", "")
-                .httpOnly(true)
-                .secure(true)
-                .path("/") // MUST match original path
-                .maxAge(0) // expire immediately
-                .sameSite("Strict")
-                .build();
+        /**
+         * Endpoint to log out from existing account.
+         *
+         * This endpoint clears the authentication cookies by setting them with empty
+         * values and immediate expiration
+         *
+         * Endpoint: GET /auth/logout
+         *
+         * @return a response with cleared cookies
+         */
+        @GetMapping("/logout")
+        public ResponseEntity<?> logout() {
+                ResponseCookie accessCookie = ResponseCookie.from("access_token", "")
+                                .httpOnly(true)
+                                .secure(true)
+                                .path("/") // MUST match original path
+                                .maxAge(0) // expire immediately
+                                .sameSite("Strict")
+                                .build();
 
-        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", "")
-                .httpOnly(true)
-                .secure(true)
-                .path("/") // MUST match original path
-                .maxAge(0)
-                .sameSite("Strict")
-                .build();
+                ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", "")
+                                .httpOnly(true)
+                                .secure(true)
+                                .path("/") // MUST match original path
+                                .maxAge(0)
+                                .sameSite("Strict")
+                                .build();
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
-                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-                .build();
-    }
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+                                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                                .build();
+        }
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginDto body) {
-        LoginResult result = loginUseCase.execute(body);
-        TokenPair tokens = result.tokens();
+        /**
+         * Endpoint to log in an existing account.
+         *
+         * This endpoint accepts a JSON body with the login credentials (e.g., email and
+         * password). It deligates the authentication logic to the LoginUseCase
+         *
+         * Endpoint: POST /auth/login
+         *
+         * @param body the request body containing the login credentials
+         * @return account and tokens
+         */
+        @PostMapping("/login")
+        public ResponseEntity<?> login(@RequestBody LoginDto body) {
+                LoginResult result = loginUseCase.execute(body);
+                TokenPair tokens = result.tokens();
 
-        ResponseCookie accessCookie = ResponseCookie.from("access_token", tokens.getAccessToken())
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(Duration.ofMinutes(15))
-                .sameSite("Strict")
-                .build();
+                ResponseCookie accessCookie = ResponseCookie.from("access_token", tokens.getAccessToken())
+                                .httpOnly(true)
+                                .secure(true)
+                                .path("/")
+                                .maxAge(Duration.ofMinutes(15))
+                                .sameSite("Strict")
+                                .build();
 
-        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", tokens.getRefreshToken())
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(Duration.ofDays(30))
-                .sameSite("Strict")
-                .build();
+                ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", tokens.getRefreshToken())
+                                .httpOnly(true)
+                                .secure(true)
+                                .path("/")
+                                .maxAge(Duration.ofDays(30))
+                                .sameSite("Strict")
+                                .build();
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
-                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-                .body(result.user());
-    }
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+                                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                                .body(result.user());
+        }
 
-    @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(@CookieValue(name = "refresh_token") String refreshToken) {
-        LoginResult result = refreshTokensUseCase.execute(refreshToken);
-        TokenPair tokens = result.tokens();
+        /**
+         * Endpoint to refresh authentication tokens.
+         *
+         * This endpoint accepts a refresh token. It deligates the token refresh logic
+         * to the refreshTokensUseCase, which handles all the necessary validations,
+         * password
+         * hashing, and persistence.
+         *
+         * Endpoint: POST /auth/refresh
+         *
+         * @param cookie refresh_token the request body containing the account details
+         * @return account and tokens
+         */
+        @PostMapping("/refresh")
+        public ResponseEntity<?> refresh(@CookieValue(name = "refresh_token") String refreshToken) {
+                LoginResult result = refreshTokensUseCase.execute(refreshToken);
+                TokenPair tokens = result.tokens();
 
-        ResponseCookie accessCookie = ResponseCookie.from("access_token", tokens.getAccessToken())
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(Duration.ofMinutes(15))
-                .sameSite("Strict")
-                .build();
+                ResponseCookie accessCookie = ResponseCookie.from("access_token", tokens.getAccessToken())
+                                .httpOnly(true)
+                                .secure(true)
+                                .path("/")
+                                .maxAge(Duration.ofMinutes(15))
+                                .sameSite("Strict")
+                                .build();
 
-        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", tokens.getRefreshToken())
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(Duration.ofDays(30))
-                .sameSite("Strict")
-                .build();
+                ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", tokens.getRefreshToken())
+                                .httpOnly(true)
+                                .secure(true)
+                                .path("/")
+                                .maxAge(Duration.ofDays(30))
+                                .sameSite("Strict")
+                                .build();
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
-                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-                .body(result.user());
-    }
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+                                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                                .body(result.user());
+        }
 }

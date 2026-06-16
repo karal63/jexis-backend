@@ -11,12 +11,26 @@ import com.jexis.jexis_backend.account.domain.entities.Account;
 
 import jakarta.persistence.*;
 
+/**
+ * Wallet entity mapped to the persistence layer.
+ *
+ * Represents a wallet record stored in the database and defines
+ * its persistence structure (table mapping, constraints, and identifiers).
+ *
+ * This class is managed by JPA and is used to persist and retrieve
+ * wallet data.
+ *
+ * Author: Leo
+ */
 @Entity
 @Table(name = "wallets")
 public class Wallet {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @Column(nullable = false)
+    private String stripeFinancialAccountId;
 
     @ManyToOne
     @JoinColumn(name = "account_id", referencedColumnName = "id", nullable = false)
@@ -40,7 +54,8 @@ public class Wallet {
     Wallet() {
     }
 
-    public Wallet(Account account) {
+    public Wallet(String stripeFinancialAccountId, Account account) {
+        this.stripeFinancialAccountId = stripeFinancialAccountId;
         this.account = account;
     }
 
@@ -54,6 +69,10 @@ public class Wallet {
 
     public void setAvailableBalance(BigDecimal availableBalance) {
         this.availableBalance = availableBalance;
+    }
+
+    public String getStripeFinancialAccountId() {
+        return stripeFinancialAccountId;
     }
 
     public Account getAccount() {
@@ -82,6 +101,10 @@ public class Wallet {
 
     public void setDeletedAt(LocalDateTime deletedAt) {
         this.deletedAt = deletedAt;
+    }
+
+    public String setStripeFinancialAccountId() {
+        return stripeFinancialAccountId;
     }
 
 }
