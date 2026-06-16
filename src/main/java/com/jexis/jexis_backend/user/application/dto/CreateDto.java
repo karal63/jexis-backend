@@ -13,6 +13,7 @@ public class CreateDto {
     private String firstName;
     private String lastName;
     private String email;
+    private String phoneNumber;
     private String password;
 
     public String getFirstName() {
@@ -25,6 +26,10 @@ public class CreateDto {
 
     public String getEmail() {
         return email;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
 
     public String getPassword() {

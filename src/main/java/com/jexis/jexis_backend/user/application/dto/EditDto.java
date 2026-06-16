@@ -14,6 +14,7 @@ public class EditDto {
     private String firstName;
     private String lastName;
     private String email;
+    private String phoneNumber;
     private String password;
 
     public String getFirstName() {
@@ -26,6 +27,10 @@ public class EditDto {
 
     public String getEmail() {
         return email;
+    }
+
+    public String getPhoneNUmber() {
+        return phoneNumber;
     }
 
     public String getPassword() {

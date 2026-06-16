@@ -28,12 +28,6 @@ public class EditCardHolderUseCase {
             if (dto.getName() != null) {
                 foundCardHolder.setName(dto.getName());
             }
-            if (dto.getEmail() != null) {
-                foundCardHolder.setEmail(dto.getEmail());
-            }
-            if (dto.getPhoneNumber() != null) {
-                foundCardHolder.setPhoneNumber(dto.getPhoneNumber());
-            }
             if (dto.getAddressLine1() != null) {
                 foundCardHolder.setAddressLine1(dto.getAddressLine1());
             }

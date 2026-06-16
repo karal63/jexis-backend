@@ -38,19 +38,18 @@ public class CreateCardHolderUseCase {
     public CardHolder execute(CreateCardHolderDto body, HttpServletRequest request) throws StripeException {
         Account account = getAccountUseCase.execute(body.accountId());
         User user = getUserUseCase.execute(body.userId());
-        Optional<CardHolder> existingCardHolder = repo.findByEmailAndAccountId(user.getEmail(), account.getId());
+        Optional<CardHolder> existingCardHolder = repo.findByUserEmailAndAccountId(user.getEmail(), account.getId());
 
         if (existingCardHolder.isPresent()) {
             throw new CardHolderExistsException(user.getEmail());
         }
 
-        // TODO replace phone number when i add it to user entity
         Cardholder stripeCardHolder = createStripeHolder.execute(request, new CreateStripeHolderDto(
                 account.getConnectAccountId(),
                 user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),
-                "+18888675309",
+                user.getPhoneNumber(),
                 body.addressLine1(),
                 body.city(),
                 body.state(),
@@ -58,8 +57,6 @@ public class CreateCardHolderUseCase {
                 body.postalCode()));
 
         CardHolder cardHolder = new CardHolder(stripeCardHolder.getId(), account, user, user.getFirstName(),
-                user.getEmail(),
-                "+18888675309",
                 body.addressLine1(), body.city(), body.state(), body.country(),
                 body.postalCode());
 

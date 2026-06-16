@@ -60,6 +60,9 @@ public class EditUserUseCase {
             if (body.getEmail() != null) {
                 user.setEmail(body.getEmail());
             }
+            if (body.getPhoneNUmber() != null) {
+                user.setPhoneNumber(body.getPhoneNUmber());
+            }
             if (body.getPassword() != null) {
                 user.setPassword(body.getPassword());
             }
