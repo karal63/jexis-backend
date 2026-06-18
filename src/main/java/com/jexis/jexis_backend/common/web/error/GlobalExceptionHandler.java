@@ -26,4 +26,11 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(ex.getStatus(), ex.getCode(), ex.getMessage()));
     }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleServerError(RuntimeException ex) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .body(new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "UNKNOWN_ERROR", ex.getMessage()));
+    }
+
 }
