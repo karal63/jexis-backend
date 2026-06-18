@@ -13,9 +13,11 @@ import com.jexis.jexis_backend.auth.infrastructure.security.JwtUtil;
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
+    private final JwtAuthEntryPoint jwtAuthEntryPoint;
 
-    public SecurityConfig(JwtUtil jwtUtil) {
+    public SecurityConfig(JwtUtil jwtUtil, JwtAuthEntryPoint jwtAuthEntryPoint) {
         this.jwtUtil = jwtUtil;
+        this.jwtAuthEntryPoint = jwtAuthEntryPoint;
     }
 
     @Bean
@@ -30,6 +32,8 @@ public class SecurityConfig {
                                 "/webjars/**")
                         .permitAll()
                         .anyRequest().authenticated())
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(jwtAuthEntryPoint))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

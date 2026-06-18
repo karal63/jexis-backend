@@ -2,6 +2,8 @@ package com.jexis.jexis_backend.card.application.dto;
 
 import java.util.UUID;
 
+import jakarta.validation.constraints.NotNull;
+
 /**
  * CreateCardDto
  *
@@ -12,9 +14,16 @@ import java.util.UUID;
  * Author: Leo
  */
 public class CreateCardDto {
+    @NotNull(message = "Account id cannot be blank")
     private UUID accountId;
+
+    @NotNull(message = "Card holder id cannot be blank")
     private UUID cardHolderId;
+
+    @NotNull(message = "Wallet id cannot be blank")
     private UUID walletId;
+
+    @NotNull(message = "User id cannot be blank")
     private UUID userId;
 
     public UUID getAccountId() {

@@ -1,5 +1,7 @@
 package com.jexis.jexis_backend.account.application.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 /**
  * CreateAccountDto
  *
@@ -10,6 +12,7 @@ package com.jexis.jexis_backend.account.application.dto;
  * Author: Leo
  */
 public class CreateAccountDto {
+    @NotBlank(message = "email is required")
     private String email;
 
     public String getEmail() {

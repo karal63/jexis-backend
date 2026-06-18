@@ -16,20 +16,22 @@ public class CreateStripeCardUseCase {
         this.client = client;
     }
 
-    public Card execute(String cardholderId, String financialAccountId, String connectedAccountId)
-            throws StripeException {
-        CardCreateParams params = CardCreateParams.builder()
-                .setCardholder(cardholderId)
-                .setFinancialAccount(financialAccountId)
-                .setCurrency("usd")
-                .setType(CardCreateParams.Type.VIRTUAL)
-                .setStatus(CardCreateParams.Status.ACTIVE)
-                .build();
+    public Card execute(String cardholderId, String financialAccountId, String connectedAccountId) {
+        try {
+            CardCreateParams params = CardCreateParams.builder()
+                    .setCardholder(cardholderId)
+                    .setFinancialAccount(financialAccountId)
+                    .setCurrency("usd")
+                    .setType(CardCreateParams.Type.VIRTUAL)
+                    .setStatus(CardCreateParams.Status.ACTIVE)
+                    .build();
 
-        RequestOptions requestOptions = RequestOptions.builder().setStripeAccount(connectedAccountId).build();
-        // For SDK versions 29.4.0 or lower, remove '.v1()' from the following line.
+            RequestOptions requestOptions = RequestOptions.builder().setStripeAccount(connectedAccountId).build();
 
-        Card card = client.v1().issuing().cards().create(params, requestOptions);
-        return card;
+            Card card = client.v1().issuing().cards().create(params, requestOptions);
+            return card;
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 }

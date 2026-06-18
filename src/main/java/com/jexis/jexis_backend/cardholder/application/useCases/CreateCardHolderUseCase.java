@@ -35,7 +35,7 @@ public class CreateCardHolderUseCase {
         this.getUserUseCase = getUserUseCase;
     }
 
-    public CardHolder execute(CreateCardHolderDto body, HttpServletRequest request) throws StripeException {
+    public CardHolder execute(CreateCardHolderDto body, HttpServletRequest request) {
         Account account = getAccountUseCase.execute(body.accountId());
         User user = getUserUseCase.execute(body.userId());
         Optional<CardHolder> existingCardHolder = repo.findByUserEmailAndAccountId(user.getEmail(), account.getId());

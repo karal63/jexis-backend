@@ -26,6 +26,8 @@ import com.jexis.jexis_backend.user.application.useCases.GetUserUseCase;
 import com.jexis.jexis_backend.user.domain.entities.User;
 import com.stripe.exception.StripeException;
 
+import jakarta.validation.Valid;
+
 import org.springframework.web.bind.annotation.RequestBody;
 
 /**
@@ -111,17 +113,11 @@ public class AccountController {
      * @return the newly created account
      */
     @PostMapping("/create")
-    public Account create(@RequestBody CreateAccountDto body, @AuthenticationPrincipal AuthUser user) {
-        try {
-            User foundUser = getUserUseCase.execute(user.id());
-            return createAccountUseCase.execute(body, foundUser);
-        } catch (Exception e) {
-            if (e instanceof StripeException) {
-                throw new RuntimeException("Stripe API error: " + e.getMessage());
-            } else {
-                throw new RuntimeException("Error creating account: " + e.getMessage());
-            }
-        }
+    public Account create(@Valid @RequestBody CreateAccountDto body, @AuthenticationPrincipal AuthUser user)
+            throws StripeException {
+        User foundUser = getUserUseCase.execute(user.id());
+        return createAccountUseCase.execute(body, foundUser);
+
     }
 
     /**

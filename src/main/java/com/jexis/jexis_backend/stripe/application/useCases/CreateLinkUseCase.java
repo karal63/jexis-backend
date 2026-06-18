@@ -33,15 +33,19 @@ public class CreateLinkUseCase {
      * 
      * @return the created account link
      */
-    public AccountLink execute(String accountId) throws StripeException {
-        AccountLinkCreateParams params = AccountLinkCreateParams.builder()
-                .setAccount(accountId)
-                .setRefreshUrl("https://example.com")
-                .setReturnUrl("https://example.com?accountId=" + accountId)
-                .setType(AccountLinkCreateParams.Type.ACCOUNT_ONBOARDING)
-                .build();
+    public AccountLink execute(String accountId) {
+        try {
+            AccountLinkCreateParams params = AccountLinkCreateParams.builder()
+                    .setAccount(accountId)
+                    .setRefreshUrl("https://example.com")
+                    .setReturnUrl("https://example.com?accountId=" + accountId)
+                    .setType(AccountLinkCreateParams.Type.ACCOUNT_ONBOARDING)
+                    .build();
 
-        AccountLink accountLink = stripe.v1().accountLinks().create(params);
-        return accountLink;
+            AccountLink accountLink = stripe.v1().accountLinks().create(params);
+            return accountLink;
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 }
