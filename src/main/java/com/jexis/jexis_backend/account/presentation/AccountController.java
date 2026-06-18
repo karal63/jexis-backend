@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.jexis.jexis_backend.account.application.dto.CreateAccountDto;
 import com.jexis.jexis_backend.account.application.dto.EditAccountDto;
 import com.jexis.jexis_backend.account.application.useCases.CreateAccountUseCase;
 import com.jexis.jexis_backend.account.application.useCases.DeleteAccountUseCase;
@@ -24,9 +23,6 @@ import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.auth.application.dto.AuthUser;
 import com.jexis.jexis_backend.user.application.useCases.GetUserUseCase;
 import com.jexis.jexis_backend.user.domain.entities.User;
-import com.stripe.exception.StripeException;
-
-import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -113,10 +109,9 @@ public class AccountController {
      * @return the newly created account
      */
     @PostMapping("/create")
-    public Account create(@Valid @RequestBody CreateAccountDto body, @AuthenticationPrincipal AuthUser user)
-            throws StripeException {
+    public Account create(@AuthenticationPrincipal AuthUser user) {
         User foundUser = getUserUseCase.execute(user.id());
-        return createAccountUseCase.execute(body, foundUser);
+        return createAccountUseCase.execute(foundUser);
 
     }
 

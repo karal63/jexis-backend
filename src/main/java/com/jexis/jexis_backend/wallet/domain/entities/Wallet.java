@@ -30,6 +30,9 @@ public class Wallet {
     private UUID id;
 
     @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
     private String stripeFinancialAccountId;
 
     @ManyToOne
@@ -54,7 +57,8 @@ public class Wallet {
     Wallet() {
     }
 
-    public Wallet(String stripeFinancialAccountId, Account account) {
+    public Wallet(String name, String stripeFinancialAccountId, Account account) {
+        this.name = name;
         this.stripeFinancialAccountId = stripeFinancialAccountId;
         this.account = account;
     }
@@ -105,6 +109,14 @@ public class Wallet {
 
     public String setStripeFinancialAccountId() {
         return stripeFinancialAccountId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
 }

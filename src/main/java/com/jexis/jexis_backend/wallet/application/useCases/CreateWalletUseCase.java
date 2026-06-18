@@ -38,10 +38,10 @@ public class CreateWalletUseCase {
      * 
      * @return the created wallet
      */
-    public Wallet execute(Account account) {
-        FinancialAccount financialAccount = createTreasuryAccount.execute(account.getConnectAccountId());
+    public Wallet execute(Account account, String walletName) {
+        FinancialAccount financialAccount = createTreasuryAccount.execute(account.getConnectAccountId(), walletName);
 
-        Wallet wallet = new Wallet(financialAccount.getId(), account);
+        Wallet wallet = new Wallet(walletName, financialAccount.getId(), account);
         return repo.save(wallet);
     }
 }
