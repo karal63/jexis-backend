@@ -5,11 +5,11 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.jexis.jexis_backend.auth.application.dto.AuthUser;
 import com.jexis.jexis_backend.auth.application.dto.LoginResult;
 import com.jexis.jexis_backend.auth.application.dto.TokenPair;
 import com.jexis.jexis_backend.auth.domain.exception.InvalidRtException;
 import com.jexis.jexis_backend.auth.infrastructure.security.JwtUtil;
+import com.jexis.jexis_backend.user.application.dto.UserResponseDto;
 import com.jexis.jexis_backend.user.domain.entities.User;
 import com.jexis.jexis_backend.user.domain.exceptions.UserNotFoundException;
 import com.jexis.jexis_backend.user.infrastructure.UserRepository;
@@ -54,19 +54,21 @@ public class RefreshTokensUseCase {
 
         Claims claims = jwtUtil.extractClaimsRt(token);
 
-        Optional<User> dbUser = repo.findById(UUID.fromString(claims.get("id", String.class)));
+        Optional<User> user = repo.findById(UUID.fromString(claims.get("id", String.class)));
 
-        if (dbUser.isEmpty()) {
+        if (user.isEmpty()) {
             throw new UserNotFoundException();
         }
 
-        TokenPair tokens = jwtUtil.generateTokens(dbUser.get().getId(), dbUser.get().getFirstName(),
-                dbUser.get().getEmail(),
-                dbUser.get().getIsActivated());
+        TokenPair tokens = jwtUtil.generateTokens(user.get().getId(), user.get().getFirstName(),
+                user.get().getEmail(),
+                user.get().getIsActivated());
 
-        AuthUser user = new AuthUser(dbUser.get().getId(), dbUser.get().getFirstName(), dbUser.get().getEmail(),
-                dbUser.get().getIsActivated());
+        UserResponseDto userResponse = new UserResponseDto(user.get().getId(), user.get().getFirstName(),
+                user.get().getLastName(), user.get().getEmail(),
+                user.get().getPhoneNumber(), user.get().getIsActivated(), user.get().getCreatedAt(),
+                user.get().getUpdatedAt());
 
-        return new LoginResult(user, tokens);
+        return new LoginResult(userResponse, tokens);
     }
 }

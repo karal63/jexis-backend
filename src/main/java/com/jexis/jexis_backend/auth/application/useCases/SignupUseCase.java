@@ -2,12 +2,12 @@ package com.jexis.jexis_backend.auth.application.useCases;
 
 import org.springframework.stereotype.Service;
 
-import com.jexis.jexis_backend.auth.application.dto.AuthUser;
 import com.jexis.jexis_backend.common.logging.AsyncLogger;
 import com.jexis.jexis_backend.auth.application.dto.SignupResult;
 import com.jexis.jexis_backend.auth.application.dto.TokenPair;
 import com.jexis.jexis_backend.auth.infrastructure.security.JwtUtil;
 import com.jexis.jexis_backend.user.application.dto.CreateDto;
+import com.jexis.jexis_backend.user.application.dto.UserResponseDto;
 import com.jexis.jexis_backend.user.application.useCases.CreateUserUseCase;
 import com.jexis.jexis_backend.user.domain.entities.User;
 
@@ -53,8 +53,12 @@ public class SignupUseCase {
         TokenPair tokens = jwtUtil.generateTokens(
                 user.getId(), user.getFirstName(), user.getEmail(), user.getIsActivated());
 
-        AuthUser authUser = new AuthUser(user.getId(), user.getFirstName(), user.getEmail(), user.getIsActivated());
+        UserResponseDto userResponse = new UserResponseDto(user.getId(), user.getFirstName(),
+                user.getLastName(), user.getEmail(),
+                user.getPhoneNumber(), user.getIsActivated(), user.getCreatedAt(),
+                user.getUpdatedAt());
+
         logger.info("AUTH", "Signup completed for user: " + user.getEmail());
-        return new SignupResult(authUser, tokens);
+        return new SignupResult(userResponse, tokens);
     }
 }
