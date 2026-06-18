@@ -23,8 +23,6 @@ public class JexisBackendApplication {
 
     @PostMapping("/create")
     public String create(@Valid @RequestBody TestDto body) {
-        System.out.println(body.getEmail());
-        System.out.println(body.getPassword());
         return body.getEmail();
     }
 }
