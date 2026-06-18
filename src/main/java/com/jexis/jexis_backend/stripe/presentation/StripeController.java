@@ -1,7 +1,15 @@
 package com.jexis.jexis_backend.stripe.presentation;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.jexis.jexis_backend.common.web.error.DomainException;
+import com.stripe.StripeClient;
+import com.stripe.exception.StripeException;
+import com.stripe.model.Account;
+import com.stripe.net.RequestOptions;
 
 /**
  * StripeController
@@ -23,7 +31,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("")
 public class StripeController {
 
-    public StripeController() {
+    private final StripeClient client;
 
+    public StripeController(StripeClient client) {
+        this.client = client;
+    }
+
+    @PostMapping("test")
+    public ResponseEntity<Account> test() {
+        try {
+            Account account = client.v1().accounts().retrieve("acct_1TafqCLGRmU4Cdd");
+            return ResponseEntity.status(200).body(account);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 }
+
+// test Exception
+// test if same effect with no try catch

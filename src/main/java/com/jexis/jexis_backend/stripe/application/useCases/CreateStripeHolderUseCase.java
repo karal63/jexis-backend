@@ -44,54 +44,58 @@ public class CreateStripeHolderUseCase {
      * 
      * @return the created cardholder
      */
-    public Cardholder execute(HttpServletRequest request, CreateStripeHolderDto dto) throws StripeException {
-        logger.info("STRIPE", "Starting cardholder creation for account: " + dto.connectedAccountId());
+    public Cardholder execute(HttpServletRequest request, CreateStripeHolderDto dto) {
+        try {
+            logger.info("STRIPE", "Starting cardholder creation for account: " + dto.connectedAccountId());
 
-        String ip = extractClientIp(request);
-        long acceptanceTime = Instant.now().getEpochSecond();
+            String ip = extractClientIp(request);
+            long acceptanceTime = Instant.now().getEpochSecond();
 
-        CardholderCreateParams params = CardholderCreateParams.builder()
-                .setType(CardholderCreateParams.Type.INDIVIDUAL)
-                .setName(dto.firstName())
-                .setEmail(dto.email())
-                .setPhoneNumber(dto.phoneNumber())
-                .setBilling(
-                        CardholderCreateParams.Billing.builder()
-                                .setAddress(
-                                        CardholderCreateParams.Billing.Address
-                                                .builder()
-                                                .setLine1(dto.addressLine1())
-                                                .setCity(dto.city())
-                                                .setState(dto.state())
-                                                .setCountry(dto.country())
-                                                .setPostalCode(dto
-                                                        .postalCode())
-                                                .build())
-                                .build())
-                .setIndividual(
-                        CardholderCreateParams.Individual.builder()
-                                .setFirstName(dto.firstName())
-                                .setLastName(dto.lastName())
-                                .setCardIssuing(
-                                        CardholderCreateParams.Individual.CardIssuing.builder()
-                                                .setUserTermsAcceptance(
-                                                        CardholderCreateParams.Individual.CardIssuing.UserTermsAcceptance
-                                                                .builder()
-                                                                .setIp(ip)
-                                                                .setDate(acceptanceTime)
-                                                                .build())
-                                                .build())
-                                .build())
-                .build();
+            CardholderCreateParams params = CardholderCreateParams.builder()
+                    .setType(CardholderCreateParams.Type.INDIVIDUAL)
+                    .setName(dto.firstName())
+                    .setEmail(dto.email())
+                    .setPhoneNumber(dto.phoneNumber())
+                    .setBilling(
+                            CardholderCreateParams.Billing.builder()
+                                    .setAddress(
+                                            CardholderCreateParams.Billing.Address
+                                                    .builder()
+                                                    .setLine1(dto.addressLine1())
+                                                    .setCity(dto.city())
+                                                    .setState(dto.state())
+                                                    .setCountry(dto.country())
+                                                    .setPostalCode(dto
+                                                            .postalCode())
+                                                    .build())
+                                    .build())
+                    .setIndividual(
+                            CardholderCreateParams.Individual.builder()
+                                    .setFirstName(dto.firstName())
+                                    .setLastName(dto.lastName())
+                                    .setCardIssuing(
+                                            CardholderCreateParams.Individual.CardIssuing.builder()
+                                                    .setUserTermsAcceptance(
+                                                            CardholderCreateParams.Individual.CardIssuing.UserTermsAcceptance
+                                                                    .builder()
+                                                                    .setIp(ip)
+                                                                    .setDate(acceptanceTime)
+                                                                    .build())
+                                                    .build())
+                                    .build())
+                    .build();
 
-        RequestOptions options = RequestOptions.builder()
-                .setStripeAccount(dto.connectedAccountId())
-                .build();
+            RequestOptions options = RequestOptions.builder()
+                    .setStripeAccount(dto.connectedAccountId())
+                    .build();
 
-        Cardholder cardholder = stripe.v1().issuing().cardholders().create(params, options);
-        logger.info("STRIPE", "Cardholder created successfully with id: " + cardholder.getId());
+            Cardholder cardholder = stripe.v1().issuing().cardholders().create(params, options);
+            logger.info("STRIPE", "Cardholder created successfully with id: " + cardholder.getId());
 
-        return cardholder;
+            return cardholder;
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     private String extractClientIp(HttpServletRequest request) {

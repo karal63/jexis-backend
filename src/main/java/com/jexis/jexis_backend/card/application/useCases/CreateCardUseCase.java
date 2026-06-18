@@ -67,7 +67,7 @@ public class CreateCardUseCase {
      * @param dto the data transfer object containing card creation details
      * @return the created card entity
      */
-    public Card execute(CreateCardDto dto) throws StripeException {
+    public Card execute(CreateCardDto dto) {
         CardHolder cardHolder = getCardHolderUseCase.execute(dto.getCardHolderId());
         Wallet wallet = getWalletUseCase.execute(dto.getWalletId());
         Account connectAccount = getAccountUseCase.execute(dto.getAccountId());

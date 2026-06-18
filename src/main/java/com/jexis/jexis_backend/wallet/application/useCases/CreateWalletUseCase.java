@@ -38,7 +38,7 @@ public class CreateWalletUseCase {
      * 
      * @return the created wallet
      */
-    public Wallet execute(Account account) throws StripeException {
+    public Wallet execute(Account account) {
         FinancialAccount financialAccount = createTreasuryAccount.execute(account.getConnectAccountId());
 
         Wallet wallet = new Wallet(financialAccount.getId(), account);

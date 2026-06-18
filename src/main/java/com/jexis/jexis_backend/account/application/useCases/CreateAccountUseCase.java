@@ -50,7 +50,7 @@ public class CreateAccountUseCase {
      * @param body passed by controller payload containing account creation data
      * @return the newly created account
      */
-    public Account execute(CreateAccountDto body, User owner) throws StripeException {
+    public Account execute(CreateAccountDto body, User owner) {
         logger.info("ACCOUNT", "Creating account with email: " + body.getEmail());
 
         Optional<Account> existingAccount = repo.findByEmail(body.getEmail());
