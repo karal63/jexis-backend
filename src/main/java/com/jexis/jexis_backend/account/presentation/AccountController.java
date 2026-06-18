@@ -113,8 +113,7 @@ public class AccountController {
      * @return the newly created account
      */
     @PostMapping("/create")
-    public Account create(@Valid @RequestBody CreateAccountDto body, @AuthenticationPrincipal AuthUser user)
-            throws StripeException {
+    public Account create(@Valid @RequestBody CreateAccountDto body, @AuthenticationPrincipal AuthUser user) {
         User foundUser = getUserUseCase.execute(user.id());
         return createAccountUseCase.execute(body, foundUser);
 

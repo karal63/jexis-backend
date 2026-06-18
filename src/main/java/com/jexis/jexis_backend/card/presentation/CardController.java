@@ -103,7 +103,7 @@ public class CardController {
      * @return the newly created card entity
      */
     @PostMapping("/create")
-    public Card create(@Valid @RequestBody CreateCardDto body) throws StripeException {
+    public Card create(@Valid @RequestBody CreateCardDto body) {
         return createCardUseCase.execute(body);
     }
 

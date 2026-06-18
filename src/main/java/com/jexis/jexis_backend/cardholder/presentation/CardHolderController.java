@@ -56,7 +56,7 @@ public class CardHolderController {
     }
 
     @PostMapping("/create")
-    public CardHolder create(@RequestBody CreateCardHolderDto body, HttpServletRequest request) throws StripeException {
+    public CardHolder create(@RequestBody CreateCardHolderDto body, HttpServletRequest request) {
         return createCardHolderUseCase.execute(body, request);
     }
 

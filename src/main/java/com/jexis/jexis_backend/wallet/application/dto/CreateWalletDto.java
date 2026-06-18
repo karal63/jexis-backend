@@ -2,6 +2,8 @@ package com.jexis.jexis_backend.wallet.application.dto;
 
 import java.util.UUID;
 
+import jakarta.validation.constraints.NotNull;
+
 /**
  * CreateWalletDto
  *
@@ -12,9 +14,17 @@ import java.util.UUID;
  * Author: Leo
  */
 public class CreateWalletDto {
+    @NotNull(message = "Account id is required")
     private UUID accountId;
+
+    @NotNull(message = "Wallet name is required")
+    private String name;
 
     public UUID getAccountId() {
         return accountId;
+    }
+
+    public String getName() {
+        return name;
     }
 }

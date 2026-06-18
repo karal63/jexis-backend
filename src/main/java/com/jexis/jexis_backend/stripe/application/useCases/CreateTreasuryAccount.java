@@ -17,7 +17,7 @@ public class CreateTreasuryAccount {
         this.client = client;
     }
 
-    public FinancialAccount execute(String connectAccountId) {
+    public FinancialAccount execute(String connectAccountId, String walletName) {
         try {
             FinancialAccountCreateParams params = FinancialAccountCreateParams.builder()
                     .addSupportedCurrency("usd")
@@ -80,13 +80,12 @@ public class CreateTreasuryAccount {
                                                                     .build())
                                                     .build())
                                     .build())
-                    .putExtraParam("nickname", "Jexis Treasury Account")
+                    .putExtraParam("nickname", walletName)
                     .putExtraParam("features[card_issuing][requested]", true)
                     .build();
 
             RequestOptions requestOptions = RequestOptions.builder().setStripeAccount(connectAccountId)
                     .build();
-            // For SDK versions 29.4.0 or lower, remove '.v1()' from the following line.
 
             FinancialAccount financialAccount = client.v1().treasury().financialAccounts().create(params,
                     requestOptions);

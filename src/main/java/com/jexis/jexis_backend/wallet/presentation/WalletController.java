@@ -27,6 +27,8 @@ import com.jexis.jexis_backend.wallet.application.useCases.GetWalletUseCase;
 import com.jexis.jexis_backend.wallet.domain.entities.Wallet;
 import com.stripe.exception.StripeException;
 
+import jakarta.validation.Valid;
+
 /**
  * WalletController
  *
@@ -99,9 +101,9 @@ public class WalletController {
      * @return the newly created wallet entity
      */
     @PostMapping("/create-treasury-account")
-    public Wallet create(@RequestBody CreateWalletDto body) throws StripeException {
+    public Wallet create(@Valid @RequestBody CreateWalletDto body) {
         Account account = getAccountUseCase.execute(body.getAccountId());
-        return createWalletUseCase.execute(account);
+        return createWalletUseCase.execute(account, body.getName());
     }
 
     /**
