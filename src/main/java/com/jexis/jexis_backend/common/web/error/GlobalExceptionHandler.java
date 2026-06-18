@@ -25,4 +25,5 @@ public class GlobalExceptionHandler {
                 .status(ex.getStatus() != null ? ex.getStatus() : HttpStatus.BAD_REQUEST.value())
                 .body(new ErrorResponse(ex.getStatus(), ex.getCode(), ex.getMessage()));
     }
+
 }

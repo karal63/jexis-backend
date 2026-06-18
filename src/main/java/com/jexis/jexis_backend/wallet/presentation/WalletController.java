@@ -130,15 +130,4 @@ public class WalletController {
     public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID id) {
         deleteWalletUseCase.execute(user, id);
     }
-
-    // public ResponseEntity<String> createTreasuryAccount(@RequestBody
-    // CreateTreasuryAccountDto body)
-    // throws StripeException {
-    // try {
-    // return ResponseEntity.ok("Treasury account created");
-    // } catch (Exception e) {
-    // return ResponseEntity.status(500).body("Error creating treasury account: " +
-    // e.getMessage());
-    // }
-    // }
 }
