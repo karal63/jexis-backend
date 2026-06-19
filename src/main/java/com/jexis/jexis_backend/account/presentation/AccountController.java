@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.jexis.jexis_backend.account.application.dto.AccountResponseDto;
 import com.jexis.jexis_backend.account.application.dto.EditAccountDto;
 import com.jexis.jexis_backend.account.application.useCases.CreateAccountUseCase;
 import com.jexis.jexis_backend.account.application.useCases.DeleteAccountUseCase;
@@ -109,7 +110,7 @@ public class AccountController {
      * @return the newly created account
      */
     @PostMapping("/create")
-    public Account create(@AuthenticationPrincipal AuthUser user) {
+    public AccountResponseDto create(@AuthenticationPrincipal AuthUser user) {
         User foundUser = getUserUseCase.execute(user.id());
         return createAccountUseCase.execute(foundUser);
 
@@ -145,7 +146,7 @@ public class AccountController {
      * @return retuers updated account
      */
     @PatchMapping("/edit/{id}")
-    public Optional<Account> edit(@PathVariable UUID id, @RequestBody EditAccountDto body) {
+    public AccountResponseDto edit(@PathVariable UUID id, @RequestBody EditAccountDto body) {
         return editAccountUseCase.execute(id, body);
     }
 }

@@ -5,10 +5,12 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.jexis.jexis_backend.account.application.dto.AccountResponseDto;
 import com.jexis.jexis_backend.account.application.dto.EditAccountDto;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.account.domain.exception.AccountNotFoundException;
 import com.jexis.jexis_backend.account.infrastructure.AccountRepository;
+import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
 import com.jexis.jexis_backend.user.domain.entities.User;
 import com.jexis.jexis_backend.user.infrastructure.UserRepository;
 
@@ -26,10 +28,12 @@ import com.jexis.jexis_backend.user.infrastructure.UserRepository;
 public class EditAccountUseCase {
     AccountRepository accountRepo;
     UserRepository userRepo;
+    private final DtoHelper dtoHelper;
 
-    public EditAccountUseCase(AccountRepository accountRepo, UserRepository userRepo) {
+    public EditAccountUseCase(AccountRepository accountRepo, UserRepository userRepo, DtoHelper dtoHelper) {
         this.accountRepo = accountRepo;
         this.userRepo = userRepo;
+        this.dtoHelper = dtoHelper;
     }
 
     /**
@@ -44,7 +48,7 @@ public class EditAccountUseCase {
      * @param id   the ID of the account to edit
      * @return the updated account
      */
-    public Optional<Account> execute(UUID id, EditAccountDto body) {
+    public AccountResponseDto execute(UUID id, EditAccountDto body) {
         Optional<Account> account = accountRepo.findById(id);
 
         if (account.isEmpty()) {
@@ -62,6 +66,14 @@ public class EditAccountUseCase {
             return accountRepo.save(existingAccount);
         });
 
-        return account;
+        return new AccountResponseDto(
+                account.get().getId(),
+                account.get().getName(),
+                account.get().getEmail(),
+                account.get().getConnectAccountId(),
+                account.get().getAccountLink(),
+                dtoHelper.toUserDto(account.get().getOwner()),
+                account.get().getCreatedAt(),
+                account.get().getUpdatedAt());
     }
 }

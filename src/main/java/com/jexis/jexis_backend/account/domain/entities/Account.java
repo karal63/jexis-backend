@@ -31,7 +31,7 @@ public class Account {
     @Column
     private String name;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String email;
 
     @Column(nullable = false, unique = true)
@@ -70,6 +70,10 @@ public class Account {
         return name;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
     public String getAccountLink() {
         return accountLink;
     }
@@ -104,6 +108,10 @@ public class Account {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public void setAccountLink(String accountLink) {
