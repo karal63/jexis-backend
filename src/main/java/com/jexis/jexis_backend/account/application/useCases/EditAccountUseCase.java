@@ -66,14 +66,6 @@ public class EditAccountUseCase {
             return accountRepo.save(existingAccount);
         });
 
-        return new AccountResponseDto(
-                account.get().getId(),
-                account.get().getName(),
-                account.get().getEmail(),
-                account.get().getConnectAccountId(),
-                account.get().getAccountLink(),
-                dtoHelper.toUserDto(account.get().getOwner()),
-                account.get().getCreatedAt(),
-                account.get().getUpdatedAt());
+        return dtoHelper.toAccountDto(account.get());
     }
 }

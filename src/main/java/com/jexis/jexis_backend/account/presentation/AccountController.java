@@ -22,6 +22,7 @@ import com.jexis.jexis_backend.account.application.useCases.GetAccountUseCase;
 import com.jexis.jexis_backend.account.application.useCases.GetAccountsUseCase;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.auth.application.dto.AuthUser;
+import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
 import com.jexis.jexis_backend.user.application.useCases.GetUserUseCase;
 import com.jexis.jexis_backend.user.domain.entities.User;
 
@@ -52,19 +53,22 @@ public class AccountController {
     private final GetAccountUseCase getAccountUseCase;
     private final EditAccountUseCase editAccountUseCase;
     private final GetUserUseCase getUserUseCase;
+    private final DtoHelper dtoHelper;
 
     public AccountController(
             CreateAccountUseCase createAccount,
             DeleteAccountUseCase deleteAccount,
             GetAccountsUseCase getAccounts,
             GetAccountUseCase getAccount,
-            EditAccountUseCase editAccount, GetUserUseCase getUserUseCase) {
+            EditAccountUseCase editAccount, GetUserUseCase getUserUseCase,
+            DtoHelper dtoHelper) {
         this.createAccountUseCase = createAccount;
         this.deleteAccountUseCase = deleteAccount;
         this.getAccountsUseCase = getAccounts;
         this.getAccountUseCase = getAccount;
         this.editAccountUseCase = editAccount;
         this.getUserUseCase = getUserUseCase;
+        this.dtoHelper = dtoHelper;
     }
 
     /**
@@ -78,8 +82,12 @@ public class AccountController {
      * @return list of all accounts
      */
     @GetMapping("/list")
-    public List<Account> getAll() {
-        return getAccountsUseCase.execute();
+    public List<AccountResponseDto> getAll() {
+        List<Account> accounts = getAccountsUseCase.execute();
+        return accounts
+                .stream()
+                .map(dtoHelper::toAccountDto)
+                .toList();
     }
 
     /**
@@ -94,8 +102,9 @@ public class AccountController {
      * @return the account with the specified ID
      */
     @GetMapping("/{id}")
-    public Account get(@PathVariable UUID id) {
-        return getAccountUseCase.execute(id);
+    public AccountResponseDto get(@PathVariable UUID id) {
+        Account account = getAccountUseCase.execute(id);
+        return dtoHelper.toAccountDto(account);
     }
 
     /**

@@ -61,14 +61,6 @@ public class CreateAccountUseCase {
 
         logger.info("ACCOUNT", "Account created successfully: " + saved.getName());
 
-        return new AccountResponseDto(
-                saved.getId(),
-                saved.getName(),
-                saved.getEmail(),
-                saved.getConnectAccountId(),
-                saved.getAccountLink(),
-                dtoHelper.toUserDto(owner),
-                saved.getCreatedAt(),
-                saved.getUpdatedAt());
+        return dtoHelper.toAccountDto(saved);
     }
 }
