@@ -10,6 +10,8 @@ import com.jexis.jexis_backend.cardholder.application.dto.CardHolderResponseDto;
 import com.jexis.jexis_backend.cardholder.domain.entities.CardHolder;
 import com.jexis.jexis_backend.user.application.dto.UserResponseDto;
 import com.jexis.jexis_backend.user.domain.entities.User;
+import com.jexis.jexis_backend.wallet.application.dto.WalletResponseDto;
+import com.jexis.jexis_backend.wallet.domain.entities.Wallet;
 
 @Service
 public class DtoHelper {
@@ -52,15 +54,13 @@ public class DtoHelper {
                 cardHolder.getUpdatedAt());
     }
 
-    // public CardResponseDto toCardHolderDto(Card card) {
-    // return new CardResponseDto(
-    // card.getId(),
-    // toUserDto(card.getCardHolder()),
-    // card.getEmail(),
-    // card.getConnectAccountId(),
-    // card.getAccountLink(),
-    // toUserDto(account.getOwner()),
-    // account.getCreatedAt(),
-    // account.getUpdatedAt());
-    // }
+    public WalletResponseDto toWalletDto(Wallet wallet) {
+        return new WalletResponseDto(
+                wallet.getId(),
+                wallet.getName(),
+                toAccountDto(wallet.getAccount()),
+                wallet.getAvailableBalance(),
+                wallet.getCreatedAt(),
+                wallet.getUpdatedAt());
+    }
 }
