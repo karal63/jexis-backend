@@ -1,5 +1,7 @@
 package com.jexis.jexis_backend.auth.application.dto;
 
+import com.jexis.jexis_backend.user.application.dto.UserResponseDto;
+
 /**
  * LoginResult
  *
@@ -9,5 +11,5 @@ package com.jexis.jexis_backend.auth.application.dto;
  *
  * Author: Leo
  */
-public record LoginResult(AuthUser user, TokenPair tokens) {
+public record LoginResult(UserResponseDto user, TokenPair tokens) {
 }

@@ -11,6 +11,7 @@ import com.jexis.jexis_backend.auth.application.dto.LoginDto;
 import com.jexis.jexis_backend.auth.application.dto.LoginResult;
 import com.jexis.jexis_backend.auth.application.dto.TokenPair;
 import com.jexis.jexis_backend.auth.infrastructure.security.JwtUtil;
+import com.jexis.jexis_backend.user.application.dto.UserResponseDto;
 import com.jexis.jexis_backend.user.domain.entities.User;
 import com.jexis.jexis_backend.user.domain.exceptions.UserNotFoundException;
 import com.jexis.jexis_backend.user.infrastructure.UserRepository;
@@ -68,10 +69,13 @@ public class LoginUseCase {
 
         TokenPair tokens = jwtUtil.generateTokens(user.get().getId(), user.get().getFirstName(), user.get().getEmail(),
                 user.get().getIsActivated());
-        AuthUser authUser = new AuthUser(user.get().getId(), user.get().getFirstName(), user.get().getEmail(),
-                user.get().getIsActivated());
+
+        UserResponseDto userResponse = new UserResponseDto(user.get().getId(), user.get().getFirstName(),
+                user.get().getLastName(), user.get().getEmail(),
+                user.get().getPhoneNumber(), user.get().getIsActivated(), user.get().getCreatedAt(),
+                user.get().getUpdatedAt());
 
         logger.info("AUTH", "Login succeeded for user: " + user.get().getEmail());
-        return new LoginResult(authUser, tokens);
+        return new LoginResult(userResponse, tokens);
     }
 }

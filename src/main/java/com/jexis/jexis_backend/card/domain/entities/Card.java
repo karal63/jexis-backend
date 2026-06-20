@@ -183,4 +183,12 @@ public class Card {
         this.user = user;
     }
 
+    public Wallet getTreasuryAccount() {
+        return treasuryAccount;
+    }
+
+    public void setTreasuryAccount(Wallet wallet) {
+        this.treasuryAccount = wallet;
+    }
+
 }
