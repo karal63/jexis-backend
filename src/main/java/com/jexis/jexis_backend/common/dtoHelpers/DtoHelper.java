@@ -63,4 +63,20 @@ public class DtoHelper {
                 wallet.getCreatedAt(),
                 wallet.getUpdatedAt());
     }
+
+    public CardResponseDto toCardDto(Card card) {
+        return new CardResponseDto(
+                card.getId(),
+                toCardHolderDto(card.getCardHolder()),
+                toWalletDto(card.getTreasuryAccount()),
+                toUserDto(card.getUser()),
+                card.getLast4(),
+                card.getStatus(),
+                card.getLimit(),
+                card.getBrand(),
+                card.getType(),
+                card.getCurrency(),
+                card.getExpYear(),
+                card.getCreatedAt());
+    }
 }

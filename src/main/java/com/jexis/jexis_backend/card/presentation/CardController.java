@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jexis.jexis_backend.auth.application.dto.AuthUser;
+import com.jexis.jexis_backend.card.application.dto.CardResponseDto;
 import com.jexis.jexis_backend.card.application.dto.CreateCardDto;
 import com.jexis.jexis_backend.card.application.dto.EditCardDto;
 import com.jexis.jexis_backend.card.application.useCases.CreateCardUseCase;
@@ -23,6 +24,7 @@ import com.jexis.jexis_backend.card.application.useCases.GetCardUseCase;
 import com.jexis.jexis_backend.card.domain.entities.Card;
 import com.jexis.jexis_backend.cardholder.application.useCases.GetCardHolderUseCase;
 import com.jexis.jexis_backend.cardholder.domain.entities.CardHolder;
+import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
 import com.stripe.exception.StripeException;
 
 import jakarta.validation.Valid;
@@ -52,6 +54,7 @@ public class CardController {
     private final CreateCardUseCase createCardUseCase;
     private final EditCardUseCase editCardUseCase;
     private final DeleteCardUseCase deleteCardUseCase;
+    private final DtoHelper dtoHelper;
 
     public CardController(
             GetAllCardsUseCase getAllCardsUseCase,
@@ -59,13 +62,15 @@ public class CardController {
             GetCardHolderUseCase getCardHolderUseCase,
             CreateCardUseCase createCardUseCase,
             EditCardUseCase editCardUseCase,
-            DeleteCardUseCase deleteCardUseCase) {
+            DeleteCardUseCase deleteCardUseCase,
+            DtoHelper dtoHelper) {
         this.getAllCardsUseCase = getAllCardsUseCase;
         this.getCardUseCase = getCardUseCase;
         this.getCardHolderUseCase = getCardHolderUseCase;
         this.createCardUseCase = createCardUseCase;
         this.editCardUseCase = editCardUseCase;
         this.deleteCardUseCase = deleteCardUseCase;
+        this.dtoHelper = dtoHelper;
     }
 
     /**
@@ -76,8 +81,9 @@ public class CardController {
      * @return a list of all card entities
      */
     @GetMapping("/list")
-    public List<Card> list() {
-        return getAllCardsUseCase.execute();
+    public List<CardResponseDto> list() {
+        List<Card> cards = getAllCardsUseCase.execute();
+        return cards.stream().map(dtoHelper::toCardDto).toList();
     }
 
     /**
@@ -89,8 +95,9 @@ public class CardController {
      * @return the matching card entity
      */
     @GetMapping("/list/{id}")
-    public Card find(@PathVariable UUID id) {
-        return getCardUseCase.execute(id);
+    public CardResponseDto find(@PathVariable UUID id) {
+        Card card = getCardUseCase.execute(id);
+        return dtoHelper.toCardDto(card);
     }
 
     /**
@@ -103,8 +110,9 @@ public class CardController {
      * @return the newly created card entity
      */
     @PostMapping("/create")
-    public Card create(@Valid @RequestBody CreateCardDto body) {
-        return createCardUseCase.execute(body);
+    public CardResponseDto create(@Valid @RequestBody CreateCardDto body) {
+        Card card = createCardUseCase.execute(body);
+        return dtoHelper.toCardDto(card);
     }
 
     /**
@@ -117,8 +125,9 @@ public class CardController {
      * @return the updated card entity
      */
     @PatchMapping("/edit/{id}")
-    public Card edit(@PathVariable UUID id, @RequestBody EditCardDto body) {
-        return editCardUseCase.execute(id, body);
+    public CardResponseDto edit(@PathVariable UUID id, @RequestBody EditCardDto body) {
+        Card card = editCardUseCase.execute(id, body);
+        return dtoHelper.toCardDto(card);
     }
 
     /**
