@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
 import com.jexis.jexis_backend.user.application.dto.CreateDto;
 import com.jexis.jexis_backend.user.application.dto.EditDto;
+import com.jexis.jexis_backend.user.application.dto.UserResponseDto;
 import com.jexis.jexis_backend.user.application.useCases.CreateUserUseCase;
 import com.jexis.jexis_backend.user.application.useCases.DeleteUserUseCase;
 import com.jexis.jexis_backend.user.application.useCases.EditUserUseCase;
@@ -47,14 +49,17 @@ public class UserController {
     DeleteUserUseCase deleteUserUseCase;
     EditUserUseCase editUserUseCase;
     private final GetUserUseCase getUserUseCase;
+    private final DtoHelper dtoHelper;
 
     public UserController(GetUsersUseCase getUsersUseCase, CreateUserUseCase createUserUseCase,
-            DeleteUserUseCase deleteUserUseCase, EditUserUseCase editUserUseCase, GetUserUseCase getUserUseCase) {
+            DeleteUserUseCase deleteUserUseCase, EditUserUseCase editUserUseCase, GetUserUseCase getUserUseCase,
+            DtoHelper dtoHelper) {
         this.getUsersUseCase = getUsersUseCase;
         this.createUserUseCase = createUserUseCase;
         this.deleteUserUseCase = deleteUserUseCase;
         this.editUserUseCase = editUserUseCase;
         this.getUserUseCase = getUserUseCase;
+        this.dtoHelper = dtoHelper;
     }
 
     /**
@@ -68,8 +73,8 @@ public class UserController {
      * @return list of all accounts
      */
     @GetMapping("/list")
-    public List<User> getUsers() {
-        return getUsersUseCase.execute();
+    public List<UserResponseDto> getUsers() {
+        return getUsersUseCase.execute().stream().map(dtoHelper::toUserDto).toList();
     }
 
     /**
@@ -81,8 +86,8 @@ public class UserController {
      * @return the matching user entity
      */
     @GetMapping("/list/{id}")
-    public User getUser(@PathVariable UUID id) {
-        return getUserUseCase.execute(id);
+    public UserResponseDto getUser(@PathVariable UUID id) {
+        return dtoHelper.toUserDto(getUserUseCase.execute(id));
     }
 
     /**
@@ -94,8 +99,8 @@ public class UserController {
      * @return the newly created user entity
      */
     @PostMapping("/create")
-    public User createUsers(@RequestBody CreateDto createDto) {
-        return createUserUseCase.execute(createDto);
+    public UserResponseDto createUsers(@RequestBody CreateDto createDto) {
+        return dtoHelper.toUserDto(createUserUseCase.execute(createDto));
     }
 
     /**
@@ -122,7 +127,7 @@ public class UserController {
      * @return an optional updated user entity
      */
     @PatchMapping("/edit/{id}")
-    public Optional<User> editUser(@RequestBody EditDto editDto, @PathVariable UUID id) {
-        return editUserUseCase.execute(id, editDto);
+    public UserResponseDto editUser(@RequestBody EditDto editDto, @PathVariable UUID id) {
+        return dtoHelper.toUserDto(editUserUseCase.execute(id, editDto));
     }
 }

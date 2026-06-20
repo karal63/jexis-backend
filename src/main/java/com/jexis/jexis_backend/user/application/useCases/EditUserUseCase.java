@@ -43,7 +43,7 @@ public class EditUserUseCase {
      * 
      * @return a {@link User} containing the updated user
      */
-    public Optional<User> execute(UUID id, EditDto body) {
+    public User execute(UUID id, EditDto body) {
         Optional<User> foundUser = repo.findById(id);
 
         if (!foundUser.isPresent()) {
@@ -69,6 +69,6 @@ public class EditUserUseCase {
             repo.save(user);
         });
 
-        return foundUser;
+        return foundUser.get();
     }
 }
