@@ -1,0 +1,79 @@
+package com.jexis.jexis_backend.member.presentation;
+
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
+import com.jexis.jexis_backend.member.application.dto.CreateMemberDto;
+import com.jexis.jexis_backend.member.application.dto.EditMemberDto;
+import com.jexis.jexis_backend.member.application.dto.MemberResponseDto;
+import com.jexis.jexis_backend.member.application.useCases.AddMemberUseCase;
+import com.jexis.jexis_backend.member.application.useCases.EditMemberUseCase;
+import com.jexis.jexis_backend.member.application.useCases.GetMemberUseCase;
+import com.jexis.jexis_backend.member.application.useCases.GetMembersUseCase;
+import com.jexis.jexis_backend.member.application.useCases.RemoveMemberUseCase;
+import com.jexis.jexis_backend.member.domain.entities.Member;
+
+@RestController
+@RequestMapping("/member")
+public class MemberController {
+    private final GetMemberUseCase getMemberUseCase;
+    private final GetMembersUseCase getMembersUseCase;
+    private final AddMemberUseCase addMemberUseCase;
+    private final EditMemberUseCase editMemberUseCase;
+    private final RemoveMemberUseCase removeMemberUseCase;
+    private final DtoHelper dtoHelper;
+
+    public MemberController(
+            GetMemberUseCase getMemberUseCase,
+            GetMembersUseCase getMembersUseCase,
+            AddMemberUseCase addMemberUseCase,
+            EditMemberUseCase editMemberUseCase,
+            RemoveMemberUseCase removeMemberUseCase,
+            DtoHelper dtoHelper) {
+        this.getMemberUseCase = getMemberUseCase;
+        this.getMembersUseCase = getMembersUseCase;
+        this.addMemberUseCase = addMemberUseCase;
+        this.editMemberUseCase = editMemberUseCase;
+        this.removeMemberUseCase = removeMemberUseCase;
+        this.dtoHelper = dtoHelper;
+    }
+
+    @GetMapping("/list")
+    public List<MemberResponseDto> list() {
+        List<Member> members = getMembersUseCase.execute();
+        return members.stream().map(dtoHelper::toMemberDto).toList();
+    }
+
+    @GetMapping("/list/{id}")
+    public MemberResponseDto get(@PathVariable UUID id) {
+        Member member = getMemberUseCase.execute(id);
+        return dtoHelper.toMemberDto(member);
+    }
+
+    @PostMapping("/add")
+    public MemberResponseDto add(@RequestBody CreateMemberDto body) {
+        Member member = addMemberUseCase.execute(body);
+        return dtoHelper.toMemberDto(member);
+    }
+
+    @PatchMapping("/edit/{id}")
+    public MemberResponseDto edit(@PathVariable UUID id, @RequestBody EditMemberDto body) {
+        Member member = editMemberUseCase.execute(id, body);
+        return dtoHelper.toMemberDto(member);
+    }
+
+    @PostMapping("/remove/{id}")
+    public void remove(@PathVariable UUID id) {
+        removeMemberUseCase.execute(id);
+    }
+}
