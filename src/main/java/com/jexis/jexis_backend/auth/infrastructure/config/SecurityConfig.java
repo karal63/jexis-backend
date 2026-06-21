@@ -2,6 +2,7 @@ package com.jexis.jexis_backend.auth.infrastructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -10,6 +11,7 @@ import com.jexis.jexis_backend.auth.infrastructure.security.JwtFilter;
 import com.jexis.jexis_backend.auth.infrastructure.security.JwtUtil;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
@@ -28,7 +30,8 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**",
+                        .requestMatchers("/auth/**", "/swagger-ui/**", "/swagger-ui.html",
+                                "/v3/api-docs/**",
                                 "/webjars/**")
                         .permitAll()
                         .anyRequest().authenticated())

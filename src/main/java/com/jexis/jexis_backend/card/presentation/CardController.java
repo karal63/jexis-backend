@@ -3,6 +3,7 @@ package com.jexis.jexis_backend.card.presentation;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -22,10 +23,7 @@ import com.jexis.jexis_backend.card.application.useCases.EditCardUseCase;
 import com.jexis.jexis_backend.card.application.useCases.GetAllCardsUseCase;
 import com.jexis.jexis_backend.card.application.useCases.GetCardUseCase;
 import com.jexis.jexis_backend.card.domain.entities.Card;
-import com.jexis.jexis_backend.cardholder.application.useCases.GetCardHolderUseCase;
-import com.jexis.jexis_backend.cardholder.domain.entities.CardHolder;
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
-import com.stripe.exception.StripeException;
 
 import jakarta.validation.Valid;
 
@@ -50,7 +48,6 @@ import jakarta.validation.Valid;
 public class CardController {
     private final GetAllCardsUseCase getAllCardsUseCase;
     private final GetCardUseCase getCardUseCase;
-    private final GetCardHolderUseCase getCardHolderUseCase;
     private final CreateCardUseCase createCardUseCase;
     private final EditCardUseCase editCardUseCase;
     private final DeleteCardUseCase deleteCardUseCase;
@@ -59,14 +56,12 @@ public class CardController {
     public CardController(
             GetAllCardsUseCase getAllCardsUseCase,
             GetCardUseCase getCardUseCase,
-            GetCardHolderUseCase getCardHolderUseCase,
             CreateCardUseCase createCardUseCase,
             EditCardUseCase editCardUseCase,
             DeleteCardUseCase deleteCardUseCase,
             DtoHelper dtoHelper) {
         this.getAllCardsUseCase = getAllCardsUseCase;
         this.getCardUseCase = getCardUseCase;
-        this.getCardHolderUseCase = getCardHolderUseCase;
         this.createCardUseCase = createCardUseCase;
         this.editCardUseCase = editCardUseCase;
         this.deleteCardUseCase = deleteCardUseCase;
@@ -74,15 +69,17 @@ public class CardController {
     }
 
     /**
-     * Retrieves all cards available in the system.
+     * Retrieves all cards available in the account.
      *
-     * Endpoint: GET /card/list
+     * Endpoint: GET /card/list/{accountId}
      *
      * @return a list of all card entities
      */
-    @GetMapping("/list")
-    public List<CardResponseDto> list() {
-        List<Card> cards = getAllCardsUseCase.execute();
+    // Role (i would say only admin and owner has access)
+    @GetMapping("/list/{accountId}")
+    @PreAuthorize("@canAccessUseCase.execute(authentication.principal.id(), #accountId)")
+    public List<CardResponseDto> list(@PathVariable UUID accountId) {
+        List<Card> cards = getAllCardsUseCase.execute(accountId);
         return cards.stream().map(dtoHelper::toCardDto).toList();
     }
 
@@ -95,8 +92,9 @@ public class CardController {
      * @return the matching card entity
      */
     @GetMapping("/list/{id}")
-    public CardResponseDto find(@PathVariable UUID id) {
-        Card card = getCardUseCase.execute(id);
+    @PreAuthorize("@canAccessUseCase.execute(authentication.principal.id(), #accountId)")
+    public CardResponseDto find(@PathVariable UUID accountId, @PathVariable UUID id) {
+        Card card = getCardUseCase.execute(accountId, id);
         return dtoHelper.toCardDto(card);
     }
 
@@ -109,6 +107,7 @@ public class CardController {
      *             information
      * @return the newly created card entity
      */
+    // Role (i would say only admin and owner has access)
     @PostMapping("/create")
     public CardResponseDto create(@Valid @RequestBody CreateCardDto body) {
         Card card = createCardUseCase.execute(body);
@@ -124,6 +123,7 @@ public class CardController {
      * @param body the card update payload
      * @return the updated card entity
      */
+    // Role (i would say only admin and owner has access)
     @PatchMapping("/edit/{id}")
     public CardResponseDto edit(@PathVariable UUID id, @RequestBody EditCardDto body) {
         Card card = editCardUseCase.execute(id, body);
@@ -138,6 +138,7 @@ public class CardController {
      * @param user the authenticated user making the request
      * @param id   the unique identifier of the card to delete
      */
+    // Role (i would say only admin and owner has access)
     @PostMapping("/delete/{id}")
     public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID id) {
         deleteCardUseCase.execute(user, id);

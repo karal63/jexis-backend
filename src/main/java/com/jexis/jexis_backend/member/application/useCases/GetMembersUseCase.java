@@ -1,6 +1,7 @@
 package com.jexis.jexis_backend.member.application.useCases;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -15,8 +16,8 @@ public class GetMembersUseCase {
         this.repo = repo;
     }
 
-    public List<Member> execute() {
-        List<Member> members = repo.findAll();
+    public List<Member> execute(UUID accountId) {
+        List<Member> members = repo.findAllByAccountId(accountId);
         return members;
     }
 }

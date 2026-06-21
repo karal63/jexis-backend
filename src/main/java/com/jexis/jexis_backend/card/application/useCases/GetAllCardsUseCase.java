@@ -1,6 +1,7 @@
 package com.jexis.jexis_backend.card.application.useCases;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -31,7 +32,7 @@ public class GetAllCardsUseCase {
      *
      * @return a list of all card entities
      */
-    public List<Card> execute() {
-        return repo.findAll();
+    public List<Card> execute(UUID accountId) {
+        return repo.findAllByCardHolderAccountId(accountId);
     }
 }

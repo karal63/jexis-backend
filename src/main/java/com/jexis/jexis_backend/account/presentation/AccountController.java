@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -81,6 +82,7 @@ public class AccountController {
      *
      * @return list of all accounts
      */
+    // ROLE (GLOBAL ADMIN)
     @GetMapping("/list")
     public List<AccountResponseDto> getAll() {
         List<Account> accounts = getAccountsUseCase.execute();
@@ -101,7 +103,9 @@ public class AccountController {
      * @param id the ID of the account to retrieve
      * @return the account with the specified ID
      */
+    // & ROLE (GLOBAL ADMIN)
     @GetMapping("/{id}")
+    @PreAuthorize("@canAccessUseCase.execute(authentication.principal.id(), #id)")
     public AccountResponseDto get(@PathVariable UUID id) {
         Account account = getAccountUseCase.execute(id);
         return dtoHelper.toAccountDto(account);
@@ -136,6 +140,7 @@ public class AccountController {
      * @param id the ID of the account to delete
      * @return message confirming deletion of the account with the specified ID
      */
+    // ROLE (Account owner)
     @DeleteMapping("/delete/{id}")
     public String delete(@PathVariable UUID id) {
         deleteAccountUseCase.execute(id);
@@ -154,6 +159,7 @@ public class AccountController {
      * @param body payload with updated values for the account
      * @return retuers updated account
      */
+    // ROLE (Account owner and admin)
     @PatchMapping("/edit/{id}")
     public AccountResponseDto edit(@PathVariable UUID id, @RequestBody EditAccountDto body) {
         return editAccountUseCase.execute(id, body);

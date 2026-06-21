@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -56,5 +57,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleMissingBody(HttpMessageNotReadableException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST.value())
                 .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "REQ_BODY_MISSING", "Request body is missing"));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN.value())
+                .body(new ErrorResponse(HttpStatus.FORBIDDEN.value(), "USER_NOT_AUTHORIZED", "Access denied"));
     }
 }

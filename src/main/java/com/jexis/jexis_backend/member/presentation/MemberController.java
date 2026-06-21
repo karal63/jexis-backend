@@ -3,6 +3,7 @@ package com.jexis.jexis_backend.member.presentation;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,30 +49,34 @@ public class MemberController {
         this.dtoHelper = dtoHelper;
     }
 
-    @GetMapping("/list")
-    public List<MemberResponseDto> list() {
-        List<Member> members = getMembersUseCase.execute();
+    @GetMapping("/list/{accountId}")
+    @PreAuthorize("@canAccessUseCase.execute(authentication.principal.id(), #accountId)")
+    public List<MemberResponseDto> listAccountMembers(@PathVariable UUID accountId) {
+        List<Member> members = getMembersUseCase.execute(accountId);
         return members.stream().map(dtoHelper::toMemberDto).toList();
     }
 
-    @GetMapping("/list/{id}")
-    public MemberResponseDto get(@PathVariable UUID id) {
+    @GetMapping("/list/{accountId}/{id}")
+    public MemberResponseDto get(@PathVariable UUID accountId, @PathVariable UUID id) {
         Member member = getMemberUseCase.execute(id);
         return dtoHelper.toMemberDto(member);
     }
 
+    // I think only account owner and admin
     @PostMapping("/add")
     public MemberResponseDto add(@RequestBody CreateMemberDto body) {
         Member member = addMemberUseCase.execute(body);
         return dtoHelper.toMemberDto(member);
     }
 
+    // I think only account owner and admin
     @PatchMapping("/edit/{id}")
     public MemberResponseDto edit(@PathVariable UUID id, @RequestBody EditMemberDto body) {
         Member member = editMemberUseCase.execute(id, body);
         return dtoHelper.toMemberDto(member);
     }
 
+    // I think only account owner and admin
     @PostMapping("/remove/{id}")
     public void remove(@PathVariable UUID id) {
         removeMemberUseCase.execute(id);

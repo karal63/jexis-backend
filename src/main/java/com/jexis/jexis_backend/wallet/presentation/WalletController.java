@@ -104,6 +104,7 @@ public class WalletController {
      * @param body the request payload containing the account identifier
      * @return the newly created wallet entity
      */
+    // I think only account owner
     @PostMapping("/create-treasury-account")
     public WalletResponseDto create(@Valid @RequestBody CreateWalletDto body) {
         Account account = getAccountUseCase.execute(body.getAccountId());
@@ -121,6 +122,7 @@ public class WalletController {
      * @param body the wallet update payload
      * @return the updated wallet entity
      */
+    // I think only account owner
     @PatchMapping("/edit/{id}")
     public WalletResponseDto edit(@PathVariable UUID id, @RequestBody EditWalletDto body) {
         Wallet wallet = editWalletUseCase.execute(id, body);
@@ -136,6 +138,7 @@ public class WalletController {
      * @param user the authenticated user making the request
      * @param id   the unique identifier of the wallet to delete
      */
+    // I think only account owner
     @PostMapping("/delete/{id}")
     public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID id) {
         deleteWalletUseCase.execute(user, id);

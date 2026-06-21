@@ -49,30 +49,35 @@ public class CardHolderController {
         this.dtoHelper = dtoHelper;
     }
 
+    // Global Admin
     @GetMapping("/list")
     public List<CardHolderResponseDto> list() {
         List<CardHolder> cardHolders = getAllCardHoldersUseCase.execute();
         return cardHolders.stream().map(dtoHelper::toCardHolderDto).toList();
     }
 
+    // Global Admin
     @GetMapping("/list/{id}")
     public CardHolderResponseDto find(@PathVariable UUID id) {
         CardHolder cardHolder = getCardHolderUseCase.execute(id);
         return dtoHelper.toCardHolderDto(cardHolder);
     }
 
+    // I think only account owner and admin
     @PostMapping("/create")
     public CardHolderResponseDto create(@RequestBody CreateCardHolderDto body, HttpServletRequest request) {
         CardHolder cardHolder = createCardHolderUseCase.execute(body, request);
         return dtoHelper.toCardHolderDto(cardHolder);
     }
 
+    // I think only account owner and admin
     @PatchMapping("/edit/{id}")
     public CardHolderResponseDto edit(@PathVariable UUID id, @RequestBody EditCardHolderDto body) {
         CardHolder cardHolder = editCardHolderUseCase.execute(id, body);
         return dtoHelper.toCardHolderDto(cardHolder);
     }
 
+    // I think only account owner and admin
     @DeleteMapping("/delete/{id}")
     public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID id) {
         deleteCardHolderUseCase.execute(user, id);
