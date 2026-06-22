@@ -106,9 +106,9 @@ public class CardController {
      */
     @PostMapping("/create")
     @PreAuthorize("""
-            @hasRoleUseCase.execute(authentication.principal.id(), #request.accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
+            @hasRoleUseCase.execute(authentication.principal.id(), #body.accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
             or
-            @hasRoleUseCase.execute(authentication.principal.id(), #request.accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
+            @hasRoleUseCase.execute(authentication.principal.id(), #body.accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
             """)
     public CardResponseDto create(@Valid @RequestBody CreateCardDto body) {
         Card card = createCardUseCase.execute(body);
@@ -124,11 +124,10 @@ public class CardController {
      * @param body the card update payload
      * @return the updated card entity
      */
-    @PatchMapping("/edit/{cardId}")
-    // I dont know how to get account id here
-    // or create dedicated hasRole or think about different solution
-    public CardResponseDto edit(@PathVariable UUID cardId, @RequestBody EditCardDto body) {
-        Card card = editCardUseCase.execute(cardId, body);
+    @PatchMapping("/edit/{id}")
+    @PreAuthorize("cardAuthorization.canEdit(@authentication.principal.id(), #id)")
+    public CardResponseDto edit(@PathVariable UUID id, @RequestBody EditCardDto body) {
+        Card card = editCardUseCase.execute(id, body);
         return dtoHelper.toCardDto(card);
     }
 
@@ -140,8 +139,9 @@ public class CardController {
      * @param user the authenticated user making the request
      * @param id   the unique identifier of the card to delete
      */
-    @PostMapping("/delete/{cardId}")
-    public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID cardId) {
-        deleteCardUseCase.execute(user, cardId);
+    @PostMapping("/delete/{id}")
+    @PreAuthorize("cardAuthorization.canEdit(@authentication.principal.id(), #id)")
+    public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID id) {
+        deleteCardUseCase.execute(user, id);
     }
 }
