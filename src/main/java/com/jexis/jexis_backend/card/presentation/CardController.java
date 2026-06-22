@@ -125,7 +125,7 @@ public class CardController {
      * @return the updated card entity
      */
     @PatchMapping("/edit/{id}")
-    @PreAuthorize("cardAuthorization.canEdit(@authentication.principal.id(), #id)")
+    @PreAuthorize("@cardAuthorization.canEdit(@authentication.principal.id(), #id)")
     public CardResponseDto edit(@PathVariable UUID id, @RequestBody EditCardDto body) {
         Card card = editCardUseCase.execute(id, body);
         return dtoHelper.toCardDto(card);
@@ -140,7 +140,7 @@ public class CardController {
      * @param id   the unique identifier of the card to delete
      */
     @PostMapping("/delete/{id}")
-    @PreAuthorize("cardAuthorization.canEdit(@authentication.principal.id(), #id)")
+    @PreAuthorize("@cardAuthorization.canEdit(@authentication.principal.id(), #id)")
     public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID id) {
         deleteCardUseCase.execute(user, id);
     }
