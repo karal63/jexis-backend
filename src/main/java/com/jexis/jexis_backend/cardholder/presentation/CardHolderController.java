@@ -3,6 +3,7 @@ package com.jexis.jexis_backend.cardholder.presentation;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -63,22 +64,26 @@ public class CardHolderController {
         return dtoHelper.toCardHolderDto(cardHolder);
     }
 
-    // I think only account owner and admin
     @PostMapping("/create")
+    @PreAuthorize("""
+            @hasRoleUseCase.execute(authentication.principal.id(), #body.accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
+            or
+            @hasRoleUseCase.execute(authentication.principal.id(), #body.accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
+            """)
     public CardHolderResponseDto create(@RequestBody CreateCardHolderDto body, HttpServletRequest request) {
         CardHolder cardHolder = createCardHolderUseCase.execute(body, request);
         return dtoHelper.toCardHolderDto(cardHolder);
     }
 
-    // I think only account owner and admin
     @PatchMapping("/edit/{id}")
+    @PreAuthorize("@cardHolderAuthorization.canEdit(authentication.principal.id(), #id)")
     public CardHolderResponseDto edit(@PathVariable UUID id, @RequestBody EditCardHolderDto body) {
         CardHolder cardHolder = editCardHolderUseCase.execute(id, body);
         return dtoHelper.toCardHolderDto(cardHolder);
     }
 
-    // I think only account owner and admin
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("@cardHolderAuthorization.canEdit(authentication.principal.id(), #id)")
     public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID id) {
         deleteCardHolderUseCase.execute(user, id);
     }

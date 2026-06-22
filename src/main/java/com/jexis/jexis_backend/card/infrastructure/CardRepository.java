@@ -8,7 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.jexis.jexis_backend.card.domain.entities.Card;
 
 public interface CardRepository extends JpaRepository<Card, UUID> {
-    List<Card> findAllByCardHolderAccountId(UUID accountId);
-
     List<Card> findByCardHolderAccountIdAndId(UUID accountId, UUID id);
 }

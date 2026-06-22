@@ -82,7 +82,6 @@ public class AccountController {
      *
      * @return list of all accounts
      */
-    // ROLE (GLOBAL ADMIN)
     @GetMapping("/list")
     public List<AccountResponseDto> getAll() {
         List<Account> accounts = getAccountsUseCase.execute();
@@ -103,8 +102,7 @@ public class AccountController {
      * @param id the ID of the account to retrieve
      * @return the account with the specified ID
      */
-    // & ROLE (GLOBAL ADMIN)
-    @GetMapping("/{id}")
+    @GetMapping("/list/{id}")
     @PreAuthorize("@canAccessUseCase.execute(authentication.principal.id(), #id)")
     public AccountResponseDto get(@PathVariable UUID id) {
         Account account = getAccountUseCase.execute(id);
@@ -140,8 +138,8 @@ public class AccountController {
      * @param id the ID of the account to delete
      * @return message confirming deletion of the account with the specified ID
      */
-    // ROLE (Account owner)
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/delete/{accountId}")
+    @PreAuthorize("@hasRoleUseCase.execute(authentication.principal.id(), #accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)")
     public String delete(@PathVariable UUID id) {
         deleteAccountUseCase.execute(id);
         return "Account with ID " + id + " has been deleted.";
@@ -159,9 +157,13 @@ public class AccountController {
      * @param body payload with updated values for the account
      * @return retuers updated account
      */
-    // ROLE (Account owner and admin)
-    @PatchMapping("/edit/{id}")
-    public AccountResponseDto edit(@PathVariable UUID id, @RequestBody EditAccountDto body) {
-        return editAccountUseCase.execute(id, body);
+    @PatchMapping("/edit/{accountId}")
+    @PreAuthorize("""
+            @hasRoleUseCase.execute(authentication.principal.id(), #accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
+            or
+            @hasRoleUseCase.execute(authentication.principal.id(), #accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
+            """)
+    public AccountResponseDto edit(@PathVariable UUID accountId, @RequestBody EditAccountDto body) {
+        return editAccountUseCase.execute(accountId, body);
     }
 }

@@ -71,15 +71,13 @@ public class CardController {
     /**
      * Retrieves all cards available in the account.
      *
-     * Endpoint: GET /card/list/{accountId}
+     * Endpoint: GET /card/list
      *
      * @return a list of all card entities
      */
-    // Role (i would say only admin and owner has access)
-    @GetMapping("/list/{accountId}")
-    @PreAuthorize("@canAccessUseCase.execute(authentication.principal.id(), #accountId)")
-    public List<CardResponseDto> list(@PathVariable UUID accountId) {
-        List<Card> cards = getAllCardsUseCase.execute(accountId);
+    @GetMapping("/list")
+    public List<CardResponseDto> list() {
+        List<Card> cards = getAllCardsUseCase.execute();
         return cards.stream().map(dtoHelper::toCardDto).toList();
     }
 
@@ -92,7 +90,6 @@ public class CardController {
      * @return the matching card entity
      */
     @GetMapping("/list/{id}")
-    @PreAuthorize("@canAccessUseCase.execute(authentication.principal.id(), #accountId)")
     public CardResponseDto find(@PathVariable UUID accountId, @PathVariable UUID id) {
         Card card = getCardUseCase.execute(accountId, id);
         return dtoHelper.toCardDto(card);
@@ -107,8 +104,12 @@ public class CardController {
      *             information
      * @return the newly created card entity
      */
-    // Role (i would say only admin and owner has access)
     @PostMapping("/create")
+    @PreAuthorize("""
+            @hasRoleUseCase.execute(authentication.principal.id(), #request.accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
+            or
+            @hasRoleUseCase.execute(authentication.principal.id(), #request.accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
+            """)
     public CardResponseDto create(@Valid @RequestBody CreateCardDto body) {
         Card card = createCardUseCase.execute(body);
         return dtoHelper.toCardDto(card);
@@ -123,10 +124,11 @@ public class CardController {
      * @param body the card update payload
      * @return the updated card entity
      */
-    // Role (i would say only admin and owner has access)
-    @PatchMapping("/edit/{id}")
-    public CardResponseDto edit(@PathVariable UUID id, @RequestBody EditCardDto body) {
-        Card card = editCardUseCase.execute(id, body);
+    @PatchMapping("/edit/{cardId}")
+    // I dont know how to get account id here
+    // or create dedicated hasRole or think about different solution
+    public CardResponseDto edit(@PathVariable UUID cardId, @RequestBody EditCardDto body) {
+        Card card = editCardUseCase.execute(cardId, body);
         return dtoHelper.toCardDto(card);
     }
 
@@ -138,9 +140,8 @@ public class CardController {
      * @param user the authenticated user making the request
      * @param id   the unique identifier of the card to delete
      */
-    // Role (i would say only admin and owner has access)
-    @PostMapping("/delete/{id}")
-    public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID id) {
-        deleteCardUseCase.execute(user, id);
+    @PostMapping("/delete/{cardId}")
+    public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID cardId) {
+        deleteCardUseCase.execute(user, cardId);
     }
 }

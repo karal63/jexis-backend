@@ -32,7 +32,7 @@ public class GetAllCardsUseCase {
      *
      * @return a list of all card entities
      */
-    public List<Card> execute(UUID accountId) {
-        return repo.findAllByCardHolderAccountId(accountId);
+    public List<Card> execute() {
+        return repo.findAll();
     }
 }
