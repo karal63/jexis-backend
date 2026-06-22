@@ -111,6 +111,7 @@ public class UserController {
      * @param id the unique identifier of the user to delete
      * @return a confirmation message after successful deletion
      */
+    // Public
     @DeleteMapping("/delete/{id}")
     public String deleteUser(@PathVariable UUID id) {
         deleteUserUseCase.execute(id);
@@ -126,6 +127,7 @@ public class UserController {
      * @param id      the unique identifier of the user to update
      * @return an optional updated user entity
      */
+    // Public
     @PatchMapping("/edit/{id}")
     public UserResponseDto editUser(@RequestBody EditDto editDto, @PathVariable UUID id) {
         return dtoHelper.toUserDto(editUserUseCase.execute(id, editDto));

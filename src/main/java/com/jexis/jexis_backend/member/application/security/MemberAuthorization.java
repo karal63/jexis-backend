@@ -21,7 +21,6 @@ public class MemberAuthorization {
     }
 
     public boolean canEdit(UUID userId, UUID memberId) {
-        System.out.println(memberId);
         Member member = repo.findById(memberId).orElseThrow(() -> new AccessDeniedException("Access denied"));
         return hasRoleUseCase.execute(userId, member.getAccount().getId(), Role.ADMIN)
                 || hasRoleUseCase.execute(userId, member.getAccount().getId(), Role.OWNER);

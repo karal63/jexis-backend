@@ -3,6 +3,7 @@ package com.jexis.jexis_backend.wallet.presentation;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -106,11 +107,11 @@ public class WalletController {
      */
     // I think only account owner
     @PostMapping("/create-treasury-account")
+    @PreAuthorize("@hasRoleUseCase.execute(authentication.principal.id(), #body.accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)")
     public WalletResponseDto create(@Valid @RequestBody CreateWalletDto body) {
         Account account = getAccountUseCase.execute(body.getAccountId());
         Wallet wallet = createWalletUseCase.execute(account, body.getName());
         return dtoHelper.toWalletDto(wallet);
-
     }
 
     /**
@@ -122,12 +123,12 @@ public class WalletController {
      * @param body the wallet update payload
      * @return the updated wallet entity
      */
-    // I think only account owner
     @PatchMapping("/edit/{id}")
+    @PreAuthorize("@walletAuthorization.canEdit(authentication.principal.id(), #id)")
     public WalletResponseDto edit(@PathVariable UUID id, @RequestBody EditWalletDto body) {
         Wallet wallet = editWalletUseCase.execute(id, body);
         return dtoHelper.toWalletDto(wallet);
-
+        // TEST EDIT
     }
 
     /**
@@ -140,6 +141,7 @@ public class WalletController {
      */
     // I think only account owner
     @PostMapping("/delete/{id}")
+    @PreAuthorize("@walletAuthorization.canEdit(authentication.principal.id(), #id)")
     public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID id) {
         deleteWalletUseCase.execute(user, id);
     }
