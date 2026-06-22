@@ -19,10 +19,13 @@ import com.jexis.jexis_backend.account.application.dto.EditAccountDto;
 import com.jexis.jexis_backend.account.application.useCases.CreateAccountUseCase;
 import com.jexis.jexis_backend.account.application.useCases.DeleteAccountUseCase;
 import com.jexis.jexis_backend.account.application.useCases.EditAccountUseCase;
+import com.jexis.jexis_backend.account.application.useCases.GetAccountCardsUseCase;
 import com.jexis.jexis_backend.account.application.useCases.GetAccountUseCase;
 import com.jexis.jexis_backend.account.application.useCases.GetAccountsUseCase;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.auth.application.dto.AuthUser;
+import com.jexis.jexis_backend.card.application.dto.CardResponseDto;
+import com.jexis.jexis_backend.card.domain.entities.Card;
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
 import com.jexis.jexis_backend.user.application.useCases.GetUserUseCase;
 import com.jexis.jexis_backend.user.domain.entities.User;
@@ -55,6 +58,7 @@ public class AccountController {
     private final EditAccountUseCase editAccountUseCase;
     private final GetUserUseCase getUserUseCase;
     private final DtoHelper dtoHelper;
+    private final GetAccountCardsUseCase getAccountCardsUseCase;
 
     public AccountController(
             CreateAccountUseCase createAccount,
@@ -62,7 +66,8 @@ public class AccountController {
             GetAccountsUseCase getAccounts,
             GetAccountUseCase getAccount,
             EditAccountUseCase editAccount, GetUserUseCase getUserUseCase,
-            DtoHelper dtoHelper) {
+            DtoHelper dtoHelper,
+            GetAccountCardsUseCase getAccountCardsUseCase) {
         this.createAccountUseCase = createAccount;
         this.deleteAccountUseCase = deleteAccount;
         this.getAccountsUseCase = getAccounts;
@@ -70,6 +75,7 @@ public class AccountController {
         this.editAccountUseCase = editAccount;
         this.getUserUseCase = getUserUseCase;
         this.dtoHelper = dtoHelper;
+        this.getAccountCardsUseCase = getAccountCardsUseCase;
     }
 
     /**
@@ -82,6 +88,7 @@ public class AccountController {
      *
      * @return list of all accounts
      */
+    // ADMIN GLOBAL
     @GetMapping("/list")
     public List<AccountResponseDto> getAll() {
         List<Account> accounts = getAccountsUseCase.execute();
@@ -103,10 +110,20 @@ public class AccountController {
      * @return the account with the specified ID
      */
     @GetMapping("/list/{id}")
-    @PreAuthorize("@canAccessUseCase.execute(authentication.principal.id(), #id)")
     public AccountResponseDto get(@PathVariable UUID id) {
         Account account = getAccountUseCase.execute(id);
         return dtoHelper.toAccountDto(account);
+    }
+
+    @GetMapping("/list/{id}/cards")
+    @PreAuthorize("""
+            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
+            or
+            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
+            """)
+    public List<CardResponseDto> getCardsByAccount(@PathVariable UUID id) {
+        List<Card> card = getAccountCardsUseCase.execute(id);
+        return card.stream().map(dtoHelper::toCardDto).toList();
     }
 
     /**
@@ -166,4 +183,5 @@ public class AccountController {
     public AccountResponseDto edit(@PathVariable UUID accountId, @RequestBody EditAccountDto body) {
         return editAccountUseCase.execute(accountId, body);
     }
+
 }

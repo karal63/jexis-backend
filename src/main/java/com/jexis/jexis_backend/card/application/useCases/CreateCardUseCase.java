@@ -1,16 +1,11 @@
 package com.jexis.jexis_backend.card.application.useCases;
 
-import java.util.Optional;
-import java.util.UUID;
-
 import org.springframework.stereotype.Service;
 
 import com.jexis.jexis_backend.account.application.useCases.GetAccountUseCase;
 import com.jexis.jexis_backend.account.domain.entities.Account;
-import com.jexis.jexis_backend.account.infrastructure.AccountRepository;
 import com.jexis.jexis_backend.card.application.dto.CreateCardDto;
 import com.jexis.jexis_backend.card.domain.entities.Card;
-import com.jexis.jexis_backend.common.logging.AsyncLogger;
 import com.jexis.jexis_backend.stripe.application.useCases.CreateStripeCardUseCase;
 import com.jexis.jexis_backend.user.application.dto.CreateDto;
 import com.jexis.jexis_backend.user.application.useCases.GetUserUseCase;
@@ -18,12 +13,9 @@ import com.jexis.jexis_backend.user.domain.entities.User;
 import com.jexis.jexis_backend.user.infrastructure.UserRepository;
 import com.jexis.jexis_backend.wallet.application.useCases.GetWalletUseCase;
 import com.jexis.jexis_backend.wallet.domain.entities.Wallet;
-import com.jexis.jexis_backend.wallet.infrastructure.WalletRepository;
-import com.stripe.exception.StripeException;
 import com.jexis.jexis_backend.card.infrastructure.CardRepository;
 import com.jexis.jexis_backend.cardholder.application.useCases.GetCardHolderUseCase;
 import com.jexis.jexis_backend.cardholder.domain.entities.CardHolder;
-import com.jexis.jexis_backend.cardholder.infrastructure.CardHolderRepository;
 
 /**
  * CreateCardUseCase
@@ -38,19 +30,17 @@ import com.jexis.jexis_backend.cardholder.infrastructure.CardHolderRepository;
 @Service
 public class CreateCardUseCase {
     private final CardRepository cardRepo;
-    private final AsyncLogger logger;
     private final CreateStripeCardUseCase createStripeCard;
     private final GetCardHolderUseCase getCardHolderUseCase;
     private final GetWalletUseCase getWalletUseCase;
     private final GetAccountUseCase getAccountUseCase;
     private final GetUserUseCase getUserUseCase;
 
-    public CreateCardUseCase(CardRepository cardRepo, UserRepository userRepo, AsyncLogger logger,
+    public CreateCardUseCase(CardRepository cardRepo, UserRepository userRepo,
             CreateStripeCardUseCase createStripeCard, GetCardHolderUseCase getCardHolderUseCase,
             GetWalletUseCase getWalletUseCase,
             GetAccountUseCase getAccountUseCase, GetUserUseCase getUserUseCase) {
         this.cardRepo = cardRepo;
-        this.logger = logger;
         this.createStripeCard = createStripeCard;
         this.getCardHolderUseCase = getCardHolderUseCase;
         this.getWalletUseCase = getWalletUseCase;

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jexis.jexis_backend.auth.application.dto.AuthUser;
@@ -75,8 +76,10 @@ public class CardController {
      *
      * @return a list of all card entities
      */
+    // GLOBAL ADMIN
     @GetMapping("/list")
-    public List<CardResponseDto> list() {
+    public List<CardResponseDto> list(@RequestParam UUID accountId) {
+        System.out.println(accountId);
         List<Card> cards = getAllCardsUseCase.execute();
         return cards.stream().map(dtoHelper::toCardDto).toList();
     }
@@ -89,9 +92,10 @@ public class CardController {
      * @param id the unique identifier of the card to retrieve
      * @return the matching card entity
      */
+    // GLOBAL ADMIN
     @GetMapping("/list/{id}")
-    public CardResponseDto find(@PathVariable UUID accountId, @PathVariable UUID id) {
-        Card card = getCardUseCase.execute(accountId, id);
+    public CardResponseDto find(@PathVariable UUID id) {
+        Card card = getCardUseCase.execute(id);
         return dtoHelper.toCardDto(card);
     }
 

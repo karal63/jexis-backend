@@ -35,7 +35,7 @@ public class GetCardUseCase {
      * 
      * @return the retrieved card entity
      */
-    public Card execute(UUID accountId, UUID id) {
+    public Card execute(UUID id) {
         Card card = repo.findById(id).orElseThrow(() -> new CardNotFoundException());
         return card;
     }

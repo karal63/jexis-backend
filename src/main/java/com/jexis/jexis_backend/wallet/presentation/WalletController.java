@@ -128,7 +128,6 @@ public class WalletController {
     public WalletResponseDto edit(@PathVariable UUID id, @RequestBody EditWalletDto body) {
         Wallet wallet = editWalletUseCase.execute(id, body);
         return dtoHelper.toWalletDto(wallet);
-        // TEST EDIT
     }
 
     /**
