@@ -21,6 +21,7 @@ import com.jexis.jexis_backend.cardholder.application.dto.EditCardHolderDto;
 import com.jexis.jexis_backend.cardholder.application.useCases.CreateCardHolderUseCase;
 import com.jexis.jexis_backend.cardholder.application.useCases.DeleteCardHolderUseCase;
 import com.jexis.jexis_backend.cardholder.application.useCases.EditCardHolderUseCase;
+import com.jexis.jexis_backend.cardholder.application.useCases.GetAccountCardHoldersUseCase;
 import com.jexis.jexis_backend.cardholder.application.useCases.GetAllCardHoldersUseCase;
 import com.jexis.jexis_backend.cardholder.application.useCases.GetCardHolderUseCase;
 import com.jexis.jexis_backend.cardholder.domain.entities.CardHolder;
@@ -29,7 +30,7 @@ import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/card-holder")
+@RequestMapping("/")
 public class CardHolderController {
     private final GetAllCardHoldersUseCase getAllCardHoldersUseCase;
     private final GetCardHolderUseCase getCardHolderUseCase;
@@ -37,17 +38,19 @@ public class CardHolderController {
     private final EditCardHolderUseCase editCardHolderUseCase;
     private final DeleteCardHolderUseCase deleteCardHolderUseCase;
     private final DtoHelper dtoHelper;
+    private final GetAccountCardHoldersUseCase getAccountCardHoldersUseCase;
 
     public CardHolderController(GetAllCardHoldersUseCase getAllCardHoldersUseCase,
             GetCardHolderUseCase getCardHolderUseCase, CreateCardHolderUseCase createCardHolderUseCase,
             EditCardHolderUseCase editCardHolderUseCase, DeleteCardHolderUseCase deleteCardHolderUseCase,
-            DtoHelper dtoHelper) {
+            DtoHelper dtoHelper, GetAccountCardHoldersUseCase getAccountCardHoldersUseCase) {
         this.getAllCardHoldersUseCase = getAllCardHoldersUseCase;
         this.getCardHolderUseCase = getCardHolderUseCase;
         this.createCardHolderUseCase = createCardHolderUseCase;
         this.editCardHolderUseCase = editCardHolderUseCase;
         this.deleteCardHolderUseCase = deleteCardHolderUseCase;
         this.dtoHelper = dtoHelper;
+        this.getAccountCardHoldersUseCase = getAccountCardHoldersUseCase;
     }
 
     // Global Admin
@@ -64,7 +67,7 @@ public class CardHolderController {
         return dtoHelper.toCardHolderDto(cardHolder);
     }
 
-    @PostMapping("/create")
+    @PostMapping("/card-holder/create")
     @PreAuthorize("""
             @hasRoleUseCase.execute(authentication.principal.id(), #body.accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
             or
@@ -75,16 +78,31 @@ public class CardHolderController {
         return dtoHelper.toCardHolderDto(cardHolder);
     }
 
-    @PatchMapping("/edit/{id}")
-    @PreAuthorize("@cardHolderAuthorization.canEdit(authentication.principal.id(), #id)")
-    public CardHolderResponseDto edit(@PathVariable UUID id, @RequestBody EditCardHolderDto body) {
-        CardHolder cardHolder = editCardHolderUseCase.execute(id, body);
-        return dtoHelper.toCardHolderDto(cardHolder);
+    @GetMapping("/accounts/{accountId}/card-holders")
+    @PreAuthorize("""
+            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
+            or
+            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
+            """)
+    public List<CardHolderResponseDto> getCardHoldersByAccount(@PathVariable UUID id) {
+        List<CardHolder> cardHolder = getAccountCardHoldersUseCase.execute(id);
+        return cardHolder.stream().map(dtoHelper::toCardHolderDto).toList();
     }
 
-    @DeleteMapping("/delete/{id}")
-    @PreAuthorize("@cardHolderAuthorization.canEdit(authentication.principal.id(), #id)")
-    public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID id) {
-        deleteCardHolderUseCase.execute(user, id);
-    }
+    // @PatchMapping("/edit/{id}")
+    // @PreAuthorize("@cardHolderAuthorization.canEdit(authentication.principal.id(),
+    // #id)")
+    // public CardHolderResponseDto edit(@PathVariable UUID id, @RequestBody
+    // EditCardHolderDto body) {
+    // CardHolder cardHolder = editCardHolderUseCase.execute(id, body);
+    // return dtoHelper.toCardHolderDto(cardHolder);
+    // }
+
+    // @DeleteMapping("/delete/{id}")
+    // @PreAuthorize("@cardHolderAuthorization.canEdit(authentication.principal.id(),
+    // #id)")
+    // public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID
+    // id) {
+    // deleteCardHolderUseCase.execute(user, id);
+    // }
 }

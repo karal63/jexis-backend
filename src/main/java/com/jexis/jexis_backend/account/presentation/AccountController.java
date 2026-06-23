@@ -19,24 +19,24 @@ import com.jexis.jexis_backend.account.application.dto.EditAccountDto;
 import com.jexis.jexis_backend.account.application.useCases.CreateAccountUseCase;
 import com.jexis.jexis_backend.account.application.useCases.DeleteAccountUseCase;
 import com.jexis.jexis_backend.account.application.useCases.EditAccountUseCase;
-import com.jexis.jexis_backend.account.application.useCases.GetAccountCardHoldersUseCase;
-import com.jexis.jexis_backend.account.application.useCases.GetAccountCardsUseCase;
-import com.jexis.jexis_backend.account.application.useCases.GetAccountMembersUseCase;
 import com.jexis.jexis_backend.account.application.useCases.GetAccountUseCase;
-import com.jexis.jexis_backend.account.application.useCases.GetAccountWalletsUseCase;
 import com.jexis.jexis_backend.account.application.useCases.GetAccountsUseCase;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.auth.application.dto.AuthUser;
 import com.jexis.jexis_backend.card.application.dto.CardResponseDto;
+import com.jexis.jexis_backend.card.application.useCases.GetAccountCardsUseCase;
 import com.jexis.jexis_backend.card.domain.entities.Card;
 import com.jexis.jexis_backend.cardholder.application.dto.CardHolderResponseDto;
+import com.jexis.jexis_backend.cardholder.application.useCases.GetAccountCardHoldersUseCase;
 import com.jexis.jexis_backend.cardholder.domain.entities.CardHolder;
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
 import com.jexis.jexis_backend.member.application.dto.MemberResponseDto;
+import com.jexis.jexis_backend.member.application.useCases.GetAccountMembersUseCase;
 import com.jexis.jexis_backend.member.domain.entities.Member;
 import com.jexis.jexis_backend.user.application.useCases.GetUserUseCase;
 import com.jexis.jexis_backend.user.domain.entities.User;
 import com.jexis.jexis_backend.wallet.application.dto.WalletResponseDto;
+import com.jexis.jexis_backend.wallet.application.useCases.GetAccountWalletsUseCase;
 import com.jexis.jexis_backend.wallet.domain.entities.Wallet;
 
 import org.springframework.web.bind.annotation.RequestBody;
@@ -127,50 +127,11 @@ public class AccountController {
      * @param id the ID of the account to retrieve
      * @return the account with the specified ID
      */
+    // or global admin or member
     @GetMapping("/list/{id}")
     public AccountResponseDto get(@PathVariable UUID id) {
         Account account = getAccountUseCase.execute(id);
         return dtoHelper.toAccountDto(account);
-    }
-
-    @GetMapping("/list/{id}/cards")
-    @PreAuthorize("""
-            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
-            or
-            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
-            """)
-    public List<CardResponseDto> getCardsByAccount(@PathVariable UUID id) {
-        List<Card> card = getAccountCardsUseCase.execute(id);
-        return card.stream().map(dtoHelper::toCardDto).toList();
-    }
-
-    @GetMapping("/list/{id}/card-holders")
-    @PreAuthorize("""
-            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
-            or
-            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
-            """)
-    public List<CardHolderResponseDto> getCardHoldersByAccount(@PathVariable UUID id) {
-        List<CardHolder> cardHolder = getAccountCardHoldersUseCase.execute(id);
-        return cardHolder.stream().map(dtoHelper::toCardHolderDto).toList();
-    }
-
-    @GetMapping("/list/{id}/members")
-    @PreAuthorize("@canAccessUseCase.execute(authentication.principal.id(), #id)")
-    public List<MemberResponseDto> getMembersByAccount(@PathVariable UUID id) {
-        List<Member> member = getAccountMembersUseCase.execute(id);
-        return member.stream().map(dtoHelper::toMemberDto).toList();
-    }
-
-    @GetMapping("/list/{id}/wallets")
-    @PreAuthorize("""
-            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
-            or
-            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
-            """)
-    public List<WalletResponseDto> getWalletsByAccount(@PathVariable UUID id) {
-        List<Wallet> wallet = getAccountWalletsUseCase.execute(id);
-        return wallet.stream().map(dtoHelper::toWalletDto).toList();
     }
 
     /**
@@ -188,7 +149,6 @@ public class AccountController {
     public AccountResponseDto create(@AuthenticationPrincipal AuthUser user) {
         User foundUser = getUserUseCase.execute(user.id());
         return createAccountUseCase.execute(foundUser);
-
     }
 
     /**

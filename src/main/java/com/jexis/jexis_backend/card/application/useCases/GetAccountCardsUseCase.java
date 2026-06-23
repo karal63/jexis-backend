@@ -1,4 +1,4 @@
-package com.jexis.jexis_backend.account.application.useCases;
+package com.jexis.jexis_backend.card.application.useCases;
 
 import java.util.List;
 import java.util.UUID;
