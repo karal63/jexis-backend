@@ -35,8 +35,8 @@ public class GetWalletUseCase {
      * 
      * @return the retrieved wallet
      */
-    public Wallet execute(UUID id) {
-        Optional<Wallet> wallet = repo.findById(id);
+    public Wallet execute(UUID walletId) {
+        Optional<Wallet> wallet = repo.findById(walletId);
         if (wallet.isEmpty()) {
             throw new WalletNotFoundException();
         }

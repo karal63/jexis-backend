@@ -59,13 +59,6 @@ public class MemberController {
         return members.stream().map(dtoHelper::toMemberDto).toList();
     }
 
-    // @GetMapping("/list/{accountId}/{id}")
-    // public MemberResponseDto get(@PathVariable UUID accountId, @PathVariable UUID
-    // id) {
-    // Member member = getMemberUseCase.execute(id);
-    // return dtoHelper.toMemberDto(member);
-    // }
-
     @PostMapping("/member/add")
     @PreAuthorize("""
             @hasRoleUseCase.execute(authentication.principal.id(), #body.accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
@@ -84,19 +77,35 @@ public class MemberController {
         return member.stream().map(dtoHelper::toMemberDto).toList();
     }
 
-    // @PatchMapping("/edit/{id}")
-    // @PreAuthorize("@memberAuthorization.canEdit(authentication.principal.id(),
-    // #id)")
-    // public MemberResponseDto edit(@PathVariable UUID id, @RequestBody
-    // EditMemberDto body) {
-    // Member member = editMemberUseCase.execute(id, body);
-    // return dtoHelper.toMemberDto(member);
-    // }
+    @GetMapping("/accounts/{id}/members/{memberId}")
+    @PreAuthorize("""
+            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
+            or
+            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
+            """)
+    public MemberResponseDto get(@PathVariable UUID id, @PathVariable UUID memberId) {
+        Member member = getMemberUseCase.execute(memberId);
+        return dtoHelper.toMemberDto(member);
+    }
 
-    // @PostMapping("/remove/{id}")
-    // @PreAuthorize("@memberAuthorization.canEdit(authentication.principal.id(),
-    // #id)")
-    // public void remove(@PathVariable UUID id) {
-    // removeMemberUseCase.execute(id);
-    // }
+    @PatchMapping("/accounts/{id}/members/{memberId}/edit")
+    @PreAuthorize("""
+            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
+            or
+            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
+            """)
+    public MemberResponseDto edit(@PathVariable UUID memberId, @RequestBody EditMemberDto body) {
+        Member member = editMemberUseCase.execute(memberId, body);
+        return dtoHelper.toMemberDto(member);
+    }
+
+    @PostMapping("/accounts/{id}/members/{memberId}/remove")
+    @PreAuthorize("""
+            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
+            or
+            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
+            """)
+    public void remove(@PathVariable UUID memberId) {
+        removeMemberUseCase.execute(memberId);
+    }
 }

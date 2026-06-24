@@ -1,7 +1,6 @@
 package com.jexis.jexis_backend.account.presentation;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,23 +20,16 @@ import com.jexis.jexis_backend.account.application.useCases.DeleteAccountUseCase
 import com.jexis.jexis_backend.account.application.useCases.EditAccountUseCase;
 import com.jexis.jexis_backend.account.application.useCases.GetAccountUseCase;
 import com.jexis.jexis_backend.account.application.useCases.GetAccountsUseCase;
+import com.jexis.jexis_backend.account.application.useCases.GetUserAccountsUseCase;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.auth.application.dto.AuthUser;
-import com.jexis.jexis_backend.card.application.dto.CardResponseDto;
 import com.jexis.jexis_backend.card.application.useCases.GetAccountCardsUseCase;
-import com.jexis.jexis_backend.card.domain.entities.Card;
-import com.jexis.jexis_backend.cardholder.application.dto.CardHolderResponseDto;
 import com.jexis.jexis_backend.cardholder.application.useCases.GetAccountCardHoldersUseCase;
-import com.jexis.jexis_backend.cardholder.domain.entities.CardHolder;
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
-import com.jexis.jexis_backend.member.application.dto.MemberResponseDto;
 import com.jexis.jexis_backend.member.application.useCases.GetAccountMembersUseCase;
-import com.jexis.jexis_backend.member.domain.entities.Member;
 import com.jexis.jexis_backend.user.application.useCases.GetUserUseCase;
 import com.jexis.jexis_backend.user.domain.entities.User;
-import com.jexis.jexis_backend.wallet.application.dto.WalletResponseDto;
 import com.jexis.jexis_backend.wallet.application.useCases.GetAccountWalletsUseCase;
-import com.jexis.jexis_backend.wallet.domain.entities.Wallet;
 
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -58,7 +50,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * Author: Leo
  */
 @RestController
-@RequestMapping("/account")
+@RequestMapping("/")
 public class AccountController {
     private final CreateAccountUseCase createAccountUseCase;
     private final DeleteAccountUseCase deleteAccountUseCase;
@@ -67,10 +59,7 @@ public class AccountController {
     private final EditAccountUseCase editAccountUseCase;
     private final GetUserUseCase getUserUseCase;
     private final DtoHelper dtoHelper;
-    private final GetAccountCardsUseCase getAccountCardsUseCase;
-    private final GetAccountCardHoldersUseCase getAccountCardHoldersUseCase;
-    private final GetAccountMembersUseCase getAccountMembersUseCase;
-    private final GetAccountWalletsUseCase getAccountWalletsUseCase;
+    private final GetUserAccountsUseCase getUserAccountsUseCase;
 
     public AccountController(
             CreateAccountUseCase createAccount,
@@ -82,7 +71,8 @@ public class AccountController {
             GetAccountCardsUseCase getAccountCardsUseCase,
             GetAccountCardHoldersUseCase getAccountCardHoldersUseCase,
             GetAccountMembersUseCase getAccountMembersUseCase,
-            GetAccountWalletsUseCase getAccountWalletsUseCase) {
+            GetAccountWalletsUseCase getAccountWalletsUseCase,
+            GetUserAccountsUseCase getUserAccountsUseCase) {
         this.createAccountUseCase = createAccount;
         this.deleteAccountUseCase = deleteAccount;
         this.getAccountsUseCase = getAccounts;
@@ -90,10 +80,7 @@ public class AccountController {
         this.editAccountUseCase = editAccount;
         this.getUserUseCase = getUserUseCase;
         this.dtoHelper = dtoHelper;
-        this.getAccountCardsUseCase = getAccountCardsUseCase;
-        this.getAccountCardHoldersUseCase = getAccountCardHoldersUseCase;
-        this.getAccountMembersUseCase = getAccountMembersUseCase;
-        this.getAccountWalletsUseCase = getAccountWalletsUseCase;
+        this.getUserAccountsUseCase = getUserAccountsUseCase;
     }
 
     /**
@@ -106,10 +93,20 @@ public class AccountController {
      *
      * @return list of all accounts
      */
-    // ADMIN GLOBAL
-    @GetMapping("/list")
+
+    @GetMapping("/account/list")
+    // @PreAuthorize("@hasRole('ADMIN')")
     public List<AccountResponseDto> getAll() {
         List<Account> accounts = getAccountsUseCase.execute();
+        return accounts
+                .stream()
+                .map(dtoHelper::toAccountDto)
+                .toList();
+    }
+
+    @GetMapping("/users/{id}/accounts")
+    public List<AccountResponseDto> getUserAccounts(@PathVariable UUID id) {
+        List<Account> accounts = getUserAccountsUseCase.execute(id);
         return accounts
                 .stream()
                 .map(dtoHelper::toAccountDto)
@@ -127,10 +124,10 @@ public class AccountController {
      * @param id the ID of the account to retrieve
      * @return the account with the specified ID
      */
-    // or global admin or member
-    @GetMapping("/list/{id}")
-    public AccountResponseDto get(@PathVariable UUID id) {
-        Account account = getAccountUseCase.execute(id);
+    @GetMapping("/users/{id}/accounts/{accountId}")
+    @PreAuthorize("@canAccessUseCase.execute(authentication.principal.id(), #accountId)")
+    public AccountResponseDto get(@PathVariable UUID accountId) {
+        Account account = getAccountUseCase.execute(accountId);
         return dtoHelper.toAccountDto(account);
     }
 
@@ -145,7 +142,7 @@ public class AccountController {
      * @param body request payload containing account creation data
      * @return the newly created account
      */
-    @PostMapping("/create")
+    @PostMapping("/account/create")
     public AccountResponseDto create(@AuthenticationPrincipal AuthUser user) {
         User foundUser = getUserUseCase.execute(user.id());
         return createAccountUseCase.execute(foundUser);
@@ -162,7 +159,7 @@ public class AccountController {
      * @param id the ID of the account to delete
      * @return message confirming deletion of the account with the specified ID
      */
-    @DeleteMapping("/delete/{accountId}")
+    @DeleteMapping("/account/{accountId}/delete")
     @PreAuthorize("@hasRoleUseCase.execute(authentication.principal.id(), #accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)")
     public String delete(@PathVariable UUID id) {
         deleteAccountUseCase.execute(id);
@@ -181,12 +178,8 @@ public class AccountController {
      * @param body payload with updated values for the account
      * @return retuers updated account
      */
-    @PatchMapping("/edit/{accountId}")
-    @PreAuthorize("""
-            @hasRoleUseCase.execute(authentication.principal.id(), #accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
-            or
-            @hasRoleUseCase.execute(authentication.principal.id(), #accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
-            """)
+    @PatchMapping("/account/{accountId}/edit")
+    @PreAuthorize("@hasRoleUseCase.execute(authentication.principal.id(), #accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)")
     public AccountResponseDto edit(@PathVariable UUID accountId, @RequestBody EditAccountDto body) {
         return editAccountUseCase.execute(accountId, body);
     }

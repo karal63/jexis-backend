@@ -89,21 +89,6 @@ public class CardController {
     }
 
     /**
-     * Retrieves a single card by its identifier.
-     *
-     * Endpoint: GET /card/list/{id}
-     *
-     * @param id the unique identifier of the card to retrieve
-     * @return the matching card entity
-     */
-    // === GLOBAL ADMIN ===
-    @GetMapping("/list/{id}")
-    public CardResponseDto find(@PathVariable UUID id) {
-        Card card = getCardUseCase.execute(id);
-        return dtoHelper.toCardDto(card);
-    }
-
-    /**
      * Creates a new card for the specified card holder.
      *
      * Endpoint: POST /card/create
@@ -123,15 +108,30 @@ public class CardController {
         return dtoHelper.toCardDto(card);
     }
 
-    @GetMapping("/accounts/{accountId}/cards")
+    @GetMapping("/accounts/{id}/cards")
     @PreAuthorize("""
-            @hasRoleUseCase.execute(authentication.principal.id(), #accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
+            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
             or
-            @hasRoleUseCase.execute(authentication.principal.id(), #accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
+            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
             """)
     public List<CardResponseDto> getCardsByAccount(@PathVariable UUID id) {
         List<Card> card = getAccountCardsUseCase.execute(id);
         return card.stream().map(dtoHelper::toCardDto).toList();
+    }
+
+    /**
+     * Retrieves a single card by its identifier.
+     *
+     * Endpoint: GET /card/list/{id}
+     *
+     * @param id the unique identifier of the card to retrieve
+     * @return the matching card entity
+     */
+    @GetMapping("/accounts/{id}/cards/{cardId}")
+    @PreAuthorize("@cardAuthorization.canView(authentication.principal.id(), #cardId)")
+    public CardResponseDto find(@PathVariable UUID cardId) {
+        Card card = getCardUseCase.execute(cardId);
+        return dtoHelper.toCardDto(card);
     }
 
     /**
@@ -143,14 +143,16 @@ public class CardController {
      * @param body the card update payload
      * @return the updated card entity
      */
-    // @PatchMapping("/edit/{id}")
-    // @PreAuthorize("@cardAuthorization.canEdit(@authentication.principal.id(),
-    // #id)")
-    // public CardResponseDto edit(@PathVariable UUID id, @RequestBody EditCardDto
-    // body) {
-    // Card card = editCardUseCase.execute(id, body);
-    // return dtoHelper.toCardDto(card);
-    // }
+    @PatchMapping("/accounts/{id}/cards/{cardID}/edit")
+    @PreAuthorize("""
+            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
+            or
+            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
+            """)
+    public CardResponseDto edit(@PathVariable UUID cardId, @RequestBody EditCardDto body) {
+        Card card = editCardUseCase.execute(cardId, body);
+        return dtoHelper.toCardDto(card);
+    }
 
     /**
      * Deletes a card owned by the authenticated user.
@@ -160,11 +162,13 @@ public class CardController {
      * @param user the authenticated user making the request
      * @param id   the unique identifier of the card to delete
      */
-    // @PostMapping("/delete/{id}")
-    // @PreAuthorize("@cardAuthorization.canEdit(@authentication.principal.id(),
-    // #id)")
-    // public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID
-    // id) {
-    // deleteCardUseCase.execute(user, id);
-    // }
+    @PostMapping("/accounts/{id}/cards/{cardId}/delete")
+    @PreAuthorize("""
+            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
+            or
+            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
+            """)
+    public void delete(@PathVariable UUID cardId) {
+        deleteCardUseCase.execute(cardId);
+    }
 }

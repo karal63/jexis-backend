@@ -94,11 +94,11 @@ public class WalletController {
      * @param id the unique identifier of the wallet to retrieve
      * @return the matching wallet entity
      */
-    @GetMapping("/list/{id}")
-    public WalletResponseDto find(@PathVariable UUID id) {
-        Wallet wallet = getWalletUseCase.execute(id);
-        return dtoHelper.toWalletDto(wallet);
-    }
+    // @GetMapping("/list/{id}")
+    // public WalletResponseDto find(@PathVariable UUID id) {
+    // Wallet wallet = getWalletUseCase.execute(id);
+    // return dtoHelper.toWalletDto(wallet);
+    // }
 
     /**
      * Creates a new wallet for the specified account.
@@ -127,6 +127,18 @@ public class WalletController {
         return wallet.stream().map(dtoHelper::toWalletDto).toList();
     }
 
+    @GetMapping("/accounts/{id}/wallets/{walletId}")
+    @PreAuthorize("""
+            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
+            or
+            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
+            """)
+    // or global admin
+    public WalletResponseDto find(@PathVariable UUID id, @PathVariable UUID walletId) {
+        Wallet wallet = getWalletUseCase.execute(walletId);
+        return dtoHelper.toWalletDto(wallet);
+    }
+
     /**
      * Updates an existing wallet with the provided changes.
      *
@@ -136,14 +148,12 @@ public class WalletController {
      * @param body the wallet update payload
      * @return the updated wallet entity
      */
-    // @PatchMapping("/edit/{id}")
-    // @PreAuthorize("@walletAuthorization.canEdit(authentication.principal.id(),
-    // #id)")
-    // public WalletResponseDto edit(@PathVariable UUID id, @RequestBody
-    // EditWalletDto body) {
-    // Wallet wallet = editWalletUseCase.execute(id, body);
-    // return dtoHelper.toWalletDto(wallet);
-    // }
+    @PatchMapping("/accounts/{id}/wallets/{walletId}/edit")
+    @PreAuthorize("@hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)")
+    public WalletResponseDto edit(@PathVariable UUID walletId, @RequestBody EditWalletDto body) {
+        Wallet wallet = editWalletUseCase.execute(walletId, body);
+        return dtoHelper.toWalletDto(wallet);
+    }
 
     /**
      * Deletes a wallet owned by the authenticated user.
@@ -153,12 +163,9 @@ public class WalletController {
      * @param user the authenticated user making the request
      * @param id   the unique identifier of the wallet to delete
      */
-    // I think only account owner
-    // @PostMapping("/delete/{id}")
-    // @PreAuthorize("@walletAuthorization.canEdit(authentication.principal.id(),
-    // #id)")
-    // public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID
-    // id) {
-    // deleteWalletUseCase.execute(user, id);
-    // }
+    @PostMapping("/accounts/{id}/wallets/{walletId}/delete")
+    @PreAuthorize("@hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)")
+    public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID walletId) {
+        deleteWalletUseCase.execute(user, walletId);
+    }
 }
