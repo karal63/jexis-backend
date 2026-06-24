@@ -104,7 +104,7 @@ public class AccountController {
     }
 
     @GetMapping("/users/{id}/accounts")
-    // Only for owner
+    @PreAuthorize("@accountAuthorization.canViewAll(authentication.principal.id(), #id)")
     public List<AccountResponseDto> getUserAccounts(@PathVariable UUID id) {
         List<Account> accounts = getUserAccountsUseCase.execute(id);
         return accounts
@@ -125,7 +125,7 @@ public class AccountController {
      * @return the account with the specified ID
      */
     @GetMapping("/users/{id}/accounts/{accountId}")
-    @PreAuthorize("@canAccessUseCase.execute(authentication.principal.id(), #accountId)")
+    @PreAuthorize("@accountAuthorization.canView(authentication.principal.id(), #accountId)")
     public AccountResponseDto get(@PathVariable UUID accountId) {
         Account account = getAccountUseCase.execute(accountId);
         return dtoHelper.toAccountDto(account);
@@ -160,7 +160,7 @@ public class AccountController {
      * @return message confirming deletion of the account with the specified ID
      */
     @DeleteMapping("/users/{id}/accounts/{accountId}/delete")
-    @PreAuthorize("@hasRoleUseCase.execute(authentication.principal.id(), #accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)")
+    @PreAuthorize("@accountAuthorization.canDelete(authentication.principal.id(), #accountId)")
     public String delete(@PathVariable UUID accountId) {
         deleteAccountUseCase.execute(accountId);
         return "Account with ID " + accountId + " has been deleted.";
@@ -179,7 +179,7 @@ public class AccountController {
      * @return retuers updated account
      */
     @PatchMapping("/users/{id}/accounts/{accountId}/edit")
-    @PreAuthorize("@hasRoleUseCase.execute(authentication.principal.id(), #accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)")
+    @PreAuthorize("@accountAuthorization.canEdit(authentication.principal.id(), #accountId)")
     public AccountResponseDto edit(@PathVariable UUID accountId, @RequestBody EditAccountDto body) {
         return editAccountUseCase.execute(accountId, body);
     }

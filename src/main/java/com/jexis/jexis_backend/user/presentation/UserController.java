@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -111,8 +112,8 @@ public class UserController {
      * @param id the unique identifier of the user to delete
      * @return a confirmation message after successful deletion
      */
-    // Public
     @PostMapping("/users/{id}/delete")
+    @PreAuthorize("@userAuthorization.canDelete(authentication.principal.id(), #id)")
     public String deleteUser(@PathVariable UUID id) {
         deleteUserUseCase.execute(id);
         return "User deleted successfully";
@@ -127,8 +128,8 @@ public class UserController {
      * @param id      the unique identifier of the user to update
      * @return an optional updated user entity
      */
-    // Public
     @PatchMapping("/users/{id}/edit")
+    @PreAuthorize("@userAuthorization.canEdit(authentication.principal.id(), #id)")
     public UserResponseDto editUser(@RequestBody EditDto editDto, @PathVariable UUID id) {
         return dtoHelper.toUserDto(editUserUseCase.execute(id, editDto));
     }

@@ -97,22 +97,14 @@ public class CardController {
      * @return the newly created card entity
      */
     @PostMapping("/cards/create")
-    @PreAuthorize("""
-            @hasRoleUseCase.execute(authentication.principal.id(), #body.accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
-            or
-            @hasRoleUseCase.execute(authentication.principal.id(), #body.accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
-            """)
+    @PreAuthorize("@cardAuthorization.canCreate(authentication.principal.id(), #body.accountId)")
     public CardResponseDto create(@Valid @RequestBody CreateCardDto body) {
         Card card = createCardUseCase.execute(body);
         return dtoHelper.toCardDto(card);
     }
 
     @GetMapping("/accounts/{id}/cards")
-    @PreAuthorize("""
-            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
-            or
-            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
-            """)
+    @PreAuthorize("@cardAuthorization.canViewAll(authentication.principal.id(), #id)")
     public List<CardResponseDto> getCardsByAccount(@PathVariable UUID id) {
         List<Card> card = getAccountCardsUseCase.execute(id);
         return card.stream().map(dtoHelper::toCardDto).toList();
@@ -127,8 +119,8 @@ public class CardController {
      * @return the matching card entity
      */
     @GetMapping("/accounts/{id}/cards/{cardId}")
-    @PreAuthorize("@cardAuthorization.canView(authentication.principal.id(), #cardId)")
-    public CardResponseDto find(@PathVariable UUID cardId) {
+    @PreAuthorize("@cardAuthorization.canView(authentication.principal.id(), #id, #cardId)")
+    public CardResponseDto find(@PathVariable UUID id, @PathVariable UUID cardId) {
         Card card = getCardUseCase.execute(cardId);
         return dtoHelper.toCardDto(card);
     }
@@ -143,11 +135,7 @@ public class CardController {
      * @return the updated card entity
      */
     @PatchMapping("/accounts/{id}/cards/{cardId}/edit")
-    @PreAuthorize("""
-            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
-            or
-            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
-            """)
+    @PreAuthorize("@cardAuthorization.canEdit(authentication.principal.id(), #id)")
     public CardResponseDto edit(@PathVariable UUID id, @PathVariable UUID cardId, @RequestBody EditCardDto body) {
         Card card = editCardUseCase.execute(cardId, body);
         return dtoHelper.toCardDto(card);
@@ -162,11 +150,7 @@ public class CardController {
      * @param id   the unique identifier of the card to delete
      */
     @PostMapping("/accounts/{id}/cards/{cardId}/delete")
-    @PreAuthorize("""
-            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
-            or
-            @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
-            """)
+    @PreAuthorize("@cardAuthorization.canDelete(authentication.principal.id(), #id)")
     public void delete(@PathVariable UUID id, @PathVariable UUID cardId) {
         deleteCardUseCase.execute(cardId);
     }

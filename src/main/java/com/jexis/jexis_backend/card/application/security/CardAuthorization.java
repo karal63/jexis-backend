@@ -2,38 +2,48 @@ package com.jexis.jexis_backend.card.application.security;
 
 import java.util.UUID;
 
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
+import com.jexis.jexis_backend.card.application.useCases.GetCardUseCase;
 import com.jexis.jexis_backend.card.domain.entities.Card;
-import com.jexis.jexis_backend.card.infrastructure.CardRepository;
-import com.jexis.jexis_backend.member.application.useCases.CanAccessUseCase;
 import com.jexis.jexis_backend.member.application.useCases.HasRoleUseCase;
 import com.jexis.jexis_backend.member.domain.enums.Role;
 
 @Component
 public class CardAuthorization {
-    private final CardRepository repo;
     private final HasRoleUseCase hasRoleUseCase;
-    private final CanAccessUseCase canAccessUseCase;
+    private final GetCardUseCase getCardUseCase;
 
-    public CardAuthorization(CardRepository repo, HasRoleUseCase hasRoleUseCase, CanAccessUseCase canAccessUseCase) {
-        this.repo = repo;
+    public CardAuthorization(HasRoleUseCase hasRoleUseCase, GetCardUseCase getCardUseCase) {
         this.hasRoleUseCase = hasRoleUseCase;
-        this.canAccessUseCase = canAccessUseCase;
+        this.getCardUseCase = getCardUseCase;
     }
 
-    public boolean canView(UUID userId, UUID cardId) {
-        Card card = repo.findById(cardId).orElseThrow(() -> new AccessDeniedException("Access denied"));
-        return hasRoleUseCase.execute(userId, card.getCardHolder().getAccount().getId(), Role.ADMIN)
-                || hasRoleUseCase.execute(userId, card.getCardHolder().getAccount().getId(), Role.OWNER)
-                || userId == card.getUser().getId();
+    public boolean canViewAll(UUID userId, UUID accountId) {
+        return hasRoleUseCase.execute(userId, accountId, Role.OWNER)
+                || hasRoleUseCase.execute(userId, accountId, Role.ADMIN);
     }
 
-    public boolean canEdit(UUID userId, UUID cardId) {
-        Card card = repo.findById(cardId).orElseThrow(() -> new AccessDeniedException("Access denied"));
-        System.out.println(card.toString());
-        return hasRoleUseCase.execute(userId, card.getCardHolder().getAccount().getId(), Role.ADMIN)
-                || hasRoleUseCase.execute(userId, card.getCardHolder().getAccount().getId(), Role.OWNER);
+    public boolean canView(UUID userId, UUID accountId, UUID cardId) {
+        Card card = getCardUseCase.execute(cardId);
+
+        return hasRoleUseCase.execute(userId, accountId, Role.OWNER)
+                || hasRoleUseCase.execute(userId, accountId, Role.ADMIN)
+                || card.getUser().getId().equals(userId);
+    }
+
+    public boolean canCreate(UUID userId, UUID accountId) {
+        return hasRoleUseCase.execute(userId, accountId, Role.OWNER)
+                || hasRoleUseCase.execute(userId, accountId, Role.ADMIN);
+    }
+
+    public boolean canEdit(UUID userId, UUID accountId) {
+        return hasRoleUseCase.execute(userId, accountId, Role.OWNER)
+                || hasRoleUseCase.execute(userId, accountId, Role.ADMIN);
+    }
+
+    public boolean canDelete(UUID userId, UUID accountId) {
+        return hasRoleUseCase.execute(userId, accountId, Role.OWNER)
+                || hasRoleUseCase.execute(userId, accountId, Role.ADMIN);
     }
 }

@@ -2,30 +2,35 @@ package com.jexis.jexis_backend.cardholder.application.security;
 
 import java.util.UUID;
 
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
-import com.jexis.jexis_backend.cardholder.domain.entities.CardHolder;
-import com.jexis.jexis_backend.cardholder.infrastructure.CardHolderRepository;
 import com.jexis.jexis_backend.member.application.useCases.HasRoleUseCase;
 import com.jexis.jexis_backend.member.domain.enums.Role;
 
 @Component
 public class CardHolderAuthorization {
-    private CardHolderRepository repo;
     private final HasRoleUseCase hasRoleUseCase;
 
-    public CardHolderAuthorization(CardHolderRepository repo, HasRoleUseCase hasRoleUseCase) {
-        this.repo = repo;
+    public CardHolderAuthorization(HasRoleUseCase hasRoleUseCase) {
         this.hasRoleUseCase = hasRoleUseCase;
     }
 
-    public boolean canEdit(UUID userId, UUID cardHolderId) {
-        CardHolder cardHolder = repo.findById(cardHolderId)
-                .orElseThrow(() -> new AccessDeniedException("Access denied"));
+    public boolean canView(UUID userId, UUID accountId) {
+        return hasRoleUseCase.execute(userId, accountId, Role.OWNER)
+                || hasRoleUseCase.execute(userId, accountId, Role.ADMIN);
+    }
 
-        UUID accountId = cardHolder.getAccount().getId();
+    public boolean canCreate(UUID userId, UUID accountId) {
+        return hasRoleUseCase.execute(userId, accountId, Role.OWNER)
+                || hasRoleUseCase.execute(userId, accountId, Role.ADMIN);
+    }
 
+    public boolean canEdit(UUID userId, UUID accountId) {
+        return hasRoleUseCase.execute(userId, accountId, Role.OWNER)
+                || hasRoleUseCase.execute(userId, accountId, Role.ADMIN);
+    }
+
+    public boolean canDelete(UUID userId, UUID accountId) {
         return hasRoleUseCase.execute(userId, accountId, Role.OWNER)
                 || hasRoleUseCase.execute(userId, accountId, Role.ADMIN);
     }
