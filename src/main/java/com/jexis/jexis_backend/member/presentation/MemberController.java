@@ -52,8 +52,7 @@ public class MemberController {
         this.getAccountMembersUseCase = getAccountMembersUseCase;
     }
 
-    // ADMIN GLOBAL
-    @GetMapping("/list")
+    @GetMapping("/admin/members")
     public List<MemberResponseDto> listAccountMembers() {
         List<Member> members = getMembersUseCase.execute();
         return members.stream().map(dtoHelper::toMemberDto).toList();
@@ -94,7 +93,7 @@ public class MemberController {
             or
             @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
             """)
-    public MemberResponseDto edit(@PathVariable UUID memberId, @RequestBody EditMemberDto body) {
+    public MemberResponseDto edit(@PathVariable UUID id, @PathVariable UUID memberId, @RequestBody EditMemberDto body) {
         Member member = editMemberUseCase.execute(memberId, body);
         return dtoHelper.toMemberDto(member);
     }
@@ -105,7 +104,7 @@ public class MemberController {
             or
             @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
             """)
-    public void remove(@PathVariable UUID memberId) {
+    public void remove(@PathVariable UUID id, @PathVariable UUID memberId) {
         removeMemberUseCase.execute(memberId);
     }
 }

@@ -47,7 +47,7 @@ import jakarta.validation.Valid;
  * Author: Leo
  */
 @RestController
-@RequestMapping("/wallet")
+@RequestMapping("/")
 public class WalletController {
 
     private final GetAllWalletsUseCase getAllWalletsUseCase;
@@ -80,7 +80,7 @@ public class WalletController {
      *
      * @return a list of all wallet entities
      */
-    @GetMapping("/list")
+    @GetMapping("/admin/wallets")
     public List<WalletResponseDto> list() {
         List<Wallet> wallets = getAllWalletsUseCase.execute();
         return wallets.stream().map(dtoHelper::toWalletDto).toList();
@@ -108,7 +108,7 @@ public class WalletController {
      * @param body the request payload containing the account identifier
      * @return the newly created wallet entity
      */
-    @PostMapping("/create-treasury-account")
+    @PostMapping("/wallets/create-treasury-account")
     @PreAuthorize("@hasRoleUseCase.execute(authentication.principal.id(), #body.accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)")
     public WalletResponseDto create(@Valid @RequestBody CreateWalletDto body) {
         Account account = getAccountUseCase.execute(body.getAccountId());
@@ -150,7 +150,7 @@ public class WalletController {
      */
     @PatchMapping("/accounts/{id}/wallets/{walletId}/edit")
     @PreAuthorize("@hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)")
-    public WalletResponseDto edit(@PathVariable UUID walletId, @RequestBody EditWalletDto body) {
+    public WalletResponseDto edit(@PathVariable UUID id, @PathVariable UUID walletId, @RequestBody EditWalletDto body) {
         Wallet wallet = editWalletUseCase.execute(walletId, body);
         return dtoHelper.toWalletDto(wallet);
     }
@@ -165,7 +165,7 @@ public class WalletController {
      */
     @PostMapping("/accounts/{id}/wallets/{walletId}/delete")
     @PreAuthorize("@hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)")
-    public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID walletId) {
+    public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID id, @PathVariable UUID walletId) {
         deleteWalletUseCase.execute(user, walletId);
     }
 }

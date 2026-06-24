@@ -41,7 +41,7 @@ import com.jexis.jexis_backend.user.domain.entities.User;
  * Author: Leo
  */
 @RestController
-@RequestMapping("/user")
+@RequestMapping("")
 public class UserController {
 
     GetUsersUseCase getUsersUseCase;
@@ -72,7 +72,7 @@ public class UserController {
      *
      * @return list of all accounts
      */
-    @GetMapping("/list")
+    @GetMapping("/admin/users")
     public List<UserResponseDto> getUsers() {
         return getUsersUseCase.execute().stream().map(dtoHelper::toUserDto).toList();
     }
@@ -85,7 +85,7 @@ public class UserController {
      * @param id the unique identifier of the user to retrieve
      * @return the matching user entity
      */
-    @GetMapping("/list/{id}")
+    @GetMapping("/admin/users/{id}")
     public UserResponseDto getUser(@PathVariable UUID id) {
         return dtoHelper.toUserDto(getUserUseCase.execute(id));
     }
@@ -98,7 +98,7 @@ public class UserController {
      * @param createDto the request payload containing user creation details
      * @return the newly created user entity
      */
-    @PostMapping("/create")
+    @PostMapping("/admin/users/create")
     public UserResponseDto createUsers(@RequestBody CreateDto createDto) {
         return dtoHelper.toUserDto(createUserUseCase.execute(createDto));
     }
@@ -112,7 +112,7 @@ public class UserController {
      * @return a confirmation message after successful deletion
      */
     // Public
-    @DeleteMapping("/delete/{id}")
+    @PostMapping("/users/{id}/delete")
     public String deleteUser(@PathVariable UUID id) {
         deleteUserUseCase.execute(id);
         return "User deleted successfully";
@@ -128,7 +128,7 @@ public class UserController {
      * @return an optional updated user entity
      */
     // Public
-    @PatchMapping("/edit/{id}")
+    @PatchMapping("/users/{id}/edit")
     public UserResponseDto editUser(@RequestBody EditDto editDto, @PathVariable UUID id) {
         return dtoHelper.toUserDto(editUserUseCase.execute(id, editDto));
     }

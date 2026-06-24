@@ -89,13 +89,12 @@ public class AccountController {
      * This endpoint retrieves all existing accounts by delegating to the
      * getAccountsUseCase, which interacts with the repository to fetch the data.
      *
-     * Endpoint: GET /account/list
+     * Endpoint: GET /admin/accounts
      *
      * @return list of all accounts
      */
 
-    @GetMapping("/account/list")
-    // @PreAuthorize("@hasRole('ADMIN')")
+    @GetMapping("/admin/accounts")
     public List<AccountResponseDto> getAll() {
         List<Account> accounts = getAccountsUseCase.execute();
         return accounts
@@ -105,6 +104,7 @@ public class AccountController {
     }
 
     @GetMapping("/users/{id}/accounts")
+    // Only for owner
     public List<AccountResponseDto> getUserAccounts(@PathVariable UUID id) {
         List<Account> accounts = getUserAccountsUseCase.execute(id);
         return accounts
@@ -142,7 +142,7 @@ public class AccountController {
      * @param body request payload containing account creation data
      * @return the newly created account
      */
-    @PostMapping("/account/create")
+    @PostMapping("/accounts/create")
     public AccountResponseDto create(@AuthenticationPrincipal AuthUser user) {
         User foundUser = getUserUseCase.execute(user.id());
         return createAccountUseCase.execute(foundUser);
@@ -159,11 +159,11 @@ public class AccountController {
      * @param id the ID of the account to delete
      * @return message confirming deletion of the account with the specified ID
      */
-    @DeleteMapping("/account/{accountId}/delete")
+    @DeleteMapping("/users/{id}/accounts/{accountId}/delete")
     @PreAuthorize("@hasRoleUseCase.execute(authentication.principal.id(), #accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)")
-    public String delete(@PathVariable UUID id) {
-        deleteAccountUseCase.execute(id);
-        return "Account with ID " + id + " has been deleted.";
+    public String delete(@PathVariable UUID accountId) {
+        deleteAccountUseCase.execute(accountId);
+        return "Account with ID " + accountId + " has been deleted.";
     }
 
     /**
@@ -178,7 +178,7 @@ public class AccountController {
      * @param body payload with updated values for the account
      * @return retuers updated account
      */
-    @PatchMapping("/account/{accountId}/edit")
+    @PatchMapping("/users/{id}/accounts/{accountId}/edit")
     @PreAuthorize("@hasRoleUseCase.execute(authentication.principal.id(), #accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)")
     public AccountResponseDto edit(@PathVariable UUID accountId, @RequestBody EditAccountDto body) {
         return editAccountUseCase.execute(accountId, body);

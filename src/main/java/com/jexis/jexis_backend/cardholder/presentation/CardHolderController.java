@@ -54,7 +54,7 @@ public class CardHolderController {
     }
 
     // Global Admin
-    @GetMapping("/list")
+    @GetMapping("/admin/card-holders")
     public List<CardHolderResponseDto> list() {
         List<CardHolder> cardHolders = getAllCardHoldersUseCase.execute();
         return cardHolders.stream().map(dtoHelper::toCardHolderDto).toList();
@@ -71,7 +71,7 @@ public class CardHolderController {
         return dtoHelper.toCardHolderDto(cardHolder);
     }
 
-    @GetMapping("/accounts/{accountId}/card-holders")
+    @GetMapping("/accounts/{id}/card-holders")
     @PreAuthorize("""
             @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
             or
@@ -88,7 +88,7 @@ public class CardHolderController {
             or
             @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
             """)
-    public CardHolderResponseDto find(@PathVariable UUID cardHolderId) {
+    public CardHolderResponseDto find(@PathVariable UUID id, @PathVariable UUID cardHolderId) {
         CardHolder cardHolder = getCardHolderUseCase.execute(cardHolderId);
         return dtoHelper.toCardHolderDto(cardHolder);
     }
@@ -99,18 +99,19 @@ public class CardHolderController {
             or
             @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
             """)
-    public CardHolderResponseDto edit(@PathVariable UUID cardHolderId, @RequestBody EditCardHolderDto body) {
+    public CardHolderResponseDto edit(@PathVariable UUID id, @PathVariable UUID cardHolderId,
+            @RequestBody EditCardHolderDto body) {
         CardHolder cardHolder = editCardHolderUseCase.execute(cardHolderId, body);
         return dtoHelper.toCardHolderDto(cardHolder);
     }
 
-    @PostMapping("/accounts/{id}/card-holders/{cardHolderId}/remove")
+    @PostMapping("/accounts/{id}/card-holders/{cardHolderId}/delete")
     @PreAuthorize("""
             @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
             or
             @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
             """)
-    public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID cardHolderId) {
+    public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID id, @PathVariable UUID cardHolderId) {
         deleteCardHolderUseCase.execute(user, cardHolderId);
     }
 }

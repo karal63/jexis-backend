@@ -81,9 +81,8 @@ public class CardController {
      * @return a list of all card entities
      */
     // === GLOBAL ADMIN ===
-    @GetMapping("/list")
-    public List<CardResponseDto> list(@RequestParam UUID accountId) {
-        System.out.println(accountId);
+    @GetMapping("/admin/cards")
+    public List<CardResponseDto> list() {
         List<Card> cards = getAllCardsUseCase.execute();
         return cards.stream().map(dtoHelper::toCardDto).toList();
     }
@@ -97,7 +96,7 @@ public class CardController {
      *             information
      * @return the newly created card entity
      */
-    @PostMapping("/card/create")
+    @PostMapping("/cards/create")
     @PreAuthorize("""
             @hasRoleUseCase.execute(authentication.principal.id(), #body.accountId, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
             or
@@ -143,13 +142,13 @@ public class CardController {
      * @param body the card update payload
      * @return the updated card entity
      */
-    @PatchMapping("/accounts/{id}/cards/{cardID}/edit")
+    @PatchMapping("/accounts/{id}/cards/{cardId}/edit")
     @PreAuthorize("""
             @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).OWNER)
             or
             @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
             """)
-    public CardResponseDto edit(@PathVariable UUID cardId, @RequestBody EditCardDto body) {
+    public CardResponseDto edit(@PathVariable UUID id, @PathVariable UUID cardId, @RequestBody EditCardDto body) {
         Card card = editCardUseCase.execute(cardId, body);
         return dtoHelper.toCardDto(card);
     }
@@ -168,7 +167,7 @@ public class CardController {
             or
             @hasRoleUseCase.execute(authentication.principal.id(), #id, T(com.jexis.jexis_backend.member.domain.enums.Role).ADMIN)
             """)
-    public void delete(@PathVariable UUID cardId) {
+    public void delete(@PathVariable UUID id, @PathVariable UUID cardId) {
         deleteCardUseCase.execute(cardId);
     }
 }

@@ -32,6 +32,7 @@ public class CardAuthorization {
 
     public boolean canEdit(UUID userId, UUID cardId) {
         Card card = repo.findById(cardId).orElseThrow(() -> new AccessDeniedException("Access denied"));
+        System.out.println(card.toString());
         return hasRoleUseCase.execute(userId, card.getCardHolder().getAccount().getId(), Role.ADMIN)
                 || hasRoleUseCase.execute(userId, card.getCardHolder().getAccount().getId(), Role.OWNER);
     }

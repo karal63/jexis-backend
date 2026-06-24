@@ -16,6 +16,9 @@ public class HasRoleUseCase {
     }
 
     public boolean execute(UUID userId, UUID accountId, Role role) {
+        System.out.println(userId);
+        System.out.println(accountId);
+        System.out.println(role);
         return repo.existsByUserIdAndAccountIdAndRole(userId, accountId, role);
     }
 }
