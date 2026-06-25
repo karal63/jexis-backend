@@ -95,6 +95,7 @@ public class AccountController {
      */
 
     @GetMapping("/admin/accounts")
+    @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
     public List<AccountResponseDto> getAll() {
         List<Account> accounts = getAccountsUseCase.execute();
         return accounts

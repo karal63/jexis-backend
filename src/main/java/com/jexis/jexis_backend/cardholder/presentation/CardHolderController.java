@@ -53,8 +53,8 @@ public class CardHolderController {
         this.getAccountCardHoldersUseCase = getAccountCardHoldersUseCase;
     }
 
-    // Global Admin
     @GetMapping("/admin/card-holders")
+    @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
     public List<CardHolderResponseDto> list() {
         List<CardHolder> cardHolders = getAllCardHoldersUseCase.execute();
         return cardHolders.stream().map(dtoHelper::toCardHolderDto).toList();

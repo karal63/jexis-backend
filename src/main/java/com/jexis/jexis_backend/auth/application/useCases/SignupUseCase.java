@@ -1,5 +1,7 @@
 package com.jexis.jexis_backend.auth.application.useCases;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.jexis.jexis_backend.common.logging.AsyncLogger;
@@ -10,6 +12,7 @@ import com.jexis.jexis_backend.user.application.dto.CreateDto;
 import com.jexis.jexis_backend.user.application.dto.UserResponseDto;
 import com.jexis.jexis_backend.user.application.useCases.CreateUserUseCase;
 import com.jexis.jexis_backend.user.domain.entities.User;
+import com.jexis.jexis_backend.user.domain.enums.UserRole;
 
 /**
  * SignupUseCase
@@ -48,14 +51,15 @@ public class SignupUseCase {
     public SignupResult execute(CreateDto body) {
         logger.info("AUTH", "Signup started for email: " + body.getEmail());
 
-        User user = createUserUseCase.execute(body);
+        List<UserRole> roles = List.of(UserRole.USER);
+        User user = createUserUseCase.execute(body, roles);
 
         TokenPair tokens = jwtUtil.generateTokens(
-                user.getId(), user.getFirstName(), user.getEmail(), user.getIsActivated());
+                user.getId(), user.getFirstName(), user.getEmail(), user.getIsActivated(), user.getRoles());
 
         UserResponseDto userResponse = new UserResponseDto(user.getId(), user.getFirstName(),
                 user.getLastName(), user.getEmail(),
-                user.getPhoneNumber(), user.getIsActivated(), user.getCreatedAt(),
+                user.getPhoneNumber(), user.getRoles(), user.getIsActivated(), user.getCreatedAt(),
                 user.getUpdatedAt());
 
         logger.info("AUTH", "Signup completed for user: " + user.getEmail());

@@ -1,6 +1,9 @@
 package com.jexis.jexis_backend.auth.application.dto;
 
+import java.util.List;
 import java.util.UUID;
+
+import com.jexis.jexis_backend.user.domain.enums.UserRole;
 
 /**
  * AuthUser
@@ -15,5 +18,6 @@ public record AuthUser(
         UUID id,
         String name,
         String email,
-        Boolean isActivated) {
+        Boolean isActivated,
+        List<UserRole> roles) {
 }

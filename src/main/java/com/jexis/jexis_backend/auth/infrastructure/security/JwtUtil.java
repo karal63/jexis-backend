@@ -7,9 +7,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.jexis.jexis_backend.auth.application.dto.TokenPair;
+import com.jexis.jexis_backend.user.domain.enums.UserRole;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -27,12 +29,13 @@ public class JwtUtil {
         this.REFRESH_TOKEN = Keys.hmacShaKeyFor(refreshSecret.getBytes());
     }
 
-    public TokenPair generateTokens(UUID id, String name, String email, Boolean isActivated) {
+    public TokenPair generateTokens(UUID id, String name, String email, Boolean isActivated, List<UserRole> roles) {
         String accessToken = Jwts.builder()
                 .claim("id", id.toString())
                 .claim("name", name)
                 .claim("email", email)
                 .claim("isActivated", isActivated)
+                .claim("roles", roles)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + atExpirationMs))
                 .signWith(ACCESS_TOKEN)
@@ -43,6 +46,7 @@ public class JwtUtil {
                 .claim("name", name)
                 .claim("email", email)
                 .claim("isActivated", isActivated)
+                .claim("roles", roles)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + rtExpirationMs))
                 .signWith(REFRESH_TOKEN)

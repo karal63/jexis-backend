@@ -24,6 +24,7 @@ public class DtoHelper {
                 user.getLastName(),
                 user.getEmail(),
                 user.getPhoneNumber(),
+                user.getRoles(),
                 user.getIsActivated(),
                 user.getCreatedAt(),
                 user.getUpdatedAt());

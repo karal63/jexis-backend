@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
+import com.jexis.jexis_backend.user.application.dto.AdminCreateDto;
 import com.jexis.jexis_backend.user.application.dto.CreateDto;
 import com.jexis.jexis_backend.user.application.dto.EditDto;
 import com.jexis.jexis_backend.user.application.dto.UserResponseDto;
@@ -74,6 +75,7 @@ public class UserController {
      * @return list of all accounts
      */
     @GetMapping("/admin/users")
+    @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
     public List<UserResponseDto> getUsers() {
         return getUsersUseCase.execute().stream().map(dtoHelper::toUserDto).toList();
     }
@@ -87,6 +89,7 @@ public class UserController {
      * @return the matching user entity
      */
     @GetMapping("/admin/users/{id}")
+    @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
     public UserResponseDto getUser(@PathVariable UUID id) {
         return dtoHelper.toUserDto(getUserUseCase.execute(id));
     }
@@ -100,8 +103,11 @@ public class UserController {
      * @return the newly created user entity
      */
     @PostMapping("/admin/users/create")
-    public UserResponseDto createUsers(@RequestBody CreateDto createDto) {
-        return dtoHelper.toUserDto(createUserUseCase.execute(createDto));
+    @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
+    public UserResponseDto createUsers(@RequestBody AdminCreateDto body) {
+        CreateDto dto = new CreateDto(body.getFirstName(), body.getLastName(), body.getEmail(), body.getPhoneNumber(),
+                body.getPassword());
+        return dtoHelper.toUserDto(createUserUseCase.execute(dto, body.getRoles()));
     }
 
     /**

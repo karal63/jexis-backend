@@ -82,6 +82,7 @@ public class WalletController {
      * @return a list of all wallet entities
      */
     @GetMapping("/admin/wallets")
+    @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
     public List<WalletResponseDto> list() {
         List<Wallet> wallets = getAllWalletsUseCase.execute();
         return wallets.stream().map(dtoHelper::toWalletDto).toList();

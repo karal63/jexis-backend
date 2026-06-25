@@ -53,6 +53,7 @@ public class MemberController {
     }
 
     @GetMapping("/admin/members")
+    @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
     public List<MemberResponseDto> listAccountMembers() {
         List<Member> members = getMembersUseCase.execute();
         return members.stream().map(dtoHelper::toMemberDto).toList();

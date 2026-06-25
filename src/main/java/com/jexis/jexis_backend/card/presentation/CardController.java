@@ -80,7 +80,7 @@ public class CardController {
      *
      * @return a list of all card entities
      */
-    // === GLOBAL ADMIN ===
+    @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
     @GetMapping("/admin/cards")
     public List<CardResponseDto> list() {
         List<Card> cards = getAllCardsUseCase.execute();
