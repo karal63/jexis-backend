@@ -62,11 +62,12 @@ public class RefreshTokensUseCase {
 
         TokenPair tokens = jwtUtil.generateTokens(user.get().getId(), user.get().getFirstName(),
                 user.get().getEmail(),
-                user.get().getIsActivated());
+                user.get().getIsActivated(), user.get().getRoles());
 
         UserResponseDto userResponse = new UserResponseDto(user.get().getId(), user.get().getFirstName(),
                 user.get().getLastName(), user.get().getEmail(),
-                user.get().getPhoneNumber(), user.get().getIsActivated(), user.get().getCreatedAt(),
+                user.get().getPhoneNumber(), user.get().getRoles(), user.get().getIsActivated(),
+                user.get().getCreatedAt(),
                 user.get().getUpdatedAt());
 
         return new LoginResult(userResponse, tokens);

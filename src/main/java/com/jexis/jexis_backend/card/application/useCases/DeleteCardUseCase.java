@@ -7,9 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.jexis.jexis_backend.card.domain.entities.Card;
 import com.jexis.jexis_backend.card.domain.exceptions.CardNotFoundException;
-import com.jexis.jexis_backend.card.domain.exceptions.ForbiddenException;
 import com.jexis.jexis_backend.card.infrastructure.CardRepository;
-import com.jexis.jexis_backend.auth.application.dto.AuthUser;
 
 /**
  * DeleteCardUseCase
@@ -37,14 +35,10 @@ public class DeleteCardUseCase {
      *
      * @param user the owner of the card and the id of the card to be deleted
      */
-    public void execute(AuthUser user, UUID cardId) {
+    public void execute(UUID cardId) {
         Optional<Card> card = repo.findById(cardId);
         if (card.isEmpty()) {
             throw new CardNotFoundException();
-        }
-
-        if (!card.get().getCardHolder().getAccount().getOwner().getId().equals(user.id())) {
-            throw new ForbiddenException();
         }
 
         repo.delete(card.get());

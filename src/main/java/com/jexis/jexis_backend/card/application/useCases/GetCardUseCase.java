@@ -36,10 +36,7 @@ public class GetCardUseCase {
      * @return the retrieved card entity
      */
     public Card execute(UUID id) {
-        Optional<Card> card = repo.findById(id);
-        if (card.isEmpty()) {
-            throw new CardNotFoundException();
-        }
-        return card.get();
+        Card card = repo.findById(id).orElseThrow(() -> new CardNotFoundException());
+        return card;
     }
 }

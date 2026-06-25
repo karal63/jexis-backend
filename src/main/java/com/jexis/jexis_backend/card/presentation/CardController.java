@@ -3,6 +3,7 @@ package com.jexis.jexis_backend.card.presentation;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jexis.jexis_backend.auth.application.dto.AuthUser;
@@ -19,13 +21,11 @@ import com.jexis.jexis_backend.card.application.dto.EditCardDto;
 import com.jexis.jexis_backend.card.application.useCases.CreateCardUseCase;
 import com.jexis.jexis_backend.card.application.useCases.DeleteCardUseCase;
 import com.jexis.jexis_backend.card.application.useCases.EditCardUseCase;
+import com.jexis.jexis_backend.card.application.useCases.GetAccountCardsUseCase;
 import com.jexis.jexis_backend.card.application.useCases.GetAllCardsUseCase;
 import com.jexis.jexis_backend.card.application.useCases.GetCardUseCase;
 import com.jexis.jexis_backend.card.domain.entities.Card;
-import com.jexis.jexis_backend.cardholder.application.useCases.GetCardHolderUseCase;
-import com.jexis.jexis_backend.cardholder.domain.entities.CardHolder;
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
-import com.stripe.exception.StripeException;
 
 import jakarta.validation.Valid;
 
@@ -46,58 +46,45 @@ import jakarta.validation.Valid;
  * Author: Leo
  */
 @RestController
-@RequestMapping("/card")
+@RequestMapping("/")
 public class CardController {
     private final GetAllCardsUseCase getAllCardsUseCase;
     private final GetCardUseCase getCardUseCase;
-    private final GetCardHolderUseCase getCardHolderUseCase;
     private final CreateCardUseCase createCardUseCase;
     private final EditCardUseCase editCardUseCase;
     private final DeleteCardUseCase deleteCardUseCase;
     private final DtoHelper dtoHelper;
+    private final GetAccountCardsUseCase getAccountCardsUseCase;
 
     public CardController(
             GetAllCardsUseCase getAllCardsUseCase,
             GetCardUseCase getCardUseCase,
-            GetCardHolderUseCase getCardHolderUseCase,
             CreateCardUseCase createCardUseCase,
             EditCardUseCase editCardUseCase,
             DeleteCardUseCase deleteCardUseCase,
-            DtoHelper dtoHelper) {
+            DtoHelper dtoHelper,
+            GetAccountCardsUseCase getAccountCardsUseCase) {
         this.getAllCardsUseCase = getAllCardsUseCase;
         this.getCardUseCase = getCardUseCase;
-        this.getCardHolderUseCase = getCardHolderUseCase;
         this.createCardUseCase = createCardUseCase;
         this.editCardUseCase = editCardUseCase;
         this.deleteCardUseCase = deleteCardUseCase;
         this.dtoHelper = dtoHelper;
+        this.getAccountCardsUseCase = getAccountCardsUseCase;
     }
 
     /**
-     * Retrieves all cards available in the system.
+     * Retrieves all cards available in the account.
      *
      * Endpoint: GET /card/list
      *
      * @return a list of all card entities
      */
-    @GetMapping("/list")
+    @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
+    @GetMapping("/admin/cards")
     public List<CardResponseDto> list() {
         List<Card> cards = getAllCardsUseCase.execute();
         return cards.stream().map(dtoHelper::toCardDto).toList();
-    }
-
-    /**
-     * Retrieves a single card by its identifier.
-     *
-     * Endpoint: GET /card/list/{id}
-     *
-     * @param id the unique identifier of the card to retrieve
-     * @return the matching card entity
-     */
-    @GetMapping("/list/{id}")
-    public CardResponseDto find(@PathVariable UUID id) {
-        Card card = getCardUseCase.execute(id);
-        return dtoHelper.toCardDto(card);
     }
 
     /**
@@ -109,9 +96,32 @@ public class CardController {
      *             information
      * @return the newly created card entity
      */
-    @PostMapping("/create")
+    @PostMapping("/cards/create")
+    @PreAuthorize("@cardAuthorization.canCreate(authentication.principal.id(), #body.accountId)")
     public CardResponseDto create(@Valid @RequestBody CreateCardDto body) {
         Card card = createCardUseCase.execute(body);
+        return dtoHelper.toCardDto(card);
+    }
+
+    @GetMapping("/accounts/{id}/cards")
+    @PreAuthorize("@cardAuthorization.canViewAll(authentication.principal.id(), #id)")
+    public List<CardResponseDto> getCardsByAccount(@PathVariable UUID id) {
+        List<Card> card = getAccountCardsUseCase.execute(id);
+        return card.stream().map(dtoHelper::toCardDto).toList();
+    }
+
+    /**
+     * Retrieves a single card by its identifier.
+     *
+     * Endpoint: GET /card/list/{id}
+     *
+     * @param id the unique identifier of the card to retrieve
+     * @return the matching card entity
+     */
+    @GetMapping("/accounts/{id}/cards/{cardId}")
+    @PreAuthorize("@cardAuthorization.canView(authentication.principal.id(), #id, #cardId)")
+    public CardResponseDto find(@PathVariable UUID id, @PathVariable UUID cardId) {
+        Card card = getCardUseCase.execute(cardId);
         return dtoHelper.toCardDto(card);
     }
 
@@ -124,9 +134,10 @@ public class CardController {
      * @param body the card update payload
      * @return the updated card entity
      */
-    @PatchMapping("/edit/{id}")
-    public CardResponseDto edit(@PathVariable UUID id, @RequestBody EditCardDto body) {
-        Card card = editCardUseCase.execute(id, body);
+    @PatchMapping("/accounts/{id}/cards/{cardId}/edit")
+    @PreAuthorize("@cardAuthorization.canEdit(authentication.principal.id(), #id)")
+    public CardResponseDto edit(@PathVariable UUID id, @PathVariable UUID cardId, @RequestBody EditCardDto body) {
+        Card card = editCardUseCase.execute(cardId, body);
         return dtoHelper.toCardDto(card);
     }
 
@@ -138,8 +149,9 @@ public class CardController {
      * @param user the authenticated user making the request
      * @param id   the unique identifier of the card to delete
      */
-    @PostMapping("/delete/{id}")
-    public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID id) {
-        deleteCardUseCase.execute(user, id);
+    @PostMapping("/accounts/{id}/cards/{cardId}/delete")
+    @PreAuthorize("@cardAuthorization.canDelete(authentication.principal.id(), #id)")
+    public void delete(@PathVariable UUID id, @PathVariable UUID cardId) {
+        deleteCardUseCase.execute(cardId);
     }
 }

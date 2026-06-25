@@ -5,7 +5,6 @@ import java.util.Optional;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.jexis.jexis_backend.auth.application.dto.AuthUser;
 import com.jexis.jexis_backend.common.logging.AsyncLogger;
 import com.jexis.jexis_backend.auth.application.dto.LoginDto;
 import com.jexis.jexis_backend.auth.application.dto.LoginResult;
@@ -68,11 +67,12 @@ public class LoginUseCase {
         }
 
         TokenPair tokens = jwtUtil.generateTokens(user.get().getId(), user.get().getFirstName(), user.get().getEmail(),
-                user.get().getIsActivated());
+                user.get().getIsActivated(), user.get().getRoles());
 
         UserResponseDto userResponse = new UserResponseDto(user.get().getId(), user.get().getFirstName(),
                 user.get().getLastName(), user.get().getEmail(),
-                user.get().getPhoneNumber(), user.get().getIsActivated(), user.get().getCreatedAt(),
+                user.get().getPhoneNumber(), user.get().getRoles(), user.get().getIsActivated(),
+                user.get().getCreatedAt(),
                 user.get().getUpdatedAt());
 
         logger.info("AUTH", "Login succeeded for user: " + user.get().getEmail());

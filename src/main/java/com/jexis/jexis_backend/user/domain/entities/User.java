@@ -1,10 +1,13 @@
 package com.jexis.jexis_backend.user.domain.entities;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import com.jexis.jexis_backend.user.domain.enums.UserRole;
 
 import jakarta.persistence.*;
 
@@ -41,6 +44,9 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false)
+    private List<UserRole> roles;
+
     private Boolean isActivated = false;
 
     @Column(nullable = false)
@@ -58,13 +64,15 @@ public class User {
     public User() {
     }
 
-    public User(String firstName, String lastName, String email, String phoneNumber, String password) {
+    public User(String firstName, String lastName, String email, String phoneNumber, String password,
+            List<UserRole> roles) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.password = password;
         this.isActivated = false;
+        this.roles = roles;
     }
 
     public UUID getId() {
@@ -89,6 +97,10 @@ public class User {
 
     public String getPassword() {
         return password;
+    }
+
+    public List<UserRole> getRoles() {
+        return roles;
     }
 
     public Boolean getIsActivated() {
@@ -125,6 +137,10 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public void setRoles(List<UserRole> roles) {
+        this.roles = roles;
     }
 
     public void setIsActivated(Boolean isActivated) {

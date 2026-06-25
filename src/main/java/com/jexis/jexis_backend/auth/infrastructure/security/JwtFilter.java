@@ -11,6 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.jexis.jexis_backend.auth.application.dto.AuthUser;
+import com.jexis.jexis_backend.user.domain.enums.UserRole;
 
 import io.jsonwebtoken.Claims;
 
@@ -53,8 +54,12 @@ public class JwtFilter extends OncePerRequestFilter {
                     String name = claims.get("name", String.class);
                     String email = claims.get("email", String.class);
                     Boolean isActivated = claims.get("isActivated", Boolean.class);
+                    List<?> rolesNames = claims.get("roles", List.class);
+                    List<UserRole> roles = rolesNames.stream()
+                            .map(role -> UserRole.valueOf(role.toString()))
+                            .toList();
 
-                    AuthUser user = new AuthUser(id, name, email, isActivated);
+                    AuthUser user = new AuthUser(id, name, email, isActivated, roles);
 
                     var auth = new UsernamePasswordAuthenticationToken(
                             user, null, List.of());

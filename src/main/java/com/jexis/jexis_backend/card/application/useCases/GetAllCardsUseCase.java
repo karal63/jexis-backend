@@ -1,6 +1,7 @@
 package com.jexis.jexis_backend.card.application.useCases;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 

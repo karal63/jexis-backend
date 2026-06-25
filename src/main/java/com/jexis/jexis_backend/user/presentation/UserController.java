@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
+import com.jexis.jexis_backend.user.application.dto.AdminCreateDto;
 import com.jexis.jexis_backend.user.application.dto.CreateDto;
 import com.jexis.jexis_backend.user.application.dto.EditDto;
 import com.jexis.jexis_backend.user.application.dto.UserResponseDto;
@@ -41,7 +43,7 @@ import com.jexis.jexis_backend.user.domain.entities.User;
  * Author: Leo
  */
 @RestController
-@RequestMapping("/user")
+@RequestMapping("")
 public class UserController {
 
     GetUsersUseCase getUsersUseCase;
@@ -72,7 +74,8 @@ public class UserController {
      *
      * @return list of all accounts
      */
-    @GetMapping("/list")
+    @GetMapping("/admin/users")
+    @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
     public List<UserResponseDto> getUsers() {
         return getUsersUseCase.execute().stream().map(dtoHelper::toUserDto).toList();
     }
@@ -85,7 +88,8 @@ public class UserController {
      * @param id the unique identifier of the user to retrieve
      * @return the matching user entity
      */
-    @GetMapping("/list/{id}")
+    @GetMapping("/admin/users/{id}")
+    @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
     public UserResponseDto getUser(@PathVariable UUID id) {
         return dtoHelper.toUserDto(getUserUseCase.execute(id));
     }
@@ -98,9 +102,12 @@ public class UserController {
      * @param createDto the request payload containing user creation details
      * @return the newly created user entity
      */
-    @PostMapping("/create")
-    public UserResponseDto createUsers(@RequestBody CreateDto createDto) {
-        return dtoHelper.toUserDto(createUserUseCase.execute(createDto));
+    @PostMapping("/admin/users/create")
+    @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
+    public UserResponseDto createUsers(@RequestBody AdminCreateDto body) {
+        CreateDto dto = new CreateDto(body.getFirstName(), body.getLastName(), body.getEmail(), body.getPhoneNumber(),
+                body.getPassword());
+        return dtoHelper.toUserDto(createUserUseCase.execute(dto, body.getRoles()));
     }
 
     /**
@@ -111,7 +118,8 @@ public class UserController {
      * @param id the unique identifier of the user to delete
      * @return a confirmation message after successful deletion
      */
-    @DeleteMapping("/delete/{id}")
+    @PostMapping("/users/{id}/delete")
+    @PreAuthorize("@userAuthorization.canDelete(authentication.principal.id(), #id)")
     public String deleteUser(@PathVariable UUID id) {
         deleteUserUseCase.execute(id);
         return "User deleted successfully";
@@ -126,7 +134,8 @@ public class UserController {
      * @param id      the unique identifier of the user to update
      * @return an optional updated user entity
      */
-    @PatchMapping("/edit/{id}")
+    @PatchMapping("/users/{id}/edit")
+    @PreAuthorize("@userAuthorization.canEdit(authentication.principal.id(), #id)")
     public UserResponseDto editUser(@RequestBody EditDto editDto, @PathVariable UUID id) {
         return dtoHelper.toUserDto(editUserUseCase.execute(id, editDto));
     }

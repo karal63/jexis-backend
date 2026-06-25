@@ -1,9 +1,9 @@
 package com.jexis.jexis_backend.account.presentation;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,11 +20,16 @@ import com.jexis.jexis_backend.account.application.useCases.DeleteAccountUseCase
 import com.jexis.jexis_backend.account.application.useCases.EditAccountUseCase;
 import com.jexis.jexis_backend.account.application.useCases.GetAccountUseCase;
 import com.jexis.jexis_backend.account.application.useCases.GetAccountsUseCase;
+import com.jexis.jexis_backend.account.application.useCases.GetUserAccountsUseCase;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.auth.application.dto.AuthUser;
+import com.jexis.jexis_backend.card.application.useCases.GetAccountCardsUseCase;
+import com.jexis.jexis_backend.cardholder.application.useCases.GetAccountCardHoldersUseCase;
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
+import com.jexis.jexis_backend.member.application.useCases.GetAccountMembersUseCase;
 import com.jexis.jexis_backend.user.application.useCases.GetUserUseCase;
 import com.jexis.jexis_backend.user.domain.entities.User;
+import com.jexis.jexis_backend.wallet.application.useCases.GetAccountWalletsUseCase;
 
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -45,7 +50,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * Author: Leo
  */
 @RestController
-@RequestMapping("/account")
+@RequestMapping("/")
 public class AccountController {
     private final CreateAccountUseCase createAccountUseCase;
     private final DeleteAccountUseCase deleteAccountUseCase;
@@ -54,6 +59,7 @@ public class AccountController {
     private final EditAccountUseCase editAccountUseCase;
     private final GetUserUseCase getUserUseCase;
     private final DtoHelper dtoHelper;
+    private final GetUserAccountsUseCase getUserAccountsUseCase;
 
     public AccountController(
             CreateAccountUseCase createAccount,
@@ -61,7 +67,12 @@ public class AccountController {
             GetAccountsUseCase getAccounts,
             GetAccountUseCase getAccount,
             EditAccountUseCase editAccount, GetUserUseCase getUserUseCase,
-            DtoHelper dtoHelper) {
+            DtoHelper dtoHelper,
+            GetAccountCardsUseCase getAccountCardsUseCase,
+            GetAccountCardHoldersUseCase getAccountCardHoldersUseCase,
+            GetAccountMembersUseCase getAccountMembersUseCase,
+            GetAccountWalletsUseCase getAccountWalletsUseCase,
+            GetUserAccountsUseCase getUserAccountsUseCase) {
         this.createAccountUseCase = createAccount;
         this.deleteAccountUseCase = deleteAccount;
         this.getAccountsUseCase = getAccounts;
@@ -69,6 +80,7 @@ public class AccountController {
         this.editAccountUseCase = editAccount;
         this.getUserUseCase = getUserUseCase;
         this.dtoHelper = dtoHelper;
+        this.getUserAccountsUseCase = getUserAccountsUseCase;
     }
 
     /**
@@ -77,13 +89,25 @@ public class AccountController {
      * This endpoint retrieves all existing accounts by delegating to the
      * getAccountsUseCase, which interacts with the repository to fetch the data.
      *
-     * Endpoint: GET /account/list
+     * Endpoint: GET /admin/accounts
      *
      * @return list of all accounts
      */
-    @GetMapping("/list")
+
+    @GetMapping("/admin/accounts")
+    @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
     public List<AccountResponseDto> getAll() {
         List<Account> accounts = getAccountsUseCase.execute();
+        return accounts
+                .stream()
+                .map(dtoHelper::toAccountDto)
+                .toList();
+    }
+
+    @GetMapping("/users/{id}/accounts")
+    @PreAuthorize("@accountAuthorization.canViewAll(authentication.principal.id(), #id)")
+    public List<AccountResponseDto> getUserAccounts(@PathVariable UUID id) {
+        List<Account> accounts = getUserAccountsUseCase.execute(id);
         return accounts
                 .stream()
                 .map(dtoHelper::toAccountDto)
@@ -101,9 +125,10 @@ public class AccountController {
      * @param id the ID of the account to retrieve
      * @return the account with the specified ID
      */
-    @GetMapping("/{id}")
-    public AccountResponseDto get(@PathVariable UUID id) {
-        Account account = getAccountUseCase.execute(id);
+    @GetMapping("/users/{id}/accounts/{accountId}")
+    @PreAuthorize("@accountAuthorization.canView(authentication.principal.id(), #accountId)")
+    public AccountResponseDto get(@PathVariable UUID accountId) {
+        Account account = getAccountUseCase.execute(accountId);
         return dtoHelper.toAccountDto(account);
     }
 
@@ -118,11 +143,10 @@ public class AccountController {
      * @param body request payload containing account creation data
      * @return the newly created account
      */
-    @PostMapping("/create")
+    @PostMapping("/accounts/create")
     public AccountResponseDto create(@AuthenticationPrincipal AuthUser user) {
         User foundUser = getUserUseCase.execute(user.id());
         return createAccountUseCase.execute(foundUser);
-
     }
 
     /**
@@ -136,10 +160,11 @@ public class AccountController {
      * @param id the ID of the account to delete
      * @return message confirming deletion of the account with the specified ID
      */
-    @DeleteMapping("/delete/{id}")
-    public String delete(@PathVariable UUID id) {
-        deleteAccountUseCase.execute(id);
-        return "Account with ID " + id + " has been deleted.";
+    @DeleteMapping("/users/{id}/accounts/{accountId}/delete")
+    @PreAuthorize("@accountAuthorization.canDelete(authentication.principal.id(), #accountId)")
+    public String delete(@PathVariable UUID accountId) {
+        deleteAccountUseCase.execute(accountId);
+        return "Account with ID " + accountId + " has been deleted.";
     }
 
     /**
@@ -154,8 +179,10 @@ public class AccountController {
      * @param body payload with updated values for the account
      * @return retuers updated account
      */
-    @PatchMapping("/edit/{id}")
-    public AccountResponseDto edit(@PathVariable UUID id, @RequestBody EditAccountDto body) {
-        return editAccountUseCase.execute(id, body);
+    @PatchMapping("/users/{id}/accounts/{accountId}/edit")
+    @PreAuthorize("@accountAuthorization.canEdit(authentication.principal.id(), #accountId)")
+    public AccountResponseDto edit(@PathVariable UUID accountId, @RequestBody EditAccountDto body) {
+        return editAccountUseCase.execute(accountId, body);
     }
+
 }

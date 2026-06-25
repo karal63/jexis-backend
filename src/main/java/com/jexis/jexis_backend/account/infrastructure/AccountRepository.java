@@ -1,5 +1,6 @@
 package com.jexis.jexis_backend.account.infrastructure;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -10,4 +11,6 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     Optional<Account> findByName(String name);
 
     Optional<Account> findByEmail(String email);
+
+    List<Account> findAllByOwnerId(UUID ownerId);
 }
