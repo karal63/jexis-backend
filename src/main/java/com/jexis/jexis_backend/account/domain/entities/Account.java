@@ -125,4 +125,12 @@ public class Account {
     public void setOwner(User owner) {
         this.owner = owner;
     }
+
+    public void setIsDeleted(boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
+    }
 }
