@@ -9,6 +9,7 @@ import com.jexis.jexis_backend.common.logging.AsyncLogger;
 import com.jexis.jexis_backend.auth.application.dto.LoginDto;
 import com.jexis.jexis_backend.auth.application.dto.LoginResult;
 import com.jexis.jexis_backend.auth.application.dto.TokenPair;
+import com.jexis.jexis_backend.auth.domain.exception.WrongEmailOrPasswordException;
 import com.jexis.jexis_backend.auth.infrastructure.security.JwtUtil;
 import com.jexis.jexis_backend.user.application.dto.UserResponseDto;
 import com.jexis.jexis_backend.user.domain.entities.User;
@@ -39,7 +40,7 @@ public class LoginUseCase {
         this.logger = logger;
     }
 
-    /*
+    /**
      * Logs user in
      *
      * Accepts a {@link LoginDto} payload from controller, looks for
@@ -49,33 +50,28 @@ public class LoginUseCase {
      * @param body the login data transfer object containing email and password
      * 
      * @return a {@link LoginResult} containing the authenticated user and token
-     * pair
+     *         pair
      */
     public LoginResult execute(LoginDto body) {
         logger.info("AUTH", "Login attempt for email: " + body.email());
 
-        Optional<User> user = userRepo.findByEmail(body.email());
+        User user = userRepo.findByEmail(body.email()).orElseThrow(() -> new WrongEmailOrPasswordException());
 
-        if (!user.isPresent()) {
-            logger.info("AUTH", "Login failed: user not found for email " + body.email());
-            throw new UserNotFoundException();
-        }
-
-        if (!argon.matches(body.password(), user.get().getPassword())) {
+        if (!argon.matches(body.password(), user.getPassword())) {
             logger.info("AUTH", "Login failed: invalid password for email " + body.email());
-            throw new UserNotFoundException();
+            throw new WrongEmailOrPasswordException();
         }
 
-        TokenPair tokens = jwtUtil.generateTokens(user.get().getId(), user.get().getFirstName(), user.get().getEmail(),
-                user.get().getIsActivated(), user.get().getRoles());
+        TokenPair tokens = jwtUtil.generateTokens(user.getId(), user.getFirstName(), user.getEmail(),
+                user.getIsActivated(), user.getRoles());
 
-        UserResponseDto userResponse = new UserResponseDto(user.get().getId(), user.get().getFirstName(),
-                user.get().getLastName(), user.get().getEmail(),
-                user.get().getPhoneNumber(), user.get().getRoles(), user.get().getIsActivated(),
-                user.get().getCreatedAt(),
-                user.get().getUpdatedAt());
+        UserResponseDto userResponse = new UserResponseDto(user.getId(), user.getFirstName(),
+                user.getLastName(), user.getEmail(),
+                user.getPhoneNumber(), user.getRoles(), user.getIsActivated(),
+                user.getCreatedAt(),
+                user.getUpdatedAt());
 
-        logger.info("AUTH", "Login succeeded for user: " + user.get().getEmail());
+        logger.info("AUTH", "Login succeeded for user: " + user.getEmail());
         return new LoginResult(userResponse, tokens);
     }
 }
