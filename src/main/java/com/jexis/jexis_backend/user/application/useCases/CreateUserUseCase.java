@@ -11,6 +11,7 @@ import com.jexis.jexis_backend.user.application.dto.CreateDto;
 import com.jexis.jexis_backend.user.domain.entities.User;
 import com.jexis.jexis_backend.user.domain.enums.UserRole;
 import com.jexis.jexis_backend.user.domain.exceptions.EmailExistsException;
+import com.jexis.jexis_backend.user.domain.exceptions.PhoneNumberExistsException;
 import com.jexis.jexis_backend.user.infrastructure.UserRepository;
 
 /**
@@ -47,10 +48,18 @@ public class CreateUserUseCase {
     public User execute(CreateDto body, List<UserRole> roles) {
         logger.info("USER", "Creating user for email: " + body.getEmail());
 
-        Optional<User> existingUser = repo.findByEmail(body.getEmail());
+        Optional<User> existingUser = repo.findByEmailOrPhoneNumber(body.getEmail(), body.getPhoneNumber());
 
         if (existingUser.isPresent()) {
-            logger.info("USER", "User creation failed: email already exists " + body.getEmail());
+            if (existingUser.get().getEmail().equals(body.getEmail())) {
+                throw new EmailExistsException();
+            } else if (existingUser.get().getPhoneNumber().equals(body.getPhoneNumber())) {
+                throw new PhoneNumberExistsException();
+            }
+        }
+
+        if (existingUser.isPresent()) {
+            logger.info("USER", "User creation failed: email or phoneNumber already exists " + body.getEmail());
             throw new EmailExistsException();
         }
 
