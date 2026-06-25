@@ -1,9 +1,11 @@
 package com.jexis.jexis_backend.user.application.useCases;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.jexis.jexis_backend.user.domain.entities.User;
 import com.jexis.jexis_backend.user.domain.exceptions.UserNotFoundException;
 import com.jexis.jexis_backend.user.infrastructure.UserRepository;
 
@@ -37,9 +39,10 @@ public class DeleteUserUseCase {
      * 
      */
     public void execute(UUID id) {
-        if (!repo.existsById(id)) {
-            throw new UserNotFoundException();
-        }
-        repo.deleteById(id);
+        User user = repo.findById(id).orElseThrow(() -> new UserNotFoundException());
+        user.setIsDeleted(true);
+        user.setDeletedAt(LocalDateTime.now());
+
+        repo.save(user);
     }
 }

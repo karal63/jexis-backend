@@ -1,6 +1,6 @@
 package com.jexis.jexis_backend.card.application.useCases;
 
-import java.util.Optional;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ public class DeleteCardUseCase {
         this.repo = repo;
     }
 
-    /*
+    /**
      * Deletes an existing card
      *
      * Accepts a {@link DeleteDto} payload from controller, validates the user's
@@ -36,11 +36,11 @@ public class DeleteCardUseCase {
      * @param user the owner of the card and the id of the card to be deleted
      */
     public void execute(UUID cardId) {
-        Optional<Card> card = repo.findById(cardId);
-        if (card.isEmpty()) {
-            throw new CardNotFoundException();
-        }
+        Card card = repo.findById(cardId).orElseThrow(() -> new CardNotFoundException());
 
-        repo.delete(card.get());
+        card.setIsDeleted(true);
+        card.setDeletedAt(LocalDateTime.now());
+
+        repo.save(card);
     }
 }

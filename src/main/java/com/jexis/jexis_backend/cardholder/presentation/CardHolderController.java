@@ -91,7 +91,7 @@ public class CardHolderController {
 
     @PostMapping("/accounts/{id}/card-holders/{cardHolderId}/delete")
     @PreAuthorize("@cardHolderAuthorization.canDelete(authentication.principal.id(), #id)")
-    public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID id, @PathVariable UUID cardHolderId) {
-        deleteCardHolderUseCase.execute(user, cardHolderId);
+    public void delete(@PathVariable UUID id, @PathVariable UUID cardHolderId) {
+        deleteCardHolderUseCase.execute(cardHolderId);
     }
 }

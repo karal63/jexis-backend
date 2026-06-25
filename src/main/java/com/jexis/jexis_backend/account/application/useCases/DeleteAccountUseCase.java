@@ -1,6 +1,6 @@
 package com.jexis.jexis_backend.account.application.useCases;
 
-import java.util.Optional;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -37,11 +37,11 @@ public class DeleteAccountUseCase {
      * @param body passed by controller payload containing account creation data
      */
     public void execute(UUID id) {
-        Optional<Account> existingAccount = repo.findById(id);
-        if (existingAccount.isEmpty()) {
-            throw new AccountNotFoundException(id);
-        }
+        Account existingAccount = repo.findById(id).orElseThrow(() -> new AccountNotFoundException(id));
 
-        repo.deleteById(id);
+        existingAccount.setIsDeleted(true);
+        existingAccount.setDeletedAt(LocalDateTime.now());
+
+        repo.save(existingAccount);
     }
 }

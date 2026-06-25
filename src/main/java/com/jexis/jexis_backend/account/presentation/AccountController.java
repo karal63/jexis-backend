@@ -162,7 +162,7 @@ public class AccountController {
      */
     @DeleteMapping("/users/{id}/accounts/{accountId}/delete")
     @PreAuthorize("@accountAuthorization.canDelete(authentication.principal.id(), #accountId)")
-    public String delete(@PathVariable UUID accountId) {
+    public String delete(@PathVariable UUID id, @PathVariable UUID accountId) {
         deleteAccountUseCase.execute(accountId);
         return "Account with ID " + accountId + " has been deleted.";
     }
