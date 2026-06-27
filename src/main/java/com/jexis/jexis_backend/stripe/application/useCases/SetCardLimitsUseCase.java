@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import com.jexis.jexis_backend.card.domain.entities.SpendingLimit;
 import com.jexis.jexis_backend.card.domain.enums.SpendingInterval;
 import com.stripe.StripeClient;
-import com.stripe.model.Account;
 import com.stripe.model.issuing.Card;
 import com.stripe.net.RequestOptions;
 import com.stripe.param.issuing.CardUpdateParams;
