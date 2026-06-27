@@ -3,10 +3,10 @@ package com.jexis.jexis_backend.card.domain.entities;
 import com.jexis.jexis_backend.card.domain.enums.SpendingInterval;
 
 public class SpendingLimit {
-    private int amount;
+    private Long amount;
     private SpendingInterval interval;
 
-    public int getAmount() {
+    public Long getAmount() {
         return amount;
     }
 

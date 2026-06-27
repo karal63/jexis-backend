@@ -10,6 +10,7 @@ import com.jexis.jexis_backend.card.domain.entities.Card;
 import com.jexis.jexis_backend.card.domain.exceptions.CardNotFoundException;
 import com.jexis.jexis_backend.card.infrastructure.CardRepository;
 import com.jexis.jexis_backend.cardholder.application.useCases.GetCardHolderUseCase;
+import com.jexis.jexis_backend.stripe.application.useCases.SetCardLimitsUseCase;
 
 /**
  * EditCardUseCase
@@ -24,20 +25,23 @@ import com.jexis.jexis_backend.cardholder.application.useCases.GetCardHolderUseC
 public class EditCardUseCase {
     private final CardRepository repo;
     private final GetCardHolderUseCase getCardHolderUseCase;
+    private final SetCardLimitsUseCase setCardLimitsUseCase;
 
-    public EditCardUseCase(CardRepository repo, GetCardHolderUseCase getCardHolderUseCase) {
+    public EditCardUseCase(CardRepository repo, GetCardHolderUseCase getCardHolderUseCase,
+            SetCardLimitsUseCase setCardLimitsUseCase) {
         this.repo = repo;
         this.getCardHolderUseCase = getCardHolderUseCase;
+        this.setCardLimitsUseCase = setCardLimitsUseCase;
     }
 
-    /*
+    /**
      * Edits an existing card
      *
      * Accepts a {@link EditCardDto} payload from controller, updates the card,
      * and returns the updated card.
      *
      * @param id the id of the card to be edited and the new card details such as
-     * last4, status, limit, brand, type, currency, and expYear
+     *           last4, status, limit, brand, type, currency, and expYear
      * 
      * @return the updated card entity
      */
@@ -49,7 +53,11 @@ public class EditCardUseCase {
         }
 
         if (dto.spendingLimits() != null) {
+            System.out.println(card.getCardHolder().getAccount().getConnectAccountId());
+            System.out.println(card.getStripeCardId());
             card.setSpendingLimits(dto.spendingLimits());
+            setCardLimitsUseCase.execute(card.getCardHolder().getAccount().getConnectAccountId(),
+                    card.getStripeCardId(), dto.spendingLimits());
         }
 
         Card saved = repo.save(card);
