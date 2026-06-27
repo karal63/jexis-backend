@@ -2,17 +2,23 @@ package com.jexis.jexis_backend.card.domain.entities;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
+import com.jexis.jexis_backend.card.domain.enums.CardStatus;
 import com.jexis.jexis_backend.cardholder.domain.entities.CardHolder;
 import com.jexis.jexis_backend.user.domain.entities.User;
 import com.jexis.jexis_backend.wallet.domain.entities.Wallet;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -57,10 +63,14 @@ public class Card {
     private String last4;
 
     @Column(nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private CardStatus status;
 
-    @Column(name = "limit_amount")
-    private BigDecimal limit;
+    // addded this
+    // try logging result from request
+    @Column(name = "spending_limits", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private List<SpendingLimit> spendingLimits;
 
     @Column(nullable = false)
     private String brand;
@@ -90,7 +100,7 @@ public class Card {
     }
 
     public Card(String stripeCardId, CardHolder cardHolder, Wallet treasuryAccount, User user, String last4,
-            String status,
+            CardStatus status,
             String brand, String type, String currency, Long expYear) {
         this.stripeCardId = stripeCardId;
         this.cardHolder = cardHolder;
@@ -120,12 +130,12 @@ public class Card {
         return last4;
     }
 
-    public String getStatus() {
+    public CardStatus getStatus() {
         return status;
     }
 
-    public BigDecimal getLimit() {
-        return limit;
+    public List<SpendingLimit> getSpendingLimits() {
+        return spendingLimits;
     }
 
     public String getStripeCardId() {
@@ -156,12 +166,12 @@ public class Card {
         this.last4 = last4;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(CardStatus status) {
         this.status = status;
     }
 
-    public void setLimit(BigDecimal limit) {
-        this.limit = limit;
+    public void setSpendingLimits(List<SpendingLimit> spendingLimits) {
+        this.spendingLimits = spendingLimits;
     }
 
     public String getBrand() {

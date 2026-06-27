@@ -42,39 +42,18 @@ public class EditCardUseCase {
      * @return the updated card entity
      */
     public Card execute(UUID id, EditCardDto dto) {
-        Optional<Card> card = repo.findById(id);
-        if (card.isEmpty()) {
-            throw new CardNotFoundException();
+        Card card = repo.findById(id).orElseThrow(() -> new CardNotFoundException());
+
+        if (dto.status() != null) {
+            card.setStatus(dto.status());
         }
 
-        card.ifPresent(foundCard -> {
-            if (dto.getLast4() != null) {
-                foundCard.setLast4(dto.getLast4());
-            }
-            if (dto.getStatus() != null) {
-                foundCard.setStatus(dto.getStatus());
-            }
-            if (dto.getLimit() != null) {
-                foundCard.setLimit(dto.getLimit());
-            }
-            if (dto.getCardHolderId() != null) {
-                foundCard.setCardHolder(getCardHolderUseCase.execute(dto.getCardHolderId()));
-            }
-            if (dto.getBrand() != null) {
-                foundCard.setBrand(dto.getBrand());
-            }
-            if (dto.getType() != null) {
-                foundCard.setType(dto.getType());
-            }
-            if (dto.getCurrency() != null) {
-                foundCard.setCurrency(dto.getCurrency());
-            }
-            if (dto.getExpYear() != null) {
-                foundCard.setExpYear(dto.getExpYear());
-            }
-            repo.save(foundCard);
-        });
+        if (dto.spendingLimits() != null) {
+            card.setSpendingLimits(dto.spendingLimits());
+        }
 
-        return card.get();
+        Card saved = repo.save(card);
+
+        return saved;
     }
 }

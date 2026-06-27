@@ -75,7 +75,7 @@ public class DtoHelper {
                 toUserDto(card.getUser()),
                 card.getLast4(),
                 card.getStatus(),
-                card.getLimit(),
+                card.getSpendingLimits(),
                 card.getBrand(),
                 card.getType(),
                 card.getCurrency(),
