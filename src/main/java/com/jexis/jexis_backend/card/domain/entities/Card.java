@@ -12,6 +12,7 @@ import org.hibernate.type.SqlTypes;
 
 import com.jexis.jexis_backend.card.domain.enums.CardStatus;
 import com.jexis.jexis_backend.cardholder.domain.entities.CardHolder;
+import com.jexis.jexis_backend.common.dto.SpendingLimit;
 import com.jexis.jexis_backend.user.domain.entities.User;
 import com.jexis.jexis_backend.wallet.domain.entities.Wallet;
 
@@ -66,8 +67,6 @@ public class Card {
     @Enumerated(EnumType.STRING)
     private CardStatus status;
 
-    // addded this
-    // try logging result from request
     @Column(name = "spending_limits", columnDefinition = "jsonb")
     @JdbcTypeCode(SqlTypes.JSON)
     private List<SpendingLimit> spendingLimits;

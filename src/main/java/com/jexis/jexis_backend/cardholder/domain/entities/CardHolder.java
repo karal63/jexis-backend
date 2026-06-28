@@ -1,16 +1,24 @@
 package com.jexis.jexis_backend.cardholder.domain.entities;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import com.jexis.jexis_backend.account.domain.entities.Account;
+import com.jexis.jexis_backend.card.domain.enums.CardStatus;
+import com.jexis.jexis_backend.cardholder.domain.enums.CardHolderStatus;
+import com.jexis.jexis_backend.common.dto.SpendingLimit;
 import com.jexis.jexis_backend.user.domain.entities.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -40,19 +48,29 @@ public class CardHolder {
     private String name;
 
     @Column(nullable = false)
-    private String addressLine1;
+    private String billingAddressLine1;
+
+    private String billingAddressLine2;
 
     @Column(nullable = false)
-    private String city;
+    private String billingCity;
 
     @Column(nullable = false)
-    private String state;
+    private String billingState;
 
     @Column(nullable = false)
-    private String country;
+    private String billingCountry;
 
     @Column(nullable = false)
-    private String postalCode;
+    private String billingPostalCode;
+
+    @Column(name = "spending_limits", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private List<SpendingLimit> spendingLimits;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private CardHolderStatus status;
 
     @Column(nullable = false)
     @CreationTimestamp
@@ -75,15 +93,27 @@ public class CardHolder {
         this.account = account;
         this.user = user;
         this.name = name;
-        this.addressLine1 = addressLine1;
-        this.city = city;
-        this.state = state;
-        this.country = country;
-        this.postalCode = postalCode;
+        this.billingAddressLine1 = addressLine1;
+        this.billingCity = city;
+        this.billingState = state;
+        this.billingCountry = country;
+        this.billingPostalCode = postalCode;
     }
 
     public UUID getId() {
         return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getStripeCardHolderId() {
+        return stripeCardHolderId;
+    }
+
+    public void setStripeCardHolderId(String stripeCardHolderId) {
+        this.stripeCardHolderId = stripeCardHolderId;
     }
 
     public Account getAccount() {
@@ -94,6 +124,14 @@ public class CardHolder {
         this.account = account;
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     public String getName() {
         return name;
     }
@@ -102,56 +140,84 @@ public class CardHolder {
         this.name = name;
     }
 
-    public String getAddressLine1() {
-        return addressLine1;
+    public String getBillingAddressLine1() {
+        return billingAddressLine1;
     }
 
-    public void setAddressLine1(String addressLine1) {
-        this.addressLine1 = addressLine1;
+    public void setBillingAddressLine1(String billingAddressLine1) {
+        this.billingAddressLine1 = billingAddressLine1;
     }
 
-    public void setStripeCardHolderId(String stripeCardHolderId) {
-        this.stripeCardHolderId = stripeCardHolderId;
+    public String getBillingAddressLine2() {
+        return billingAddressLine2;
     }
 
-    public String getCity() {
-        return city;
+    public void setBillingAddressLine2(String billingAddressLine2) {
+        this.billingAddressLine2 = billingAddressLine2;
     }
 
-    public void setCity(String city) {
-        this.city = city;
+    public String getBillingCity() {
+        return billingCity;
     }
 
-    public String getState() {
-        return state;
+    public void setBillingCity(String billingCity) {
+        this.billingCity = billingCity;
     }
 
-    public void setState(String state) {
-        this.state = state;
+    public String getBillingState() {
+        return billingState;
     }
 
-    public String getCountry() {
-        return country;
+    public void setBillingState(String billingState) {
+        this.billingState = billingState;
     }
 
-    public void setCountry(String country) {
-        this.country = country;
+    public String getBillingCountry() {
+        return billingCountry;
     }
 
-    public String getPostalCode() {
-        return postalCode;
+    public void setBillingCountry(String billingCountry) {
+        this.billingCountry = billingCountry;
     }
 
-    public void setPostalCode(String postalCode) {
-        this.postalCode = postalCode;
+    public String getBillingPostalCode() {
+        return billingPostalCode;
+    }
+
+    public void setBillingPostalCode(String billingPostalCode) {
+        this.billingPostalCode = billingPostalCode;
+    }
+
+    public List<SpendingLimit> getSpendingLimits() {
+        return spendingLimits;
+    }
+
+    public void setSpendingLimits(List<SpendingLimit> spendingLimits) {
+        this.spendingLimits = spendingLimits;
+    }
+
+    public CardHolderStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(CardHolderStatus status) {
+        this.status = status;
     }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public Boolean getIsDeleted() {
@@ -168,17 +234,5 @@ public class CardHolder {
 
     public void setDeletedAt(LocalDateTime deletedAt) {
         this.deletedAt = deletedAt;
-    }
-
-    public String getStripeCardHolderId() {
-        return stripeCardHolderId;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public User getUser() {
-        return user;
     }
 }

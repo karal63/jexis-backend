@@ -19,33 +19,40 @@ public class EditCardHolderUseCase {
     }
 
     public CardHolder execute(UUID id, EditCardHolderDto dto) {
-        Optional<CardHolder> cardHolder = repo.findById(id);
-        if (cardHolder.isEmpty()) {
-            throw new CardHolderNotFoundException();
+        CardHolder cardHolder = repo.findById(id).orElseThrow(
+                () -> new CardHolderNotFoundException());
+
+        // Billing address
+        if (dto.billingAddress().line1() != null) {
+            cardHolder.setBillingAddressLine1(dto.billingAddress().line1());
+        }
+        if (dto.billingAddress().line2() != null) {
+            cardHolder.setBillingAddressLine2(dto.billingAddress().line2());
+        }
+        if (dto.billingAddress().city() != null) {
+            cardHolder.setBillingCity(dto.billingAddress().city());
+        }
+        if (dto.billingAddress().state() != null) {
+            cardHolder.setBillingState(dto.billingAddress().state());
+        }
+        if (dto.billingAddress().country() != null) {
+            cardHolder.setBillingCountry(dto.billingAddress().country());
+        }
+        if (dto.billingAddress().postalCode() != null) {
+            cardHolder.setBillingPostalCode(dto.billingAddress().postalCode());
         }
 
-        cardHolder.ifPresent(foundCardHolder -> {
-            if (dto.getName() != null) {
-                foundCardHolder.setName(dto.getName());
-            }
-            if (dto.getAddressLine1() != null) {
-                foundCardHolder.setAddressLine1(dto.getAddressLine1());
-            }
-            if (dto.getCity() != null) {
-                foundCardHolder.setCity(dto.getCity());
-            }
-            if (dto.getState() != null) {
-                foundCardHolder.setState(dto.getState());
-            }
-            if (dto.getCountry() != null) {
-                foundCardHolder.setCountry(dto.getCountry());
-            }
-            if (dto.getPostalCode() != null) {
-                foundCardHolder.setPostalCode(dto.getPostalCode());
-            }
-            repo.save(foundCardHolder);
-        });
+        // Spending controls
+        if (dto.spendingControlsDto().spendingLimits() != null) {
+            cardHolder.setSpendingLimits(dto.spendingControlsDto().spendingLimits());
+        }
 
-        return cardHolder.get();
+        if (dto.status() != null) {
+            cardHolder.setStatus(dto.status());
+        }
+
+        repo.save(cardHolder);
+
+        return cardHolder;
     }
 }
