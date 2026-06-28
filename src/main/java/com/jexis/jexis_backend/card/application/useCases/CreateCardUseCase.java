@@ -6,6 +6,7 @@ import com.jexis.jexis_backend.account.application.useCases.GetAccountUseCase;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.card.application.dto.CreateCardDto;
 import com.jexis.jexis_backend.card.domain.entities.Card;
+import com.jexis.jexis_backend.card.domain.enums.CardStatus;
 import com.jexis.jexis_backend.card.domain.exceptions.UserIsNotMemberException;
 import com.jexis.jexis_backend.stripe.application.useCases.CreateStripeCardUseCase;
 import com.jexis.jexis_backend.user.application.dto.CreateDto;
@@ -76,7 +77,7 @@ public class CreateCardUseCase {
                 connectAccount.getConnectAccountId());
 
         Card card = new Card(stripeCard.getId(), cardHolder, wallet, user, stripeCard.getLast4(),
-                stripeCard.getStatus(), stripeCard.getBrand(), stripeCard.getType(),
+                CardStatus.valueOf(stripeCard.getStatus()), stripeCard.getBrand(), stripeCard.getType(),
                 stripeCard.getCurrency(), stripeCard.getExpYear());
 
         Card saved = cardRepo.save(card);

@@ -10,6 +10,8 @@ import com.jexis.jexis_backend.card.domain.entities.Card;
 import com.jexis.jexis_backend.card.domain.exceptions.CardNotFoundException;
 import com.jexis.jexis_backend.card.infrastructure.CardRepository;
 import com.jexis.jexis_backend.cardholder.application.useCases.GetCardHolderUseCase;
+import com.jexis.jexis_backend.stripe.application.useCases.EditCardStatusUseCase;
+import com.jexis.jexis_backend.stripe.application.useCases.SetCardLimitsUseCase;
 
 /**
  * EditCardUseCase
@@ -24,57 +26,45 @@ import com.jexis.jexis_backend.cardholder.application.useCases.GetCardHolderUseC
 public class EditCardUseCase {
     private final CardRepository repo;
     private final GetCardHolderUseCase getCardHolderUseCase;
+    private final SetCardLimitsUseCase setCardLimitsUseCase;
+    private final EditCardStatusUseCase editCardStatusUseCase;
 
-    public EditCardUseCase(CardRepository repo, GetCardHolderUseCase getCardHolderUseCase) {
+    public EditCardUseCase(CardRepository repo, GetCardHolderUseCase getCardHolderUseCase,
+            SetCardLimitsUseCase setCardLimitsUseCase, EditCardStatusUseCase editCardStatusUseCase) {
         this.repo = repo;
         this.getCardHolderUseCase = getCardHolderUseCase;
+        this.setCardLimitsUseCase = setCardLimitsUseCase;
+        this.editCardStatusUseCase = editCardStatusUseCase;
     }
 
-    /*
+    /**
      * Edits an existing card
      *
      * Accepts a {@link EditCardDto} payload from controller, updates the card,
      * and returns the updated card.
      *
      * @param id the id of the card to be edited and the new card details such as
-     * last4, status, limit, brand, type, currency, and expYear
+     *           last4, status, limit, brand, type, currency, and expYear
      * 
      * @return the updated card entity
      */
     public Card execute(UUID id, EditCardDto dto) {
-        Optional<Card> card = repo.findById(id);
-        if (card.isEmpty()) {
-            throw new CardNotFoundException();
+        Card card = repo.findById(id).orElseThrow(() -> new CardNotFoundException());
+
+        if (dto.status() != null) {
+            editCardStatusUseCase.execute(card.getCardHolder().getAccount().getConnectAccountId(),
+                    card.getStripeCardId(), dto.status());
+            card.setStatus(dto.status());
         }
 
-        card.ifPresent(foundCard -> {
-            if (dto.getLast4() != null) {
-                foundCard.setLast4(dto.getLast4());
-            }
-            if (dto.getStatus() != null) {
-                foundCard.setStatus(dto.getStatus());
-            }
-            if (dto.getLimit() != null) {
-                foundCard.setLimit(dto.getLimit());
-            }
-            if (dto.getCardHolderId() != null) {
-                foundCard.setCardHolder(getCardHolderUseCase.execute(dto.getCardHolderId()));
-            }
-            if (dto.getBrand() != null) {
-                foundCard.setBrand(dto.getBrand());
-            }
-            if (dto.getType() != null) {
-                foundCard.setType(dto.getType());
-            }
-            if (dto.getCurrency() != null) {
-                foundCard.setCurrency(dto.getCurrency());
-            }
-            if (dto.getExpYear() != null) {
-                foundCard.setExpYear(dto.getExpYear());
-            }
-            repo.save(foundCard);
-        });
+        if (dto.spendingLimits() != null) {
+            setCardLimitsUseCase.execute(card.getCardHolder().getAccount().getConnectAccountId(),
+                    card.getStripeCardId(), dto.spendingLimits());
+            card.setSpendingLimits(dto.spendingLimits());
+        }
 
-        return card.get();
+        Card saved = repo.save(card);
+
+        return saved;
     }
 }
