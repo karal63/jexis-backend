@@ -2,8 +2,8 @@ package com.jexis.jexis_backend.card.application.dto;
 
 import java.util.List;
 
-import com.jexis.jexis_backend.card.domain.entities.SpendingLimit;
 import com.jexis.jexis_backend.card.domain.enums.CardStatus;
+import com.jexis.jexis_backend.common.dto.SpendingLimit;
 
 /**
  * EditCardDto
@@ -14,6 +14,6 @@ import com.jexis.jexis_backend.card.domain.enums.CardStatus;
  * Author: Leo
  */
 public record EditCardDto(
-                CardStatus status,
-                List<SpendingLimit> spendingLimits) {
+        CardStatus status,
+        List<SpendingLimit> spendingLimits) {
 }
