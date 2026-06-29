@@ -4,7 +4,7 @@ import com.jexis.jexis_backend.cardholder.domain.enums.CardHolderStatus;
 
 public record EditCardHolderDto(
         BillingAddressDto billingAddress,
-        SpendingControlsDto spendingControlsDto,
+        SpendingControlsDto spendingControls,
         CardHolderStatus status) {
 
 }

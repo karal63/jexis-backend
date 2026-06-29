@@ -88,7 +88,7 @@ public class CardHolder {
     }
 
     public CardHolder(String stripeCardHolderId, Account account, User user, String name, String addressLine1,
-            String city, String state, String country, String postalCode) {
+            String city, String state, String country, String postalCode, CardHolderStatus status) {
         this.stripeCardHolderId = stripeCardHolderId;
         this.account = account;
         this.user = user;
@@ -98,6 +98,7 @@ public class CardHolder {
         this.billingState = state;
         this.billingCountry = country;
         this.billingPostalCode = postalCode;
+        this.status = status;
     }
 
     public UUID getId() {

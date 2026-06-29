@@ -9,6 +9,7 @@ import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.card.domain.exceptions.UserIsNotMemberException;
 import com.jexis.jexis_backend.cardholder.application.dto.CreateCardHolderDto;
 import com.jexis.jexis_backend.cardholder.domain.entities.CardHolder;
+import com.jexis.jexis_backend.cardholder.domain.enums.CardHolderStatus;
 import com.jexis.jexis_backend.cardholder.domain.exceptions.CardHolderExistsException;
 import com.jexis.jexis_backend.cardholder.infrastructure.CardHolderRepository;
 import com.jexis.jexis_backend.common.logging.AsyncLogger;
@@ -67,7 +68,7 @@ public class CreateCardHolderUseCase {
 
         CardHolder cardHolder = new CardHolder(stripeCardHolder.getId(), account, user, user.getFirstName(),
                 body.addressLine1(), body.city(), body.state(), body.country(),
-                body.postalCode());
+                body.postalCode(), CardHolderStatus.valueOf(stripeCardHolder.getStatus()));
 
         return repo.save(cardHolder);
     }
