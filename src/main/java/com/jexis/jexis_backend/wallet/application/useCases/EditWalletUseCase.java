@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.jexis.jexis_backend.stripe.application.useCases.UpdateStripeWalletUseCase;
 import com.jexis.jexis_backend.wallet.application.dto.EditWalletDto;
 import com.jexis.jexis_backend.wallet.domain.entities.Wallet;
 import com.jexis.jexis_backend.wallet.domain.exceptions.WalletNotFoundException;
@@ -22,10 +23,12 @@ import com.jexis.jexis_backend.wallet.infrastructure.WalletRepository;
  */
 @Service
 public class EditWalletUseCase {
-    WalletRepository repo;
+    private final WalletRepository repo;
+    private final UpdateStripeWalletUseCase updateStripeWalletUseCase;
 
-    public EditWalletUseCase(WalletRepository repo) {
+    public EditWalletUseCase(WalletRepository repo, UpdateStripeWalletUseCase updateStripeWalletUseCase) {
         this.repo = repo;
+        this.updateStripeWalletUseCase = updateStripeWalletUseCase;
     }
 
     /*
@@ -43,25 +46,16 @@ public class EditWalletUseCase {
      */
     public Wallet execute(UUID id, EditWalletDto dto) {
 
-        Optional<Wallet> wallet = repo.findById(id);
+        Wallet wallet = repo.findById(id).orElseThrow(() -> new WalletNotFoundException());
 
-        if (!wallet.isPresent()) {
-            throw new WalletNotFoundException();
+        if (dto.getName() != null) {
+            wallet.setName(dto.getName());
+            updateStripeWalletUseCase.execute(wallet.getAccount().getConnectAccountId(),
+                    wallet.getStripeFinancialAccountId(), dto);
         }
 
-        wallet.ifPresent(newWallet -> {
-            if (dto.getAvailableBalance() != null) {
-                newWallet.setAvailableBalance(dto.getAvailableBalance());
-            }
-            if (dto.getIsDeleted() != null) {
-                newWallet.setIsDeleted(dto.getIsDeleted());
-            }
-            if (dto.getDeletedAt() != null) {
-                newWallet.setDeletedAt(dto.getDeletedAt());
-            }
-            repo.save(newWallet);
-        });
+        repo.save(wallet);
 
-        return wallet.get();
+        return wallet;
     }
 }
