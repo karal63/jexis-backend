@@ -1,8 +1,5 @@
 package com.jexis.jexis_backend.wallet.application.dto;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
 /**
  * EditWalletDto
  *
@@ -14,19 +11,10 @@ import java.time.LocalDateTime;
  * Author: Leo
  */
 public class EditWalletDto {
-    private BigDecimal availableBalance;
-    private Boolean isDeleted;
-    private LocalDateTime deletedAt;
+    private String name;
 
-    public BigDecimal getAvailableBalance() {
-        return availableBalance;
+    public String getName() {
+        return name;
     }
 
-    public Boolean getIsDeleted() {
-        return isDeleted;
-    }
-
-    public LocalDateTime getDeletedAt() {
-        return deletedAt;
-    }
 }
