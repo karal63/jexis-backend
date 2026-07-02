@@ -3,6 +3,9 @@ package com.jexis.jexis_backend.account.presentation;
 import java.util.List;
 import java.util.UUID;
 
+import com.jexis.jexis_backend.account.application.dto.GetUpdateLinkDto;
+import com.jexis.jexis_backend.account.application.useCases.*;
+import com.stripe.model.AccountLink;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,21 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jexis.jexis_backend.account.application.dto.AccountResponseDto;
 import com.jexis.jexis_backend.account.application.dto.EditAccountDto;
-import com.jexis.jexis_backend.account.application.useCases.CreateAccountUseCase;
-import com.jexis.jexis_backend.account.application.useCases.DeleteAccountUseCase;
-import com.jexis.jexis_backend.account.application.useCases.EditAccountUseCase;
-import com.jexis.jexis_backend.account.application.useCases.GetAccountUseCase;
-import com.jexis.jexis_backend.account.application.useCases.GetAccountsUseCase;
-import com.jexis.jexis_backend.account.application.useCases.GetUserAccountsUseCase;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.auth.application.dto.AuthUser;
-import com.jexis.jexis_backend.card.application.useCases.GetAccountCardsUseCase;
-import com.jexis.jexis_backend.cardholder.application.useCases.GetAccountCardHoldersUseCase;
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
-import com.jexis.jexis_backend.member.application.useCases.GetAccountMembersUseCase;
 import com.jexis.jexis_backend.user.application.useCases.GetUserUseCase;
 import com.jexis.jexis_backend.user.domain.entities.User;
-import com.jexis.jexis_backend.wallet.application.useCases.GetAccountWalletsUseCase;
 
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -60,6 +53,7 @@ public class AccountController {
     private final GetUserUseCase getUserUseCase;
     private final DtoHelper dtoHelper;
     private final GetUserAccountsUseCase getUserAccountsUseCase;
+    private final GetUpdateLinkUseCase getUpdateLinkUseCase;
 
     public AccountController(
             CreateAccountUseCase createAccount,
@@ -68,11 +62,8 @@ public class AccountController {
             GetAccountUseCase getAccount,
             EditAccountUseCase editAccount, GetUserUseCase getUserUseCase,
             DtoHelper dtoHelper,
-            GetAccountCardsUseCase getAccountCardsUseCase,
-            GetAccountCardHoldersUseCase getAccountCardHoldersUseCase,
-            GetAccountMembersUseCase getAccountMembersUseCase,
-            GetAccountWalletsUseCase getAccountWalletsUseCase,
-            GetUserAccountsUseCase getUserAccountsUseCase) {
+            GetUserAccountsUseCase getUserAccountsUseCase,
+            GetUpdateLinkUseCase getUpdateLinkUseCase) {
         this.createAccountUseCase = createAccount;
         this.deleteAccountUseCase = deleteAccount;
         this.getAccountsUseCase = getAccounts;
@@ -81,6 +72,7 @@ public class AccountController {
         this.getUserUseCase = getUserUseCase;
         this.dtoHelper = dtoHelper;
         this.getUserAccountsUseCase = getUserAccountsUseCase;
+        this.getUpdateLinkUseCase = getUpdateLinkUseCase;
     }
 
     /**
@@ -185,4 +177,10 @@ public class AccountController {
         return editAccountUseCase.execute(accountId, body);
     }
 
+    @GetMapping("/users/{id}/accounts/{accountId}/get-update-link")
+    @PreAuthorize("@accountAuthorization.canEdit(authentication.principal.id(), #accountId)")
+    public GetUpdateLinkDto getUpdateLink(@PathVariable UUID id, @PathVariable UUID accountId) {
+        AccountLink link = getUpdateLinkUseCase.execute(accountId);
+        return new GetUpdateLinkDto(link.getUrl());
+    }
 }

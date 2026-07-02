@@ -1,5 +1,6 @@
 package com.jexis.jexis_backend.account.application.useCases;
 
+import com.stripe.param.AccountLinkCreateParams;
 import org.springframework.stereotype.Service;
 
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
@@ -58,7 +59,7 @@ public class CreateAccountUseCase {
         logger.info("ACCOUNT", "Creating account");
 
         com.stripe.model.Account connectAccount = createConnectUseCase.execute(owner.getEmail());
-        AccountLink link = createLinkUseCase.execute(connectAccount.getId());
+        AccountLink link = createLinkUseCase.execute(connectAccount.getId(), AccountLinkCreateParams.Type.ACCOUNT_ONBOARDING);
 
         Account account = new Account(owner.getEmail(), connectAccount.getId(), link.getUrl(), owner);
         Account saved = repo.save(account);
@@ -66,7 +67,6 @@ public class CreateAccountUseCase {
 
         addMemberUseCase.execute(new CreateMemberDto(account.getId(), owner.getId(), Role.OWNER));
         logger.info("MEMBER", "Initial member created successfully");
-
         return dtoHelper.toAccountDto(saved);
     }
 }

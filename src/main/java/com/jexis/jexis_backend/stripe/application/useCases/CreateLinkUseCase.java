@@ -33,13 +33,13 @@ public class CreateLinkUseCase {
      * 
      * @return the created account link
      */
-    public AccountLink execute(String accountId) {
+    public AccountLink execute(String accountId, AccountLinkCreateParams.Type type) {
         try {
             AccountLinkCreateParams params = AccountLinkCreateParams.builder()
                     .setAccount(accountId)
                     .setRefreshUrl("https://example.com")
                     .setReturnUrl("https://example.com?accountId=" + accountId)
-                    .setType(AccountLinkCreateParams.Type.ACCOUNT_ONBOARDING)
+                    .setType(type)
                     .build();
 
             AccountLink accountLink = stripe.v1().accountLinks().create(params);
