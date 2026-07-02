@@ -28,18 +28,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 /**
  * AccountController
- *
  * REST controller in the presentation layer responsible for exposing
  * account-related HTTP endpoints.
- *
  * It handles request routing, input validation, and response mapping,
  * delegating all business logic execution to dedicated account use case
  * services (application layer).
- *
  * This class does not contain domain logic; its role is limited to
  * orchestrating request/response flow between the client and the
  * application layer.
- *
  * Author: Leo
  */
 @RestController
@@ -77,10 +73,8 @@ public class AccountController {
 
     /**
      * Returns a list of all accounts.
-     *
      * This endpoint retrieves all existing accounts by delegating to the
      * getAccountsUseCase, which interacts with the repository to fetch the data.
-     *
      * Endpoint: GET /admin/accounts
      *
      * @return list of all accounts
@@ -108,31 +102,28 @@ public class AccountController {
 
     /**
      * Return a specific account.
-     *
      * This endpoint retrieves a specific account by delegating to the
      * getAccountsUseCase, which interacts with the repository to fetch the data.
-     *
      * Endpoint: GET /account/{id}
      *
-     * @param id the ID of the account to retrieve
+     * @param id  the ID of the user
+     * @param accountId the ID of the user
      * @return the account with the specified ID
      */
     @GetMapping("/users/{id}/accounts/{accountId}")
     @PreAuthorize("@accountAuthorization.canView(authentication.principal.id(), #accountId)")
-    public AccountResponseDto get(@PathVariable UUID accountId) {
+    public AccountResponseDto get(@PathVariable UUID id, @PathVariable UUID accountId) {
         Account account = getAccountUseCase.execute(accountId);
         return dtoHelper.toAccountDto(account);
     }
 
     /**
      * Handles account creation requests.
-     *
-     * Accepts a {@link CreateAccountDto} payload, delegates execution to the
+     * Accepts a {@link AuthUser} payload, delegates execution to the
      * createAccountUseCase, and returns the created {@link Account}.
-     *
      * Endpoint: POST /account/create
      *
-     * @param body request payload containing account creation data
+     * @param user user principal
      * @return the newly created account
      */
     @PostMapping("/accounts/create")
@@ -143,13 +134,11 @@ public class AccountController {
 
     /**
      * Handles account deletion requests.
-     *
-     * Accepts a {@link id} in the path, delegates execution to the
-     * deleteAccountUseCase, and returns the deleted {@link Account}.
-     *
+     * Accepts a {@param id} in the path, delegates execution to the
+     * deleteAccountUseCase
      * Endpoint: DELETE /account/delete/{id}
-     *
-     * @param id the ID of the account to delete
+     * @param id the ID of the user account
+     * @param accountId the ID of the account to delete
      * @return message confirming deletion of the account with the specified ID
      */
     @DeleteMapping("/users/{id}/accounts/{accountId}/delete")
@@ -161,19 +150,16 @@ public class AccountController {
 
     /**
      * Handles account editing requests.
-     *
-     * Accepts a {@link id} in the path, delegates execution to the
+     * Accepts a {@param id} in the path, delegates execution to the
      * editAccountUseCase, and returns the updated {@link Account}.
-     *
      * Endpoint: PATCH /account/edit/{id}
-     *
      * @param id   the ID of the account to edit
      * @param body payload with updated values for the account
-     * @return retuers updated account
+     * @return returns updated account
      */
     @PatchMapping("/users/{id}/accounts/{accountId}/edit")
     @PreAuthorize("@accountAuthorization.canEdit(authentication.principal.id(), #accountId)")
-    public AccountResponseDto edit(@PathVariable UUID accountId, @RequestBody EditAccountDto body) {
+    public AccountResponseDto edit(@PathVariable UUID id, @PathVariable UUID accountId, @RequestBody EditAccountDto body) {
         return editAccountUseCase.execute(accountId, body);
     }
 
