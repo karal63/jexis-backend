@@ -8,6 +8,7 @@ build/
 TODO.md
 LEARN.md
 application.yml
+application.properties
 
 ### STS ###
 .apt_generated

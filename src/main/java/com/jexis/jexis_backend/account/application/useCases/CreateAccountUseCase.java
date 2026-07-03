@@ -1,5 +1,6 @@
 package com.jexis.jexis_backend.account.application.useCases;
 
+import com.stripe.param.AccountLinkCreateParams;
 import org.springframework.stereotype.Service;
 
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
@@ -17,12 +18,10 @@ import com.stripe.model.AccountLink;
 
 /**
  * CreateAccountUseCase
- *
  * This service class implements the use case for creating a new account.
  * It contains only the business logic related to account creation, such as
  * validating input data and interacting with the repository to persist the new
  * account.
- *
  * Author: Leo
  */
 @Service
@@ -46,19 +45,15 @@ public class CreateAccountUseCase {
 
     /**
      * Handles account creation.
-     *
-     * Accepts a {@link CreateAccountDto} payload from controller, looks for
-     * duplicate account name, calls the repository to save the account, and returns
-     * the created {@link Account}.
-     *
-     * @param body passed by controller payload containing account creation data
+     * Creates Stripe account
+     * @param owner passed by controller payload containing account creation data
      * @return the newly created account
      */
     public AccountResponseDto execute(User owner) {
         logger.info("ACCOUNT", "Creating account");
 
         com.stripe.model.Account connectAccount = createConnectUseCase.execute(owner.getEmail());
-        AccountLink link = createLinkUseCase.execute(connectAccount.getId());
+        AccountLink link = createLinkUseCase.execute(connectAccount.getId(), AccountLinkCreateParams.Type.ACCOUNT_ONBOARDING);
 
         Account account = new Account(owner.getEmail(), connectAccount.getId(), link.getUrl(), owner);
         Account saved = repo.save(account);
@@ -66,7 +61,6 @@ public class CreateAccountUseCase {
 
         addMemberUseCase.execute(new CreateMemberDto(account.getId(), owner.getId(), Role.OWNER));
         logger.info("MEMBER", "Initial member created successfully");
-
         return dtoHelper.toAccountDto(saved);
     }
 }
