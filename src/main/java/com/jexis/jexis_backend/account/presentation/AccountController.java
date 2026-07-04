@@ -157,11 +157,11 @@ public class AccountController {
      * @param body payload with updated values for the account
      * @return returns updated account
      */
-    @PatchMapping("/users/{id}/accounts/{accountId}/edit")
-    @PreAuthorize("@accountAuthorization.canEdit(authentication.principal.id(), #accountId)")
-    public AccountResponseDto edit(@PathVariable UUID id, @PathVariable UUID accountId, @RequestBody EditAccountDto body) {
-        return editAccountUseCase.execute(accountId, body);
-    }
+//    @PatchMapping("/users/{id}/accounts/{accountId}/edit")
+//    @PreAuthorize("@accountAuthorization.canEdit(authentication.principal.id(), #accountId)")
+//    public AccountResponseDto edit(@PathVariable UUID id, @PathVariable UUID accountId, @RequestBody EditAccountDto body) {
+//        return editAccountUseCase.execute(accountId, body);
+//    }
 
     @GetMapping("/users/{id}/accounts/{accountId}/get-update-link")
     @PreAuthorize("@accountAuthorization.canEdit(authentication.principal.id(), #accountId)")

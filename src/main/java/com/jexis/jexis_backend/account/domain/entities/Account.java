@@ -12,13 +12,13 @@ import jakarta.persistence.*;
 
 /**
  * Account entity mapped to the persistence layer.
- *
+ * <p>
  * Represents an account record stored in the database and defines
  * its persistence structure (table mapping, constraints, and identifiers).
- *
+ * <p>
  * This class is managed by JPA and is used to persist and retrieve
  * account data.
- *
+ * <p>
  * Author: Leo
  */
 @Entity
@@ -28,11 +28,35 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column
-    private String name;
+//    @Column(nullable = false)
+    private String firstName;
 
-    @Column(nullable = false)
-    private String email;
+//    @Column(nullable = false)
+    private String lastName;
+
+//    @Column(nullable = false)
+    private String city;
+
+//    @Column(nullable = false)
+    private String country;
+
+//    @Column(nullable = false)
+    private String line1;
+
+//    @Column(nullable = false)
+    private String line2;
+
+//    @Column(nullable = false)
+    private String postalCode;
+
+//    @Column(nullable = false)
+    private String state;
+
+//    @Column(nullable = false)
+    private String phone;
+
+//    @Column(nullable = false)
+//    private String email;
 
     @Column(nullable = false, unique = true)
     private String connectAccountId;
@@ -59,78 +83,165 @@ public class Account {
     Account() {
     }
 
-    public Account(String email, String connectAccountId, String accountLink, User owner) {
-        this.email = email;
+    public Account(String firstName, String lastName, String city, String country, String line1,
+                   String line2, String postalCode, String state, String phone,
+                   String connectAccountId, String accountLink, User owner) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.city = city;
+        this.country = country;
+        this.line1 = line1;
+        this.line2 = line2;
+        this.postalCode = postalCode;
+        this.state = state;
+        this.phone = phone;
+//        this.email = email;
         this.connectAccountId = connectAccountId;
         this.accountLink = accountLink;
         this.owner = owner;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getAccountLink() {
-        return accountLink;
-    }
-
-    public String getConnectAccountId() {
-        return connectAccountId;
-    }
-
-    public User getOwner() {
-        return owner;
     }
 
     public UUID getId() {
         return id;
     }
 
-    public Boolean getIsDeleted() {
-        return isDeleted;
+    public void setId(UUID id) {
+        this.id = id;
     }
 
-    public LocalDateTime getDeletedAt() {
-        return deletedAt;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public String getCity() {
+        return city;
     }
 
-    public void setAccountLink(String accountLink) {
-        this.accountLink = accountLink;
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getLine1() {
+        return line1;
+    }
+
+    public void setLine1(String line1) {
+        this.line1 = line1;
+    }
+
+    public String getLine2() {
+        return line2;
+    }
+
+    public void setLine2(String line2) {
+        this.line2 = line2;
+    }
+
+    public String getPostalCode() {
+        return postalCode;
+    }
+
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+//    public String getEmail() {
+//        return email;
+//    }
+//
+//    public void setEmail(String email) {
+//        this.email = email;
+//    }
+
+    public String getConnectAccountId() {
+        return connectAccountId;
     }
 
     public void setConnectAccountId(String connectAccountId) {
         this.connectAccountId = connectAccountId;
     }
 
+    public String getAccountLink() {
+        return accountLink;
+    }
+
+    public void setAccountLink(String accountLink) {
+        this.accountLink = accountLink;
+    }
+
+    public User getOwner() {
+        return owner;
+    }
+
     public void setOwner(User owner) {
         this.owner = owner;
     }
 
-    public void setIsDeleted(boolean isDeleted) {
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Boolean getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Boolean isDeleted) {
         this.isDeleted = isDeleted;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
     }
 
     public void setDeletedAt(LocalDateTime deletedAt) {
         this.deletedAt = deletedAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

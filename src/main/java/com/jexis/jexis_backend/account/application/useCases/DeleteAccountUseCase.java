@@ -34,10 +34,10 @@ public class DeleteAccountUseCase {
      * the account, calls the repository to delete the account, and returns
      * nothing.
      *
-     * @param body passed by controller payload containing account creation data
+     * @param id passed by controller payload containing account creation data
      */
     public void execute(UUID id) {
-        Account existingAccount = repo.findById(id).orElseThrow(() -> new AccountNotFoundException(id));
+        Account existingAccount = repo.findById(id).orElseThrow(AccountNotFoundException::new);
 
         existingAccount.setIsDeleted(true);
         existingAccount.setDeletedAt(LocalDateTime.now());

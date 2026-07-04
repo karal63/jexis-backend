@@ -33,8 +33,16 @@ public class DtoHelper {
     public AccountResponseDto toAccountDto(Account account) {
         return new AccountResponseDto(
                 account.getId(),
-                account.getName(),
-                account.getEmail(),
+                account.getFirstName(),
+                account.getLastName(),
+                account.getCity(),
+                account.getCountry(),
+                account.getLine1(),
+                account.getLine2(),
+                account.getPostalCode(),
+                account.getState(),
+                account.getPhone(),
+//                account.getEmail(),
                 account.getConnectAccountId(),
                 account.getAccountLink(),
                 toUserDto(account.getOwner()),

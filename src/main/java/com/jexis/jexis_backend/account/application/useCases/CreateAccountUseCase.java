@@ -34,7 +34,7 @@ public class CreateAccountUseCase {
     private final AddMemberUseCase addMemberUseCase;
 
     public CreateAccountUseCase(AccountRepository repo, AsyncLogger logger, CreateConnectUseCase createConnectUseCase,
-            CreateLinkUseCase createLinkUseCase, DtoHelper dtoHelper, AddMemberUseCase addMemberUseCase) {
+                                CreateLinkUseCase createLinkUseCase, DtoHelper dtoHelper, AddMemberUseCase addMemberUseCase) {
         this.repo = repo;
         this.logger = logger;
         this.createConnectUseCase = createConnectUseCase;
@@ -46,6 +46,7 @@ public class CreateAccountUseCase {
     /**
      * Handles account creation.
      * Creates Stripe account
+     *
      * @param owner passed by controller payload containing account creation data
      * @return the newly created account
      */
@@ -55,9 +56,23 @@ public class CreateAccountUseCase {
         com.stripe.model.Account connectAccount = createConnectUseCase.execute(owner.getEmail());
         AccountLink link = createLinkUseCase.execute(connectAccount.getId(), AccountLinkCreateParams.Type.ACCOUNT_ONBOARDING);
 
-        Account account = new Account(owner.getEmail(), connectAccount.getId(), link.getUrl(), owner);
+        Account account = new Account(
+                connectAccount.getIndividual().getFirstName(),
+                connectAccount.getIndividual().getLastName(),
+                connectAccount.getCompany().getAddress().getCity(),
+                connectAccount.getCompany().getAddress().getCountry(),
+                connectAccount.getCompany().getAddress().getLine1(),
+                connectAccount.getCompany().getAddress().getLine2(),
+                connectAccount.getCompany().getAddress().getPostalCode(),
+                connectAccount.getCompany().getAddress().getState(),
+                connectAccount.getCompany().getPhone(),
+//                owner.getEmail(),
+                connectAccount.getId(),
+                link.getUrl(),
+                owner);
+
         Account saved = repo.save(account);
-        logger.info("ACCOUNT", "Account created successfully: " + saved.getName());
+        logger.info("ACCOUNT", "Account created successfully: " + saved.getFirstName() + " " + saved.getLastName());
 
         addMemberUseCase.execute(new CreateMemberDto(account.getId(), owner.getId(), Role.OWNER));
         logger.info("MEMBER", "Initial member created successfully");

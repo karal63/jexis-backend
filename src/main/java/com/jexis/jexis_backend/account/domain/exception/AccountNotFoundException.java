@@ -17,7 +17,7 @@ import com.jexis.jexis_backend.common.web.error.DomainException;
  * Author: Leo
  */
 public class AccountNotFoundException extends DomainException {
-    public AccountNotFoundException(UUID id) {
-        super(HttpStatus.NOT_FOUND.value(), "ACCOUNT_NOT_FOUND", "Account with id " + id + " not found");
+    public AccountNotFoundException() {
+        super(HttpStatus.NOT_FOUND.value(), "ACCOUNT_NOT_FOUND", "Account not found");
     }
 }
