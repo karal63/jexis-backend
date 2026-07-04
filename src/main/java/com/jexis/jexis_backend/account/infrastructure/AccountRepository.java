@@ -8,9 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 
 public interface AccountRepository extends JpaRepository<Account, UUID> {
-    Optional<Account> findByName(String name);
-
-    Optional<Account> findByEmail(String email);
 
     List<Account> findAllByOwnerId(UUID ownerId);
+
+    Optional<Account> findByConnectAccountId(String connectAccountId);
 }

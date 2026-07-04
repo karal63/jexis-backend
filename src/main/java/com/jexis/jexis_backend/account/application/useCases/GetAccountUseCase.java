@@ -38,7 +38,7 @@ public class GetAccountUseCase {
     public Account execute(UUID id) {
         Optional<Account> account = repo.findById(id);
         if (account.isEmpty()) {
-            throw new AccountNotFoundException(id);
+            throw new AccountNotFoundException();
         }
         return account.get();
     }

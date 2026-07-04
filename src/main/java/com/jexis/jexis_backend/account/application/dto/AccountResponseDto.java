@@ -7,7 +7,15 @@ import com.jexis.jexis_backend.user.application.dto.UserResponseDto;
 
 public record AccountResponseDto(
         UUID id,
-        String name,
+        String firstName,
+        String lastName,
+        String city,
+        String country,
+        String line1,
+        String line2,
+        String postalCode,
+        String state,
+        String phone,
         String email,
         String connectAccountId,
         String accountLink,

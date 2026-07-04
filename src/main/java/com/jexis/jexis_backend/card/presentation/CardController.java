@@ -137,7 +137,6 @@ public class CardController {
     @PatchMapping("/accounts/{id}/cards/{cardId}/edit")
     @PreAuthorize("@cardAuthorization.canEdit(authentication.principal.id(), #id)")
     public CardResponseDto edit(@PathVariable UUID id, @PathVariable UUID cardId, @RequestBody EditCardDto body) {
-        System.out.println(body.toString());
         Card card = editCardUseCase.execute(cardId, body);
         return dtoHelper.toCardDto(card);
     }
