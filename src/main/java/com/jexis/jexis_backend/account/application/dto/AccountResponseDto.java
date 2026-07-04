@@ -16,7 +16,7 @@ public record AccountResponseDto(
         String postalCode,
         String state,
         String phone,
-//        String email,
+        String email,
         String connectAccountId,
         String accountLink,
         UserResponseDto owner,

@@ -66,7 +66,7 @@ public class CreateAccountUseCase {
                 connectAccount.getCompany().getAddress().getPostalCode(),
                 connectAccount.getCompany().getAddress().getState(),
                 connectAccount.getCompany().getPhone(),
-//                owner.getEmail(),
+                owner.getEmail(),
                 connectAccount.getId(),
                 link.getUrl(),
                 owner);

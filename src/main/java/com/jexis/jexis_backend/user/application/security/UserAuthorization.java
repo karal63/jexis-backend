@@ -19,7 +19,6 @@ public class UserAuthorization {
     }
 
     public boolean isAdmin(List<UserRole> roles) {
-        System.out.println(roles.toString());
         return roles.contains(UserRole.ADMIN);
     }
 }

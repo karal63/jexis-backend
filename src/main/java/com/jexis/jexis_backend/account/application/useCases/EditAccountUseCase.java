@@ -51,12 +51,8 @@ public class EditAccountUseCase {
      * @return the updated account
      */
     public void execute(String accountId) {
-        System.out.println("Executing EditAccountUseCase...");
         com.stripe.model.Account stripeAccount = retrieveAccountByIdUseCase.execute(accountId);
-        System.out.println("stripe Account: " + stripeAccount.toString());
         Account dbAccount = accountRepo.findByConnectAccountId(stripeAccount.getId()).orElseThrow(AccountNotFoundException::new);
-
-        System.out.println(stripeAccount.getIndividual().getFirstName());
 
         dbAccount.setFirstName(stripeAccount.getIndividual().getFirstName());
         dbAccount.setLastName(stripeAccount.getIndividual().getLastName());
@@ -67,9 +63,8 @@ public class EditAccountUseCase {
         dbAccount.setPostalCode(stripeAccount.getCompany().getAddress().getPostalCode());
         dbAccount.setState(stripeAccount.getCompany().getAddress().getState());
         dbAccount.setPhone(stripeAccount.getCompany().getPhone());
-//        dbAccount.setEmail(stripeAccount.getEmail());
+        dbAccount.setEmail(stripeAccount.getEmail());
 
         Account newAccount = accountRepo.save(dbAccount);
-        System.out.println("New Account: " + newAccount.toString());
     }
 }

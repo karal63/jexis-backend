@@ -28,35 +28,35 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-//    @Column(nullable = false)
+    @Column
     private String firstName;
 
-//    @Column(nullable = false)
+    @Column
     private String lastName;
 
-//    @Column(nullable = false)
+    @Column
     private String city;
 
-//    @Column(nullable = false)
+    @Column
     private String country;
 
-//    @Column(nullable = false)
+    @Column
     private String line1;
 
-//    @Column(nullable = false)
+    @Column
     private String line2;
 
-//    @Column(nullable = false)
+    @Column
     private String postalCode;
 
-//    @Column(nullable = false)
+    @Column
     private String state;
 
-//    @Column(nullable = false)
+    @Column
     private String phone;
 
-//    @Column(nullable = false)
-//    private String email;
+    @Column
+    private String email;
 
     @Column(nullable = false, unique = true)
     private String connectAccountId;
@@ -84,7 +84,7 @@ public class Account {
     }
 
     public Account(String firstName, String lastName, String city, String country, String line1,
-                   String line2, String postalCode, String state, String phone,
+                   String line2, String postalCode, String state, String phone, String email,
                    String connectAccountId, String accountLink, User owner) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -95,7 +95,7 @@ public class Account {
         this.postalCode = postalCode;
         this.state = state;
         this.phone = phone;
-//        this.email = email;
+        this.email = email;
         this.connectAccountId = connectAccountId;
         this.accountLink = accountLink;
         this.owner = owner;
@@ -181,13 +181,13 @@ public class Account {
         this.phone = phone;
     }
 
-//    public String getEmail() {
-//        return email;
-//    }
-//
-//    public void setEmail(String email) {
-//        this.email = email;
-//    }
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
     public String getConnectAccountId() {
         return connectAccountId;

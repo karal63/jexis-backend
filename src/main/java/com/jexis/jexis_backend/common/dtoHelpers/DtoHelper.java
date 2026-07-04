@@ -42,7 +42,7 @@ public class DtoHelper {
                 account.getPostalCode(),
                 account.getState(),
                 account.getPhone(),
-//                account.getEmail(),
+                account.getEmail(),
                 account.getConnectAccountId(),
                 account.getAccountLink(),
                 toUserDto(account.getOwner()),
@@ -95,7 +95,6 @@ public class DtoHelper {
     }
 
     public MemberResponseDto toMemberDto(Member member) {
-        System.out.println(member.toString());
         return new MemberResponseDto(
                 member.getId(),
                 toAccountDto(member.getAccount()),

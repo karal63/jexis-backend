@@ -35,7 +35,7 @@ public class AccountWebhookController {
         switch(event.getType()) {
             case "account.updated":
                 editAccountUseCase.execute(event.getAccount());
-                // TODO send full new account object to new edit account service that will replace data
+                break;
         }
 
         return ResponseEntity.ok("success");
