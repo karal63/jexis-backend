@@ -83,18 +83,7 @@ public class Account {
     Account() {
     }
 
-    public Account(String firstName, String lastName, String city, String country, String line1,
-                   String line2, String postalCode, String state, String phone, String email,
-                   String connectAccountId, String accountLink, User owner) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.city = city;
-        this.country = country;
-        this.line1 = line1;
-        this.line2 = line2;
-        this.postalCode = postalCode;
-        this.state = state;
-        this.phone = phone;
+    public Account(String email, String connectAccountId, String accountLink, User owner) {
         this.email = email;
         this.connectAccountId = connectAccountId;
         this.accountLink = accountLink;

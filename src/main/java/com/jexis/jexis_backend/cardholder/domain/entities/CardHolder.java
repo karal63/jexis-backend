@@ -50,6 +50,7 @@ public class CardHolder {
     @Column(nullable = false)
     private String billingAddressLine1;
 
+    @Column
     private String billingAddressLine2;
 
     @Column(nullable = false)

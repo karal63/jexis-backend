@@ -57,15 +57,6 @@ public class CreateAccountUseCase {
         AccountLink link = createLinkUseCase.execute(connectAccount.getId(), AccountLinkCreateParams.Type.ACCOUNT_ONBOARDING);
 
         Account account = new Account(
-                connectAccount.getIndividual().getFirstName(),
-                connectAccount.getIndividual().getLastName(),
-                connectAccount.getCompany().getAddress().getCity(),
-                connectAccount.getCompany().getAddress().getCountry(),
-                connectAccount.getCompany().getAddress().getLine1(),
-                connectAccount.getCompany().getAddress().getLine2(),
-                connectAccount.getCompany().getAddress().getPostalCode(),
-                connectAccount.getCompany().getAddress().getState(),
-                connectAccount.getCompany().getPhone(),
                 owner.getEmail(),
                 connectAccount.getId(),
                 link.getUrl(),
