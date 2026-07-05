@@ -75,14 +75,14 @@ public class CardHolderController {
     }
 
     @GetMapping("/accounts/{id}/card-holders/{cardHolderId}")
-    @PreAuthorize("@cardHolderAuthorization.canView(authentication.principal.id(), #id)")
+    @PreAuthorize("@cardHolderAuthorization.canView(authentication.principal.id(), #id, #cardHolderId)")
     public CardHolderResponseDto find(@PathVariable UUID id, @PathVariable UUID cardHolderId) {
         CardHolder cardHolder = getCardHolderUseCase.execute(cardHolderId);
         return dtoHelper.toCardHolderDto(cardHolder);
     }
 
     @PatchMapping("/accounts/{id}/card-holders/{cardHolderId}/edit")
-    @PreAuthorize("@cardHolderAuthorization.canEdit(authentication.principal.id(), #id)")
+    @PreAuthorize("@cardHolderAuthorization.canEdit(authentication.principal.id(), #id, #cardHolderId)")
     public CardHolderResponseDto edit(@PathVariable UUID id, @PathVariable UUID cardHolderId,
             @RequestBody EditCardHolderDto body) {
         CardHolder cardHolder = editCardHolderUseCase.execute(cardHolderId, body);
@@ -90,7 +90,7 @@ public class CardHolderController {
     }
 
     @PostMapping("/accounts/{id}/card-holders/{cardHolderId}/delete")
-    @PreAuthorize("@cardHolderAuthorization.canDelete(authentication.principal.id(), #id)")
+    @PreAuthorize("@cardHolderAuthorization.canDelete(authentication.principal.id(), #id, #cardHolderId)")
     public void delete(@PathVariable UUID id, @PathVariable UUID cardHolderId) {
         deleteCardHolderUseCase.execute(cardHolderId);
     }

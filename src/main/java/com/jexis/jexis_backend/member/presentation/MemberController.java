@@ -74,14 +74,14 @@ public class MemberController {
     }
 
     @GetMapping("/accounts/{id}/members/{memberId}")
-    @PreAuthorize("@memberAuthorization.canView(authentication.principal.id(), #id)")
+    @PreAuthorize("@memberAuthorization.canView(authentication.principal.id(), #id, #memberId)")
     public MemberResponseDto get(@PathVariable UUID id, @PathVariable UUID memberId) {
         Member member = getMemberUseCase.execute(memberId);
         return dtoHelper.toMemberDto(member);
     }
 
     @PatchMapping("/accounts/{id}/members/{memberId}/edit")
-    @PreAuthorize("@memberAuthorization.canEdit(authentication.principal.id(), #id)")
+    @PreAuthorize("@memberAuthorization.canEdit(authentication.principal.id(), #id, #memberId)")
     public MemberResponseDto edit(@PathVariable UUID id, @PathVariable UUID memberId, @RequestBody EditMemberDto body) {
         Member member = editMemberUseCase.execute(memberId, body);
         return dtoHelper.toMemberDto(member);

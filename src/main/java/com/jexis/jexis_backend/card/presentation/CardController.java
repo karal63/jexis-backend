@@ -31,18 +31,14 @@ import jakarta.validation.Valid;
 
 /**
  * CardController
- *
  * REST controller in the presentation layer responsible for exposing
  * card-related HTTP endpoints.
- *
  * It handles request routing, input validation, and response mapping,
  * delegating all business logic execution to dedicated card use case
  * services (application layer).
- *
  * This class does not contain domain logic; its role is limited to
  * orchestrating request/response flow between the client and the
  * application layer.
- *
  * Author: Leo
  */
 @RestController
@@ -75,7 +71,6 @@ public class CardController {
 
     /**
      * Retrieves all cards available in the account.
-     *
      * Endpoint: GET /card/list
      *
      * @return a list of all card entities
@@ -88,11 +83,10 @@ public class CardController {
     }
 
     /**
-     * Creates a new card for the specified card holder.
-     *
+     * Creates a new card for the specified cardholder.
      * Endpoint: POST /card/create
      *
-     * @param body the request payload containing card details and card holder
+     * @param body the request payload containing card details and cardholder
      *             information
      * @return the newly created card entity
      */
@@ -135,7 +129,7 @@ public class CardController {
      * @return the updated card entity
      */
     @PatchMapping("/accounts/{id}/cards/{cardId}/edit")
-    @PreAuthorize("@cardAuthorization.canEdit(authentication.principal.id(), #id)")
+    @PreAuthorize("@cardAuthorization.canEdit(authentication.principal.id(), #id, #cardId)")
     public CardResponseDto edit(@PathVariable UUID id, @PathVariable UUID cardId, @RequestBody EditCardDto body) {
         Card card = editCardUseCase.execute(cardId, body);
         return dtoHelper.toCardDto(card);
@@ -146,11 +140,11 @@ public class CardController {
      *
      * Endpoint: POST /card/delete/{id}
      *
-     * @param user the authenticated user making the request
-     * @param id   the unique identifier of the card to delete
+     * @param id account id
+     * @param cardId card id
      */
     @PostMapping("/accounts/{id}/cards/{cardId}/delete")
-    @PreAuthorize("@cardAuthorization.canDelete(authentication.principal.id(), #id)")
+    @PreAuthorize("@cardAuthorization.canDelete(authentication.principal.id(), #id, #cardId)")
     public void delete(@PathVariable UUID id, @PathVariable UUID cardId) {
         deleteCardUseCase.execute(cardId);
     }
