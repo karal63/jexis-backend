@@ -23,18 +23,14 @@ import com.jexis.jexis_backend.user.application.dto.CreateDto;
 
 /**
  * AuthController
- *
  * REST controller in the presentation layer responsible for exposing
  * authentication-related HTTP endpoints.
- *
  * It handles request routing, input validation, and response mapping,
  * delegating all business logic execution to dedicated authentication use case
  * services (application layer).
- *
  * This class does not contain domain logic; its role is limited to
  * orchestrating request/response flow between the client and the
  * application layer.
- *
  * Author: Leo
  */
 @RestController
@@ -94,10 +90,8 @@ public class AuthController {
 
         /**
          * Endpoint to log out from existing account.
-         *
          * This endpoint clears the authentication cookies by setting them with empty
          * values and immediate expiration
-         *
          * Endpoint: GET /auth/logout
          *
          * @return a response with cleared cookies
@@ -128,10 +122,8 @@ public class AuthController {
 
         /**
          * Endpoint to log in an existing account.
-         *
          * This endpoint accepts a JSON body with the login credentials (e.g., email and
          * password). It deligates the authentication logic to the LoginUseCase
-         *
          * Endpoint: POST /auth/login
          *
          * @param body the request body containing the login credentials
@@ -166,12 +158,10 @@ public class AuthController {
 
         /**
          * Endpoint to refresh authentication tokens.
-         *
          * This endpoint accepts a refresh token. It deligates the token refresh logic
          * to the refreshTokensUseCase, which handles all the necessary validations,
          * password
          * hashing, and persistence.
-         *
          * Endpoint: POST /auth/refresh
          *
          * @param cookie refresh_token the request body containing the account details

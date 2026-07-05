@@ -27,9 +27,10 @@ public class CardAuthorization {
     public boolean canView(UUID userId, UUID accountId, UUID cardId) {
         Card card = getCardUseCase.execute(cardId);
 
-        return hasRoleUseCase.execute(userId, accountId, Role.OWNER)
+        return (hasRoleUseCase.execute(userId, accountId, Role.OWNER)
                 || hasRoleUseCase.execute(userId, accountId, Role.ADMIN)
-                || card.getUser().getId().equals(userId);
+                || card.getUser().getId().equals(userId))
+                && card.getCardHolder().getAccount().getId().equals(accountId);
     }
 
     public boolean canCreate(UUID userId, UUID accountId) {
@@ -37,13 +38,19 @@ public class CardAuthorization {
                 || hasRoleUseCase.execute(userId, accountId, Role.ADMIN);
     }
 
-    public boolean canEdit(UUID userId, UUID accountId) {
-        return hasRoleUseCase.execute(userId, accountId, Role.OWNER)
-                || hasRoleUseCase.execute(userId, accountId, Role.ADMIN);
+    public boolean canEdit(UUID userId, UUID accountId,  UUID cardId) {
+        Card card = getCardUseCase.execute(cardId);
+
+        return (hasRoleUseCase.execute(userId, accountId, Role.OWNER)
+                || hasRoleUseCase.execute(userId, accountId, Role.ADMIN))
+                && card.getCardHolder().getAccount().getId().equals(accountId);
     }
 
-    public boolean canDelete(UUID userId, UUID accountId) {
-        return hasRoleUseCase.execute(userId, accountId, Role.OWNER)
-                || hasRoleUseCase.execute(userId, accountId, Role.ADMIN);
+    public boolean canDelete(UUID userId, UUID accountId, UUID cardId) {
+        Card card = getCardUseCase.execute(cardId);
+
+        return (hasRoleUseCase.execute(userId, accountId, Role.OWNER)
+                || hasRoleUseCase.execute(userId, accountId, Role.ADMIN))
+                && card.getCardHolder().getAccount().getId().equals(accountId);
     }
 }

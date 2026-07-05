@@ -76,7 +76,6 @@ public class WalletController {
 
     /**
      * Retrieves all wallets available in the system.
-     *
      * Endpoint: GET /wallet/list
      *
      * @return a list of all wallet entities
@@ -89,22 +88,7 @@ public class WalletController {
     }
 
     /**
-     * Retrieves a single wallet by its identifier.
-     *
-     * Endpoint: GET /wallet/list/{id}
-     *
-     * @param id the unique identifier of the wallet to retrieve
-     * @return the matching wallet entity
-     */
-    // @GetMapping("/list/{id}")
-    // public WalletResponseDto find(@PathVariable UUID id) {
-    // Wallet wallet = getWalletUseCase.execute(id);
-    // return dtoHelper.toWalletDto(wallet);
-    // }
-
-    /**
      * Creates a new wallet for the specified account.
-     *
      * Endpoint: POST /wallet/create
      *
      * @param body the request payload containing the account identifier
@@ -126,7 +110,7 @@ public class WalletController {
     }
 
     @GetMapping("/accounts/{id}/wallets/{walletId}")
-    @PreAuthorize("@walletAuthorization.canView(authentication.principal.id(), #id)")
+    @PreAuthorize("@walletAuthorization.canView(authentication.principal.id(), #id, #walletId)")
     public WalletResponseDto find(@PathVariable UUID id, @PathVariable UUID walletId) {
         Wallet wallet = getWalletUseCase.execute(walletId);
         return dtoHelper.toWalletDto(wallet);
@@ -134,7 +118,6 @@ public class WalletController {
 
     /**
      * Updates an existing wallet with the provided changes.
-     *
      * Endpoint: PATCH /wallet/edit/{id}
      *
      * @param id   the unique identifier of the wallet to update
@@ -142,7 +125,7 @@ public class WalletController {
      * @return the updated wallet entity
      */
     @PatchMapping("/accounts/{id}/wallets/{walletId}/edit")
-    @PreAuthorize("@walletAuthorization.canEdit(authentication.principal.id(), #id)")
+    @PreAuthorize("@walletAuthorization.canEdit(authentication.principal.id(), #id, #walletId)")
     public WalletResponseDto edit(@PathVariable UUID id, @PathVariable UUID walletId, @RequestBody EditWalletDto body) {
         Wallet wallet = editWalletUseCase.execute(walletId, body);
         return dtoHelper.toWalletDto(wallet);
@@ -150,14 +133,13 @@ public class WalletController {
 
     /**
      * Deletes a wallet owned by the authenticated user.
-     *
      * Endpoint: POST /wallet/delete/{id}
      *
      * @param user the authenticated user making the request
      * @param id   the unique identifier of the wallet to delete
      */
     @PostMapping("/accounts/{id}/wallets/{walletId}/delete")
-    @PreAuthorize("@walletAuthorization.canDelete(authentication.principal.id(), #id)")
+    @PreAuthorize("@walletAuthorization.canDelete(authentication.principal.id(), #id, #walletId)")
     public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID id, @PathVariable UUID walletId) {
         deleteWalletUseCase.execute(user, walletId);
     }
