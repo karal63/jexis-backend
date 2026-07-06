@@ -26,10 +26,12 @@ import com.jexis.jexis_backend.card.infrastructure.CardRepository;
 public class DeleteCardUseCase {
     private final CardRepository repo;
     private final EditCardStatusUseCase editCardStatusUseCase;
+    private final GetCardUseCase getCardUseCase;
 
-    public DeleteCardUseCase(CardRepository repo, EditCardStatusUseCase editCardStatusUseCase) {
+    public DeleteCardUseCase(CardRepository repo, EditCardStatusUseCase editCardStatusUseCase, GetCardUseCase getCardUseCase) {
         this.repo = repo;
         this.editCardStatusUseCase = editCardStatusUseCase;
+        this.getCardUseCase = getCardUseCase;
     }
 
     /**
@@ -40,7 +42,8 @@ public class DeleteCardUseCase {
      * @param cardId id of the card we want to delete
      */
     public void execute(UUID cardId) {
-        Card card = repo.findById(cardId).orElseThrow(CardNotFoundException::new);
+        Card card = getCardUseCase.execute(cardId);
+
         editCardStatusUseCase.execute(
                 card.getCardHolder().getAccount().getConnectAccountId(),
                 card.getStripeCardId(),

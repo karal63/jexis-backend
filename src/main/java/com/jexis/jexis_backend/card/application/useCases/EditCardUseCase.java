@@ -28,13 +28,16 @@ public class EditCardUseCase {
     private final GetCardHolderUseCase getCardHolderUseCase;
     private final SetCardLimitsUseCase setCardLimitsUseCase;
     private final EditCardStatusUseCase editCardStatusUseCase;
+    private final GetCardUseCase getCardUseCase;
 
     public EditCardUseCase(CardRepository repo, GetCardHolderUseCase getCardHolderUseCase,
-            SetCardLimitsUseCase setCardLimitsUseCase, EditCardStatusUseCase editCardStatusUseCase) {
+            SetCardLimitsUseCase setCardLimitsUseCase, EditCardStatusUseCase editCardStatusUseCase,
+                           GetCardUseCase getCardUseCase) {
         this.repo = repo;
         this.getCardHolderUseCase = getCardHolderUseCase;
         this.setCardLimitsUseCase = setCardLimitsUseCase;
         this.editCardStatusUseCase = editCardStatusUseCase;
+        this.getCardUseCase = getCardUseCase;
     }
 
     /**
@@ -49,7 +52,7 @@ public class EditCardUseCase {
      * @return the updated card entity
      */
     public Card execute(UUID id, EditCardDto dto) {
-        Card card = repo.findById(id).orElseThrow(() -> new CardNotFoundException());
+        Card card = getCardUseCase.execute(id);
 
         if (dto.status() != null) {
             editCardStatusUseCase.execute(card.getCardHolder().getAccount().getConnectAccountId(),

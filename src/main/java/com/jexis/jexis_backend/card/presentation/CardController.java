@@ -100,8 +100,8 @@ public class CardController {
     @GetMapping("/accounts/{id}/cards")
     @PreAuthorize("@cardAuthorization.canViewAll(authentication.principal.id(), #id)")
     public List<CardResponseDto> getCardsByAccount(@PathVariable UUID id) {
-        List<Card> card = getAccountCardsUseCase.execute(id);
-        return card.stream().map(dtoHelper::toCardDto).toList();
+        List<Card> cards = getAccountCardsUseCase.execute(id);
+        return cards.stream().map(dtoHelper::toCardDto).toList();
     }
 
     /**
