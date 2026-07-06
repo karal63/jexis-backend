@@ -22,10 +22,13 @@ import com.jexis.jexis_backend.account.infrastructure.AccountRepository;
 public class DeleteAccountUseCase {
     AccountRepository repo;
     private final DeleteStripeAccountUseCase deleteStripeAccountUseCase;
+    private final GetAccountUseCase getAccountUseCase;
 
-    public DeleteAccountUseCase(AccountRepository repo, DeleteStripeAccountUseCase deleteStripeAccountUseCase) {
+    public DeleteAccountUseCase(AccountRepository repo, DeleteStripeAccountUseCase deleteStripeAccountUseCase,
+                                GetAccountUseCase getAccountUseCase) {
         this.repo = repo;
         this.deleteStripeAccountUseCase = deleteStripeAccountUseCase;
+        this.getAccountUseCase = getAccountUseCase;
     }
 
     /**
@@ -37,7 +40,7 @@ public class DeleteAccountUseCase {
      * @param id passed by controller payload containing account creation data
      */
     public void execute(UUID id) {
-        Account account = repo.findById(id).orElseThrow(AccountNotFoundException::new);
+        Account account = getAccountUseCase.execute(id);
         deleteStripeAccountUseCase.execute(account.getConnectAccountId());
 
         account.setIsDeleted(true);
