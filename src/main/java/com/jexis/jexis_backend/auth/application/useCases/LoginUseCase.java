@@ -1,7 +1,5 @@
 package com.jexis.jexis_backend.auth.application.useCases;
 
-import java.util.Optional;
-
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +11,6 @@ import com.jexis.jexis_backend.auth.domain.exception.WrongEmailOrPasswordExcepti
 import com.jexis.jexis_backend.auth.infrastructure.security.JwtUtil;
 import com.jexis.jexis_backend.user.application.dto.UserResponseDto;
 import com.jexis.jexis_backend.user.domain.entities.User;
-import com.jexis.jexis_backend.user.domain.exceptions.UserNotFoundException;
 import com.jexis.jexis_backend.user.infrastructure.UserRepository;
 
 /**
@@ -55,7 +52,7 @@ public class LoginUseCase {
     public LoginResult execute(LoginDto body) {
         logger.info("AUTH", "Login attempt for email: " + body.email());
 
-        User user = userRepo.findByEmail(body.email()).orElseThrow(() -> new WrongEmailOrPasswordException());
+        User user = userRepo.findByEmailAndIsDeletedFalse(body.email()).orElseThrow(() -> new WrongEmailOrPasswordException());
 
         if (!argon.matches(body.password(), user.getPassword())) {
             logger.info("AUTH", "Login failed: invalid password for email " + body.email());
