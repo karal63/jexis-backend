@@ -3,6 +3,8 @@ package com.jexis.jexis_backend.wallet.presentation;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,9 +22,8 @@ import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
 import com.jexis.jexis_backend.wallet.application.dto.CreateWalletDto;
 import com.jexis.jexis_backend.wallet.application.dto.EditWalletDto;
 import com.jexis.jexis_backend.wallet.application.dto.WalletResponseDto;
-import com.jexis.jexis_backend.wallet.application.security.WalletAuthorization;
 import com.jexis.jexis_backend.wallet.application.useCases.CreateWalletUseCase;
-import com.jexis.jexis_backend.wallet.application.useCases.DeleteWalletUseCase;
+import com.jexis.jexis_backend.wallet.application.useCases.CloseWalletUseCase;
 import com.jexis.jexis_backend.wallet.application.useCases.EditWalletUseCase;
 import com.jexis.jexis_backend.wallet.application.useCases.GetAccountWalletsUseCase;
 import com.jexis.jexis_backend.wallet.application.useCases.GetAllWalletsUseCase;
@@ -56,13 +57,13 @@ public class WalletController {
     private final CreateWalletUseCase createWalletUseCase;
     private final GetWalletUseCase getWalletUseCase;
     private final EditWalletUseCase editWalletUseCase;
-    private final DeleteWalletUseCase deleteWalletUseCase;
+    private final CloseWalletUseCase deleteWalletUseCase;
     private final DtoHelper dtoHelper;
     private final GetAccountWalletsUseCase getAccountWalletsUseCase;
 
     public WalletController(GetAllWalletsUseCase getAllWalletsUseCase, GetAccountUseCase getAccountUseCase,
             CreateWalletUseCase createWalletUseCase, GetWalletUseCase getWalletUseCase,
-            EditWalletUseCase editWalletUseCase, DeleteWalletUseCase deleteWalletUseCase,
+            EditWalletUseCase editWalletUseCase, CloseWalletUseCase deleteWalletUseCase,
             DtoHelper dtoHelper, GetAccountWalletsUseCase getAccountWalletsUseCase) {
         this.getAllWalletsUseCase = getAllWalletsUseCase;
         this.getAccountUseCase = getAccountUseCase;
@@ -135,12 +136,12 @@ public class WalletController {
      * Deletes a wallet owned by the authenticated user.
      * Endpoint: POST /wallet/delete/{id}
      *
-     * @param user the authenticated user making the request
      * @param id   the unique identifier of the wallet to delete
      */
-    @PostMapping("/accounts/{id}/wallets/{walletId}/delete")
-    @PreAuthorize("@walletAuthorization.canDelete(authentication.principal.id(), #id, #walletId)")
-    public void delete(@AuthenticationPrincipal AuthUser user, @PathVariable UUID id, @PathVariable UUID walletId) {
-        deleteWalletUseCase.execute(user, walletId);
+    @PostMapping("/accounts/{id}/wallets/{walletId}/close")
+    @PreAuthorize("@walletAuthorization.canClose(authentication.principal.id(), #id, #walletId)")
+    public ResponseEntity<?> close(@PathVariable UUID id, @PathVariable UUID walletId) {
+        deleteWalletUseCase.execute(id, walletId);
+        return ResponseEntity.ok("Wallet has been closed");
     }
 }
