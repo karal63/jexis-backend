@@ -26,21 +26,14 @@ public class GetWalletUseCase {
         this.repo = repo;
     }
 
-    /*
+    /**
      * Retrieves a single wallet
-     *
      * Interacts with the repository to fetch a specific wallet by its ID.
      *
-     * @param id the ID of the wallet to retrieve
-     * 
+     * @param walletId the ID of the wallet to retrieve
      * @return the retrieved wallet
      */
     public Wallet execute(UUID walletId) {
-        Optional<Wallet> wallet = repo.findById(walletId);
-        if (wallet.isEmpty()) {
-            throw new WalletNotFoundException();
-        }
-
-        return wallet.get();
+        return repo.findByIdAndIsDeletedFalse(walletId).orElseThrow(WalletNotFoundException::new);
     }
 }

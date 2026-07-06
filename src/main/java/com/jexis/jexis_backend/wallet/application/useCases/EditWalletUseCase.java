@@ -45,8 +45,7 @@ public class EditWalletUseCase {
      * @return the updated wallet
      */
     public Wallet execute(UUID id, EditWalletDto dto) {
-
-        Wallet wallet = repo.findById(id).orElseThrow(() -> new WalletNotFoundException());
+        Wallet wallet = repo.findById(id).orElseThrow(WalletNotFoundException::new);
 
         if (dto.getName() != null) {
             wallet.setName(dto.getName());
@@ -54,8 +53,6 @@ public class EditWalletUseCase {
                     wallet.getStripeFinancialAccountId(), dto);
         }
 
-        repo.save(wallet);
-
-        return wallet;
+        return repo.save(wallet);
     }
 }

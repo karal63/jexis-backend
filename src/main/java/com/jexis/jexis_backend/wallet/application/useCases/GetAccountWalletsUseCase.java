@@ -17,6 +17,6 @@ public class GetAccountWalletsUseCase {
     }
 
     public List<Wallet> execute(UUID accountId) {
-        return walletRepo.findAllByAccountId(accountId);
+        return walletRepo.findAllByAccountIdAndIsDeletedFalse(accountId);
     }
 }
