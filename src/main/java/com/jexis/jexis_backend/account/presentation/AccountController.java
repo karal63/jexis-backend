@@ -141,7 +141,7 @@ public class AccountController {
      * @param accountId the ID of the account to delete
      * @return message confirming deletion of the account with the specified ID
      */
-    @DeleteMapping("/users/{id}/accounts/{accountId}/delete")
+    @PostMapping("/users/{id}/accounts/{accountId}/delete")
     @PreAuthorize("@accountAuthorization.canDelete(authentication.principal.id(), #accountId)")
     public String delete(@PathVariable UUID id, @PathVariable UUID accountId) {
         deleteAccountUseCase.execute(accountId);
