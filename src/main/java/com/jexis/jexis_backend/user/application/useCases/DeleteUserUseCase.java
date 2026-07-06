@@ -24,9 +24,11 @@ import com.jexis.jexis_backend.user.infrastructure.UserRepository;
 @Service
 public class DeleteUserUseCase {
     UserRepository repo;
+    private final GetUserUseCase getUserUseCase;
 
-    public DeleteUserUseCase(UserRepository repo) {
+    public DeleteUserUseCase(UserRepository repo, GetUserUseCase getUserUseCase) {
         this.repo = repo;
+        this.getUserUseCase = getUserUseCase;
     }
 
     /*
@@ -39,7 +41,8 @@ public class DeleteUserUseCase {
      * 
      */
     public void execute(UUID id) {
-        User user = repo.findById(id).orElseThrow(() -> new UserNotFoundException());
+        User user = getUserUseCase.execute(id);
+
         user.setIsDeleted(true);
         user.setDeletedAt(LocalDateTime.now());
 

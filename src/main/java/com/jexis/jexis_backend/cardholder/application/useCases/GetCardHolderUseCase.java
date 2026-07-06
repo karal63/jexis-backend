@@ -1,6 +1,5 @@
 package com.jexis.jexis_backend.cardholder.application.useCases;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -18,10 +17,6 @@ public class GetCardHolderUseCase {
     }
 
     public CardHolder execute(UUID id) {
-        Optional<CardHolder> cardHolder = repo.findById(id);
-        if (cardHolder.isEmpty()) {
-            throw new CardHolderNotFoundException();
-        }
-        return cardHolder.get();
+        return repo.findByIdAndIsDeletedFalse(id).orElseThrow(CardHolderNotFoundException::new);
     }
 }

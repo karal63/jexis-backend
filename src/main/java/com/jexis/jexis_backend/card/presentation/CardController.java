@@ -100,13 +100,12 @@ public class CardController {
     @GetMapping("/accounts/{id}/cards")
     @PreAuthorize("@cardAuthorization.canViewAll(authentication.principal.id(), #id)")
     public List<CardResponseDto> getCardsByAccount(@PathVariable UUID id) {
-        List<Card> card = getAccountCardsUseCase.execute(id);
-        return card.stream().map(dtoHelper::toCardDto).toList();
+        List<Card> cards = getAccountCardsUseCase.execute(id);
+        return cards.stream().map(dtoHelper::toCardDto).toList();
     }
 
     /**
      * Retrieves a single card by its identifier.
-     *
      * Endpoint: GET /card/list/{id}
      *
      * @param id the unique identifier of the card to retrieve
@@ -137,7 +136,6 @@ public class CardController {
 
     /**
      * Deletes a card owned by the authenticated user.
-     *
      * Endpoint: POST /card/delete/{id}
      *
      * @param id account id

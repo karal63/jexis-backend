@@ -15,16 +15,17 @@ import com.jexis.jexis_backend.stripe.application.useCases.UpdateStripeCardHolde
 public class EditCardHolderUseCase {
     private final CardHolderRepository repo;
     private final UpdateStripeCardHolderUseCase updateStripeCardHolderUseCase;
+    private final GetCardHolderUseCase getCardHolderUseCase;
 
     public EditCardHolderUseCase(CardHolderRepository repo,
-            UpdateStripeCardHolderUseCase updateStripeCardHolderUseCase) {
+            UpdateStripeCardHolderUseCase updateStripeCardHolderUseCase, GetCardHolderUseCase getCardHolderUseCase) {
         this.repo = repo;
         this.updateStripeCardHolderUseCase = updateStripeCardHolderUseCase;
+        this.getCardHolderUseCase = getCardHolderUseCase;
     }
 
     public CardHolder execute(UUID id, EditCardHolderDto dto) {
-        CardHolder cardHolder = repo.findById(id).orElseThrow(
-                () -> new CardHolderNotFoundException());
+        CardHolder cardHolder = getCardHolderUseCase.execute(id);
 
         // update stripe data
         updateStripeCardHolderUseCase.execute(cardHolder.getAccount().getConnectAccountId(),
@@ -63,8 +64,6 @@ public class EditCardHolderUseCase {
             cardHolder.setStatus(dto.status());
         }
 
-        repo.save(cardHolder);
-
-        return cardHolder;
+        return repo.save(cardHolder);
     }
 }

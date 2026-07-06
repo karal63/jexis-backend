@@ -148,21 +148,6 @@ public class AccountController {
         return "Account with ID " + accountId + " has been deleted.";
     }
 
-    /**
-     * Handles account editing requests.
-     * Accepts a {@param id} in the path, delegates execution to the
-     * editAccountUseCase, and returns the updated {@link Account}.
-     * Endpoint: PATCH /account/edit/{id}
-     * @param id   the ID of the account to edit
-     * @param body payload with updated values for the account
-     * @return returns updated account
-     */
-//    @PatchMapping("/users/{id}/accounts/{accountId}/edit")
-//    @PreAuthorize("@accountAuthorization.canEdit(authentication.principal.id(), #accountId)")
-//    public AccountResponseDto edit(@PathVariable UUID id, @PathVariable UUID accountId, @RequestBody EditAccountDto body) {
-//        return editAccountUseCase.execute(accountId, body);
-//    }
-
     @GetMapping("/users/{id}/accounts/{accountId}/get-update-link")
     @PreAuthorize("@accountAuthorization.canEdit(authentication.principal.id(), #accountId)")
     public GetUpdateLinkDto getUpdateLink(@PathVariable UUID id, @PathVariable UUID accountId) {

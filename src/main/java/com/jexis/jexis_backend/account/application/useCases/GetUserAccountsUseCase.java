@@ -17,6 +17,6 @@ public class GetUserAccountsUseCase {
     }
 
     public List<Account> execute(UUID id) {
-        return repo.findAllByOwnerId(id);
+        return repo.findAllByOwnerIdAndIsDeletedFalse(id);
     }
 }

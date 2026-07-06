@@ -29,17 +29,12 @@ public class GetUserUseCase {
 
     /**
      * Handles fetching all users.
-     *
      * Calls the repository to fetch all users and returns the list of
      * users.
      *
      * @return found user
      */
     public User execute(UUID id) {
-        Optional<User> user = repo.findById(id);
-        if (!user.isPresent()) {
-            throw new UserNotFoundException();
-        }
-        return user.get();
+        return repo.findByIdAndIsDeletedFalse(id).orElseThrow(UserNotFoundException::new);
     }
 }

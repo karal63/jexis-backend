@@ -17,6 +17,6 @@ public class GetAccountCardsUseCase {
     }
 
     public List<Card> execute(UUID accountId) {
-        return cardRepo.findByCardHolderAccountId(accountId);
+        return cardRepo.findByCardHolderAccountIdAndIsDeletedFalse(accountId);
     }
 }

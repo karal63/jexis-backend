@@ -9,7 +9,9 @@ import com.jexis.jexis_backend.account.domain.entities.Account;
 
 public interface AccountRepository extends JpaRepository<Account, UUID> {
 
-    List<Account> findAllByOwnerId(UUID ownerId);
+    List<Account> findAllByOwnerIdAndIsDeletedFalse(UUID ownerId);
 
-    Optional<Account> findByConnectAccountId(String connectAccountId);
+    Optional<Account> findByIdAndIsDeletedFalse(UUID id);
+
+    Optional<Account> findByConnectAccountIdAndIsDeletedFalse(String connectAccountId);
 }

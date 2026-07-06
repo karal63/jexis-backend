@@ -127,7 +127,6 @@ public class UserController {
 
     /**
      * Updates an existing user with the provided changes.
-     *
      * Endpoint: PATCH /user/edit/{id}
      *
      * @param editDto the user update payload

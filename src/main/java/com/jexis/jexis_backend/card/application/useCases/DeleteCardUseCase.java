@@ -3,6 +3,9 @@ package com.jexis.jexis_backend.card.application.useCases;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.jexis.jexis_backend.card.domain.enums.CardStatus;
+import com.jexis.jexis_backend.stripe.application.useCases.EditCardStatusUseCase;
+import com.stripe.param.issuing.CardUpdateParams;
 import org.springframework.stereotype.Service;
 
 import com.jexis.jexis_backend.card.domain.entities.Card;
@@ -11,32 +14,41 @@ import com.jexis.jexis_backend.card.infrastructure.CardRepository;
 
 /**
  * DeleteCardUseCase
- *
+ * <p>
  * This service class implements the use case for deleting an existing card.
  * It contains only the business logic related to card deletion, such as
  * validating the user's permission and interacting with the repository to
  * remove the card.
- *
+ * <p>
  * Author: Leo
  */
 @Service
 public class DeleteCardUseCase {
     private final CardRepository repo;
+    private final EditCardStatusUseCase editCardStatusUseCase;
+    private final GetCardUseCase getCardUseCase;
 
-    public DeleteCardUseCase(CardRepository repo) {
+    public DeleteCardUseCase(CardRepository repo, EditCardStatusUseCase editCardStatusUseCase, GetCardUseCase getCardUseCase) {
         this.repo = repo;
+        this.editCardStatusUseCase = editCardStatusUseCase;
+        this.getCardUseCase = getCardUseCase;
     }
 
     /**
      * Deletes an existing card
+     * <p>
+     * Accepts a {@param cardId} and removes the card from the repository.
      *
-     * Accepts a {@link DeleteDto} payload from controller, validates the user's
-     * permission, and removes the card from the repository.
-     *
-     * @param user the owner of the card and the id of the card to be deleted
+     * @param cardId id of the card we want to delete
      */
     public void execute(UUID cardId) {
-        Card card = repo.findById(cardId).orElseThrow(() -> new CardNotFoundException());
+        Card card = getCardUseCase.execute(cardId);
+
+        editCardStatusUseCase.execute(
+                card.getCardHolder().getAccount().getConnectAccountId(),
+                card.getStripeCardId(),
+                CardStatus.canceled
+        );
 
         card.setIsDeleted(true);
         card.setDeletedAt(LocalDateTime.now());
