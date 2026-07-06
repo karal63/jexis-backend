@@ -6,5 +6,7 @@ public record EditCardHolderDto(
         BillingAddressDto billingAddress,
         SpendingControlsDto spendingControls,
         CardHolderStatus status) {
-
+    public static EditCardHolderDto withStatus(CardHolderStatus status) {
+        return new EditCardHolderDto(null, null, status);
+    }
 }
