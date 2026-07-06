@@ -13,19 +13,19 @@ import com.jexis.jexis_backend.cardholder.infrastructure.CardHolderRepository;
 @Service
 public class DeleteCardHolderUseCase {
     private final CardHolderRepository repo;
+    private final GetCardHolderUseCase getCardHolderUseCase;
 
-    public DeleteCardHolderUseCase(CardHolderRepository repo) {
+    public DeleteCardHolderUseCase(CardHolderRepository repo, GetCardHolderUseCase getCardHolderUseCase) {
         this.repo = repo;
+        this.getCardHolderUseCase = getCardHolderUseCase;
     }
 
     public void execute(UUID cardHolderId) {
-        Optional<CardHolder> cardHolder = repo.findById(cardHolderId);
-        if (cardHolder.isEmpty()) {
-            throw new CardHolderNotFoundException();
-        }
+        CardHolder cardHolder = getCardHolderUseCase.execute(cardHolderId);
 
-        cardHolder.get().setIsDeleted(true);
-        cardHolder.get().setDeletedAt(LocalDateTime.now());
-        repo.save(cardHolder.get());
+        cardHolder.setIsDeleted(true);
+        cardHolder.setDeletedAt(LocalDateTime.now());
+
+        repo.save(cardHolder);
     }
 }

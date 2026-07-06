@@ -106,7 +106,6 @@ public class CardController {
 
     /**
      * Retrieves a single card by its identifier.
-     *
      * Endpoint: GET /card/list/{id}
      *
      * @param id the unique identifier of the card to retrieve
@@ -137,7 +136,6 @@ public class CardController {
 
     /**
      * Deletes a card owned by the authenticated user.
-     *
      * Endpoint: POST /card/delete/{id}
      *
      * @param id account id
