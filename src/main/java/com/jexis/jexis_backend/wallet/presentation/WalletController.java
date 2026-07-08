@@ -3,6 +3,8 @@ package com.jexis.jexis_backend.wallet.presentation;
 import java.util.List;
 import java.util.UUID;
 
+import com.jexis.jexis_backend.wallet.application.dto.AddReceivedCreditsDto;
+import com.jexis.jexis_backend.wallet.application.useCases.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,30 +24,24 @@ import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
 import com.jexis.jexis_backend.wallet.application.dto.CreateWalletDto;
 import com.jexis.jexis_backend.wallet.application.dto.EditWalletDto;
 import com.jexis.jexis_backend.wallet.application.dto.WalletResponseDto;
-import com.jexis.jexis_backend.wallet.application.useCases.CreateWalletUseCase;
-import com.jexis.jexis_backend.wallet.application.useCases.CloseWalletUseCase;
-import com.jexis.jexis_backend.wallet.application.useCases.EditWalletUseCase;
-import com.jexis.jexis_backend.wallet.application.useCases.GetAccountWalletsUseCase;
-import com.jexis.jexis_backend.wallet.application.useCases.GetAllWalletsUseCase;
-import com.jexis.jexis_backend.wallet.application.useCases.GetWalletUseCase;
 import com.jexis.jexis_backend.wallet.domain.entities.Wallet;
 
 import jakarta.validation.Valid;
 
 /**
  * WalletController
- *
+ * <p>
  * REST controller in the presentation layer responsible for exposing
  * wallet-related HTTP endpoints.
- *
+ * <p>
  * It handles request routing, input validation, and response mapping,
  * delegating all business logic execution to dedicated wallet use case
  * services (application layer).
- *
+ * <p>
  * This class does not contain domain logic; its role is limited to
  * orchestrating request/response flow between the client and the
  * application layer.
- *
+ * <p>
  * Author: Leo
  */
 @RestController
@@ -60,11 +56,12 @@ public class WalletController {
     private final CloseWalletUseCase deleteWalletUseCase;
     private final DtoHelper dtoHelper;
     private final GetAccountWalletsUseCase getAccountWalletsUseCase;
+    private final AddMoneyUseCase addMoneyUseCase;
 
     public WalletController(GetAllWalletsUseCase getAllWalletsUseCase, GetAccountUseCase getAccountUseCase,
-            CreateWalletUseCase createWalletUseCase, GetWalletUseCase getWalletUseCase,
-            EditWalletUseCase editWalletUseCase, CloseWalletUseCase deleteWalletUseCase,
-            DtoHelper dtoHelper, GetAccountWalletsUseCase getAccountWalletsUseCase) {
+                            CreateWalletUseCase createWalletUseCase, GetWalletUseCase getWalletUseCase,
+                            EditWalletUseCase editWalletUseCase, CloseWalletUseCase deleteWalletUseCase,
+                            DtoHelper dtoHelper, GetAccountWalletsUseCase getAccountWalletsUseCase, AddMoneyUseCase addMoneyUseCase) {
         this.getAllWalletsUseCase = getAllWalletsUseCase;
         this.getAccountUseCase = getAccountUseCase;
         this.createWalletUseCase = createWalletUseCase;
@@ -73,6 +70,7 @@ public class WalletController {
         this.deleteWalletUseCase = deleteWalletUseCase;
         this.dtoHelper = dtoHelper;
         this.getAccountWalletsUseCase = getAccountWalletsUseCase;
+        this.addMoneyUseCase = addMoneyUseCase;
     }
 
     /**
@@ -136,12 +134,27 @@ public class WalletController {
      * Deletes a wallet owned by the authenticated user.
      * Endpoint: POST /wallet/delete/{id}
      *
-     * @param id   the unique identifier of the wallet to delete
+     * @param id the unique identifier of the wallet to delete
      */
     @PostMapping("/accounts/{id}/wallets/{walletId}/close")
     @PreAuthorize("@walletAuthorization.canClose(authentication.principal.id(), #id, #walletId)")
     public ResponseEntity<?> close(@PathVariable UUID id, @PathVariable UUID walletId) {
         deleteWalletUseCase.execute(id, walletId);
         return ResponseEntity.ok("Wallet has been closed");
+    }
+
+    /**
+     * AddMoney
+     * Allows to add money to selected financial account
+     *
+     * @param id       represents accountId
+     * @param walletId represents wallet id
+     * @return positive message
+     */
+    @PostMapping("/test/accounts/{id}/wallets/{walletId}/add-money")
+    @PreAuthorize("@walletAuthorization.canAddMoney(authentication.principal.id(), #id, #walletId)")
+    public ResponseEntity<?> addMoney(@PathVariable UUID id, @PathVariable UUID walletId, @RequestBody AddReceivedCreditsDto body) {
+        addMoneyUseCase.execute(id, walletId, body);
+        return ResponseEntity.ok("Money has been added");
     }
 }
