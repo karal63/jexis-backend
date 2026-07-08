@@ -47,4 +47,11 @@ public class WalletAuthorization {
 
         return hasRoleUseCase.execute(userId, accountId, Role.OWNER) && wallet.getAccount().getId().equals(accountId);
     }
+
+    public boolean canAddMoney(UUID userId, UUID accountId, UUID walletId) {
+        Wallet wallet = getWalletUseCase.execute(walletId);
+
+        return hasRoleUseCase.execute(userId, accountId, Role.OWNER)
+                && wallet.getAccount().getId().equals(accountId);
+    }
 }

@@ -1,6 +1,7 @@
-package com.jexis.jexis_backend.account.presentation;
+package com.jexis.jexis_backend.wallet.presentation;
 
 import com.jexis.jexis_backend.account.application.useCases.EditAccountUseCase;
+import com.jexis.jexis_backend.common.logging.AsyncLogger;
 import com.stripe.model.Event;
 import com.stripe.net.Webhook;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,14 +10,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/webhooks/accounts")
-public class AccountWebhookController {
-    @Value("${stripe.webhook.secret.account}")
+@RequestMapping("/webhooks/wallets")
+public class WalletWebhookController {
+    @Value("${stripe.webhook.secret.wallet}")
     private String webhookSecret;
-    private final EditAccountUseCase editAccountUseCase;
+    private final AsyncLogger logger;
 
-    public AccountWebhookController(EditAccountUseCase editAccountUseCase) {
-        this.editAccountUseCase = editAccountUseCase;
+    public WalletWebhookController(AsyncLogger logger) {
+        this.logger = logger;
     }
 
     @PostMapping
@@ -32,9 +33,10 @@ public class AccountWebhookController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid signature");
         }
 
+
         switch(event.getType()) {
-            case "account.updated":
-                editAccountUseCase.execute(event.getAccount());
+            case "treasury.received_credit.created":
+                logger.info("STRIPE_WEBHOOK", "Received treasury credit created");
                 break;
         }
 
