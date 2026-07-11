@@ -18,16 +18,16 @@ public record CreateTransactionDto(
         Long amount,
         String currency,
         TransactionStatus status,
-        TransactionDirection direction,
-        String bankName,
-        String bankAccountLast4,
-        String routingNumber,
-        PaymentMethod paymentMethod,
-        Card card,
-        String merchantName,
-        String merchantCategory,
-        String merchantCity,
-        String merchantCountry,
-        String transactionId
+        TransactionDirection direction
+//        String bankName,
+//        String bankAccountLast4,
+//        String routingNumber,
+//        PaymentMethod paymentMethod,
+//        Card card,
+//        String merchantName,
+//        String merchantCategory,
+//        String merchantCity,
+//        String merchantCountry,
+//        String transactionId
 ) {
 }

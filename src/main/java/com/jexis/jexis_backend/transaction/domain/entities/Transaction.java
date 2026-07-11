@@ -59,7 +59,7 @@ public class Transaction {
 
     // card payments
     @ManyToOne
-    @JoinColumn(name = "card_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "card_id", referencedColumnName = "id")
     private Card card;
 
     @Column
