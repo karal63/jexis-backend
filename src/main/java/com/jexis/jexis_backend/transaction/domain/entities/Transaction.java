@@ -55,6 +55,7 @@ public class Transaction {
     private String routingNumber;
 
     @Column
+    @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
 
     // card payments
