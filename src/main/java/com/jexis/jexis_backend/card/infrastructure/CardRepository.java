@@ -13,4 +13,5 @@ public interface CardRepository extends JpaRepository<Card, UUID> {
 
     Optional<Card> findByIdAndIsDeletedFalse(UUID id);
 
+    Optional<Card> findByStripeCardIdAndIsDeletedFalse(String stripeCardId);
 }
