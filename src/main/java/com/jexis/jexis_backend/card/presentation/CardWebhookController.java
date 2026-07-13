@@ -64,6 +64,9 @@ public class CardWebhookController {
                         issuingTransaction.getMerchantData().getCity(),
                         issuingTransaction.getMerchantData().getCountry()
                 );
+
+                System.out.println(issuingTransaction.toString());
+
                 createCardTransactionUseCase.execute(dto);
                 logger.info("STRIPE", "Issuing transaction created");
 

@@ -26,6 +26,9 @@ public class Transaction {
     @Column()
     private String stripeObjectId;
 
+    @Column()
+    private String stripeTransactionId;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private TransactionType type;
@@ -63,6 +66,9 @@ public class Transaction {
     @JoinColumn(name = "card_id", referencedColumnName = "id")
     private Card card;
 
+//    @Column()
+//    private String authorizationId;
+
     @Column
     private String merchantName;
 
@@ -82,6 +88,7 @@ public class Transaction {
 
     public Transaction(
             Wallet wallet,
+            String stripeTransactionId,
             String stripeObjectId,
             TransactionType type,
             Long amount,
@@ -89,6 +96,7 @@ public class Transaction {
             TransactionStatus status,
             TransactionDirection direction) {
         this.wallet = wallet;
+        this.stripeTransactionId = stripeTransactionId;
         this.stripeObjectId = stripeObjectId;
         this.type = type;
         this.amount = amount;

@@ -39,6 +39,7 @@ public class CreateCardTransactionUseCase {
         Transaction transaction = new Transaction(
                 wallet,
                 treasuryTransaction.getId(),
+                dto.stripeObjectId(),
                 dto.type(),
                 dto.amount(),
                 dto.currency(),

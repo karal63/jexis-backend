@@ -29,6 +29,7 @@ public class CreateBankTransactionUseCase {
         Transaction transaction = new Transaction(
                 wallet,
                 treasuryTransaction.getId(),
+                dto.stripeObjectId(),
                 dto.type(),
                 treasuryTransaction.getAmount(),
                 treasuryTransaction.getCurrency(),
