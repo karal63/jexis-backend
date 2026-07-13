@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.jexis.jexis_backend.card.domain.enums.CardStatus;
 import com.jexis.jexis_backend.common.dto.SpendingLimit;
+import jakarta.validation.Valid;
 
 /**
  * EditCardDto
@@ -15,5 +16,6 @@ import com.jexis.jexis_backend.common.dto.SpendingLimit;
  */
 public record EditCardDto(
         CardStatus status,
+        @Valid
         List<SpendingLimit> spendingLimits) {
 }

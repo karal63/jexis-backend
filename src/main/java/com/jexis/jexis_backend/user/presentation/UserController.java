@@ -25,6 +25,7 @@ import com.jexis.jexis_backend.user.application.useCases.EditUserUseCase;
 import com.jexis.jexis_backend.user.application.useCases.GetUserUseCase;
 import com.jexis.jexis_backend.user.application.useCases.GetUsersUseCase;
 import com.jexis.jexis_backend.user.domain.entities.User;
+import jakarta.validation.Valid;
 
 /**
  * UserController
@@ -104,7 +105,7 @@ public class UserController {
      */
     @PostMapping("/admin/users/create")
     @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
-    public UserResponseDto createUsers(@RequestBody AdminCreateDto body) {
+    public UserResponseDto createUsers(@Valid @RequestBody AdminCreateDto body) {
         CreateDto dto = new CreateDto(body.getFirstName(), body.getLastName(), body.getEmail(), body.getPhoneNumber(),
                 body.getPassword());
         return dtoHelper.toUserDto(createUserUseCase.execute(dto, body.getRoles()));
@@ -135,7 +136,7 @@ public class UserController {
      */
     @PatchMapping("/users/{id}/edit")
     @PreAuthorize("@userAuthorization.canEdit(authentication.principal.id(), #id)")
-    public UserResponseDto editUser(@RequestBody EditDto editDto, @PathVariable UUID id) {
+    public UserResponseDto editUser(@Valid @RequestBody EditDto editDto, @PathVariable UUID id) {
         return dtoHelper.toUserDto(editUserUseCase.execute(id, editDto));
     }
 }

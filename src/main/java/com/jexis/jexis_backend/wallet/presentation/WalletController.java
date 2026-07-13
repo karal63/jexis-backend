@@ -125,7 +125,7 @@ public class WalletController {
      */
     @PatchMapping("/accounts/{id}/wallets/{walletId}/edit")
     @PreAuthorize("@walletAuthorization.canEdit(authentication.principal.id(), #id, #walletId)")
-    public WalletResponseDto edit(@PathVariable UUID id, @PathVariable UUID walletId, @RequestBody EditWalletDto body) {
+    public WalletResponseDto edit(@PathVariable UUID id, @PathVariable UUID walletId, @Valid @RequestBody EditWalletDto body) {
         Wallet wallet = editWalletUseCase.execute(walletId, body);
         return dtoHelper.toWalletDto(wallet);
     }
@@ -153,7 +153,7 @@ public class WalletController {
      */
     @PostMapping("/test/accounts/{id}/wallets/{walletId}/add-money")
     @PreAuthorize("@walletAuthorization.canAddMoney(authentication.principal.id(), #id, #walletId)")
-    public ResponseEntity<?> addMoney(@PathVariable UUID id, @PathVariable UUID walletId, @RequestBody AddReceivedCreditsDto body) {
+    public ResponseEntity<?> addMoney(@PathVariable UUID id, @PathVariable UUID walletId, @Valid @RequestBody AddReceivedCreditsDto body) {
         addMoneyUseCase.execute(id, walletId, body);
         return ResponseEntity.ok("Money has been added");
     }

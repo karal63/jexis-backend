@@ -23,6 +23,7 @@ import com.jexis.jexis_backend.member.application.useCases.GetMemberUseCase;
 import com.jexis.jexis_backend.member.application.useCases.GetMembersUseCase;
 import com.jexis.jexis_backend.member.application.useCases.RemoveMemberUseCase;
 import com.jexis.jexis_backend.member.domain.entities.Member;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/")
@@ -61,7 +62,7 @@ public class MemberController {
 
     @PostMapping("/members/add")
     @PreAuthorize("@memberAuthorization.canCreate(authentication.principal.id(), #body.accountId)")
-    public MemberResponseDto add(@RequestBody CreateMemberDto body) {
+    public MemberResponseDto add(@Valid @RequestBody CreateMemberDto body) {
         Member member = addMemberUseCase.execute(body);
         return dtoHelper.toMemberDto(member);
     }
@@ -82,7 +83,7 @@ public class MemberController {
 
     @PatchMapping("/accounts/{id}/members/{memberId}/edit")
     @PreAuthorize("@memberAuthorization.canEdit(authentication.principal.id(), #id, #memberId)")
-    public MemberResponseDto edit(@PathVariable UUID id, @PathVariable UUID memberId, @RequestBody EditMemberDto body) {
+    public MemberResponseDto edit(@PathVariable UUID id, @PathVariable UUID memberId, @Valid @RequestBody EditMemberDto body) {
         Member member = editMemberUseCase.execute(memberId, body);
         return dtoHelper.toMemberDto(member);
     }

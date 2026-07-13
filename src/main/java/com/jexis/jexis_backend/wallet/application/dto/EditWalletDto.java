@@ -1,5 +1,8 @@
 package com.jexis.jexis_backend.wallet.application.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 /**
  * EditWalletDto
  *
@@ -11,6 +14,8 @@ package com.jexis.jexis_backend.wallet.application.dto;
  * Author: Leo
  */
 public class EditWalletDto {
+    @NotBlank(message = "Wallet name cannot be blank")
+    @Size(min = 1, max = 100, message = "Wallet name must be between 1 and 100 characters")
     private String name;
 
     public String getName() {
