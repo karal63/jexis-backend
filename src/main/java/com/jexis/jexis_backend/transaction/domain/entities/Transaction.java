@@ -130,6 +130,14 @@ public class Transaction {
         this.stripeObjectId = stripeObjectId;
     }
 
+    public String getStripeTransactionId() {
+        return stripeTransactionId;
+    }
+
+    public void setStripeTransactionId(String stripeTransactionId) {
+        this.stripeTransactionId = stripeTransactionId;
+    }
+
     public TransactionType getType() {
         return type;
     }
