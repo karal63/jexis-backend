@@ -28,6 +28,7 @@ import com.jexis.jexis_backend.cardholder.domain.entities.CardHolder;
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/")
@@ -62,7 +63,7 @@ public class CardHolderController {
 
     @PostMapping("/card-holder/create")
     @PreAuthorize("@cardHolderAuthorization.canCreate(authentication.principal.id(), #body.accountId)")
-    public CardHolderResponseDto create(@RequestBody CreateCardHolderDto body, HttpServletRequest request) {
+    public CardHolderResponseDto create(@Valid @RequestBody CreateCardHolderDto body, HttpServletRequest request) {
         CardHolder cardHolder = createCardHolderUseCase.execute(body, request);
         return dtoHelper.toCardHolderDto(cardHolder);
     }
@@ -84,7 +85,7 @@ public class CardHolderController {
     @PatchMapping("/accounts/{id}/card-holders/{cardHolderId}/edit")
     @PreAuthorize("@cardHolderAuthorization.canEdit(authentication.principal.id(), #id, #cardHolderId)")
     public CardHolderResponseDto edit(@PathVariable UUID id, @PathVariable UUID cardHolderId,
-            @RequestBody EditCardHolderDto body) {
+            @Valid @RequestBody EditCardHolderDto body) {
         CardHolder cardHolder = editCardHolderUseCase.execute(cardHolderId, body);
         return dtoHelper.toCardHolderDto(cardHolder);
     }
