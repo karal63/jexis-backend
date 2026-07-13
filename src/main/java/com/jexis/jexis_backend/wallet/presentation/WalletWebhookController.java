@@ -46,19 +46,13 @@ public class WalletWebhookController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid signature");
         }
 
-        ReceivedCredit credit = null;
-
-        try {
-            credit =
-                    (ReceivedCredit) event.getDataObjectDeserializer()
-                            .deserializeUnsafe();
-        } catch (EventDataObjectDeserializationException e) {
-            logger.info("Received event data object deserialization exception");
-        }
-
         switch (event.getType()) {
             case "treasury.received_credit.created":
                 logger.info("STRIPE_WEBHOOK", "Webhook received credit created");
+
+                ReceivedCredit credit =
+                        (ReceivedCredit) event.getDataObjectDeserializer()
+                                .getObject().orElseThrow(() -> new IllegalStateException("Received Credit object is null"));
 
                 CreateBankTransactionDto dto = new CreateBankTransactionDto(
                         event.getAccount(),

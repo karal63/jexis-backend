@@ -2,12 +2,9 @@ package com.jexis.jexis_backend.transaction.application.useCases;
 
 import com.jexis.jexis_backend.stripe.application.useCases.GetStripeTransactionUseCase;
 import com.jexis.jexis_backend.transaction.application.dto.CreateBankTransactionDto;
-import com.jexis.jexis_backend.transaction.application.dto.CreateTransactionDto;
 import com.jexis.jexis_backend.transaction.domain.entities.Transaction;
-import com.jexis.jexis_backend.transaction.domain.enums.TransactionStatus;
 import com.jexis.jexis_backend.transaction.infrastructure.TransactionRepository;
 import com.jexis.jexis_backend.wallet.application.useCases.GetWalletByFAIdUseCase;
-import com.jexis.jexis_backend.wallet.application.useCases.GetWalletUseCase;
 import com.jexis.jexis_backend.wallet.domain.entities.Wallet;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +29,7 @@ public class CreateBankTransactionUseCase {
         Transaction transaction = new Transaction(
                 wallet,
                 treasuryTransaction.getId(),
+                dto.stripeObjectId(),
                 dto.type(),
                 treasuryTransaction.getAmount(),
                 treasuryTransaction.getCurrency(),
