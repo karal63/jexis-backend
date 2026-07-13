@@ -10,6 +10,8 @@ import com.jexis.jexis_backend.cardholder.application.dto.CardHolderResponseDto;
 import com.jexis.jexis_backend.cardholder.domain.entities.CardHolder;
 import com.jexis.jexis_backend.member.application.dto.MemberResponseDto;
 import com.jexis.jexis_backend.member.domain.entities.Member;
+import com.jexis.jexis_backend.transaction.application.dto.TransactionResponseDto;
+import com.jexis.jexis_backend.transaction.domain.entities.Transaction;
 import com.jexis.jexis_backend.user.application.dto.UserResponseDto;
 import com.jexis.jexis_backend.user.domain.entities.User;
 import com.jexis.jexis_backend.wallet.application.dto.WalletResponseDto;
@@ -100,5 +102,28 @@ public class DtoHelper {
                 toAccountDto(member.getAccount()),
                 toUserDto(member.getUser()),
                 member.getRole());
+    }
+
+    public TransactionResponseDto toTransactionDto(Transaction transaction) {
+        return new TransactionResponseDto(
+                transaction.getId(),
+                toWalletDto(transaction.getWallet()),
+                transaction.getStripeTransactionId(),
+                transaction.getStripeObjectId(),
+                transaction.getType(),
+                transaction.getAmount(),
+                transaction.getCurrency(),
+                transaction.getStatus(),
+                transaction.getDirection(),
+                transaction.getBankName(),
+                transaction.getBankAccountLast4(),
+                transaction.getRoutingNumber(),
+                transaction.getPaymentMethod(),
+                transaction.getCard() != null ? toCardDto(transaction.getCard()) : null,
+                transaction.getMerchantName(),
+                transaction.getMerchantCategory(),
+                transaction.getMerchantCity(),
+                transaction.getMerchantCountry(),
+                transaction.getCreatedAt());
     }
 }
