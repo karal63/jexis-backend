@@ -106,13 +106,12 @@ public class AccountController {
      * getAccountsUseCase, which interacts with the repository to fetch the data.
      * Endpoint: GET /account/{id}
      *
-     * @param id  the ID of the user
      * @param accountId the ID of the user
      * @return the account with the specified ID
      */
-    @GetMapping("/users/{id}/accounts/{accountId}")
+    @GetMapping("/accounts/{accountId}")
     @PreAuthorize("@accountAuthorization.canView(authentication.principal.id(), #accountId)")
-    public AccountResponseDto get(@PathVariable UUID id, @PathVariable UUID accountId) {
+    public AccountResponseDto get(@PathVariable UUID accountId) {
         Account account = getAccountUseCase.execute(accountId);
         return dtoHelper.toAccountDto(account);
     }
@@ -137,20 +136,20 @@ public class AccountController {
      * Accepts a {@param id} in the path, delegates execution to the
      * deleteAccountUseCase
      * Endpoint: DELETE /account/delete/{id}
-     * @param id the ID of the user account
+     *
      * @param accountId the ID of the account to delete
      * @return message confirming deletion of the account with the specified ID
      */
-    @PostMapping("/users/{id}/accounts/{accountId}/delete")
+    @PostMapping("/accounts/{accountId}/delete")
     @PreAuthorize("@accountAuthorization.canDelete(authentication.principal.id(), #accountId)")
-    public String delete(@PathVariable UUID id, @PathVariable UUID accountId) {
+    public String delete(@PathVariable UUID accountId) {
         deleteAccountUseCase.execute(accountId);
         return "Account with ID " + accountId + " has been deleted.";
     }
 
-    @GetMapping("/users/{id}/accounts/{accountId}/get-update-link")
+    @GetMapping("/accounts/{accountId}/get-update-link")
     @PreAuthorize("@accountAuthorization.canEdit(authentication.principal.id(), #accountId)")
-    public GetUpdateLinkDto getUpdateLink(@PathVariable UUID id, @PathVariable UUID accountId) {
+    public GetUpdateLinkDto getUpdateLink(@PathVariable UUID accountId) {
         AccountLink link = getUpdateLinkUseCase.execute(accountId);
         return new GetUpdateLinkDto(link.getUrl());
     }
