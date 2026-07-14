@@ -1,8 +1,10 @@
 package com.jexis.jexis_backend.common.web.error;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import com.jexis.jexis_backend.common.validation.ValidationError;
+import com.jexis.jexis_backend.common.validation.ValidationErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -10,17 +12,18 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import tools.jackson.databind.exc.InvalidFormatException;
 
 /**
  * Catches all exceptions of type {@link DomainException} thrown by any
  * controller
- *
+ * <p>
  * When a {@link DomainException} is thrown, this handler constructs an to
  * custom error shape defined by {@link ErrorResponse} and returns it with a
  * specified HTTP status code. This allows for consistent error responses across
  * the application, providing clients with structured information about what
  * went wrong, including an error code, message, and HTTP status.
- *
+ * <p>
  * Author: Leo
  */
 @RestControllerAdvice
@@ -40,24 +43,60 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ValidationErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
 
-        Map<String, String> errors = new HashMap<>();
-
-        ex.getBindingResult().getFieldErrors().forEach(err -> errors.put(err.getField(), err.getDefaultMessage()));
+        List<ValidationError> errors = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(error -> new ValidationError(
+                        error.getField(),
+                        error.getDefaultMessage()))
+                .toList();
 
         return ResponseEntity.badRequest()
-                .body(new ErrorResponse(
+                .body(new ValidationErrorResponse(
                         HttpStatus.BAD_REQUEST.value(),
                         "VALIDATION_ERROR",
-                        errors.toString()));
+                        "Validation error",
+                        errors));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handleMissingBody(HttpMessageNotReadableException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST.value())
-                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "REQ_BODY_MISSING", "Request body is missing"));
+    public ResponseEntity<ValidationErrorResponse> handleBodyNotReadable(HttpMessageNotReadableException ex) {
+        Throwable cause = ex.getCause();
+
+        if (cause instanceof InvalidFormatException ife &&
+                ife.getTargetType().isEnum()) {
+
+            String field = ife.getPath().stream()
+                    .findFirst()
+                    .map(ref -> ref.getPropertyName())
+                    .orElse("unknown");
+
+            String message = "Invalid value '%s'. Allowed values: %s"
+                    .formatted(
+                            ife.getValue(),
+                            Arrays.toString(ife.getTargetType().getEnumConstants())
+                    );
+
+            return ResponseEntity.badRequest()
+                    .body(new ValidationErrorResponse(
+                            HttpStatus.BAD_REQUEST.value(),
+                            "VALIDATION_ERROR",
+                            "Validation error",
+                            List.of(new ValidationError(field, message))
+                    ));
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(
+                new ValidationErrorResponse(
+                        HttpStatus.BAD_REQUEST.value(),
+                        "REQ_BODY_MISSING",
+                        "Request body is missing",
+                        null
+                ));
     }
+
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
@@ -65,3 +104,4 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(HttpStatus.FORBIDDEN.value(), "USER_NOT_AUTHORIZED", "Access denied"));
     }
 }
+

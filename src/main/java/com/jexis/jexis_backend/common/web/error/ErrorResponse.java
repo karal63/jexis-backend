@@ -9,26 +9,8 @@ package com.jexis.jexis_backend.common.web.error;
  *
  * Author: Leo
  */
-public class ErrorResponse {
-    private String code;
-    private String message;
-    private Integer status;
-
+public class ErrorResponse extends AErrorResponse {
     public ErrorResponse(Integer status, String code, String message) {
-        this.status = status;
-        this.code = code;
-        this.message = message;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public String getMessage() {
-        return message;
+        super(status, code, message);
     }
 }
