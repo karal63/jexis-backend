@@ -3,6 +3,9 @@ package com.jexis.jexis_backend.card.presentation;
 import java.util.List;
 import java.util.UUID;
 
+import com.jexis.jexis_backend.card.application.dto.TestCardPaymentDto;
+import com.jexis.jexis_backend.card.application.useCases.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,12 +21,6 @@ import com.jexis.jexis_backend.auth.application.dto.AuthUser;
 import com.jexis.jexis_backend.card.application.dto.CardResponseDto;
 import com.jexis.jexis_backend.card.application.dto.CreateCardDto;
 import com.jexis.jexis_backend.card.application.dto.EditCardDto;
-import com.jexis.jexis_backend.card.application.useCases.CreateCardUseCase;
-import com.jexis.jexis_backend.card.application.useCases.DeleteCardUseCase;
-import com.jexis.jexis_backend.card.application.useCases.EditCardUseCase;
-import com.jexis.jexis_backend.card.application.useCases.GetAccountCardsUseCase;
-import com.jexis.jexis_backend.card.application.useCases.GetAllCardsUseCase;
-import com.jexis.jexis_backend.card.application.useCases.GetCardUseCase;
 import com.jexis.jexis_backend.card.domain.entities.Card;
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
 
@@ -51,6 +48,7 @@ public class CardController {
     private final DeleteCardUseCase deleteCardUseCase;
     private final DtoHelper dtoHelper;
     private final GetAccountCardsUseCase getAccountCardsUseCase;
+    private final TestCardPaymentUseCase testCardPaymentUseCase;
 
     public CardController(
             GetAllCardsUseCase getAllCardsUseCase,
@@ -59,7 +57,8 @@ public class CardController {
             EditCardUseCase editCardUseCase,
             DeleteCardUseCase deleteCardUseCase,
             DtoHelper dtoHelper,
-            GetAccountCardsUseCase getAccountCardsUseCase) {
+            GetAccountCardsUseCase getAccountCardsUseCase,
+            TestCardPaymentUseCase testCardPaymentUseCase) {
         this.getAllCardsUseCase = getAllCardsUseCase;
         this.getCardUseCase = getCardUseCase;
         this.createCardUseCase = createCardUseCase;
@@ -67,6 +66,7 @@ public class CardController {
         this.deleteCardUseCase = deleteCardUseCase;
         this.dtoHelper = dtoHelper;
         this.getAccountCardsUseCase = getAccountCardsUseCase;
+        this.testCardPaymentUseCase = testCardPaymentUseCase;
     }
 
     /**
@@ -146,4 +146,20 @@ public class CardController {
     public void delete(@PathVariable UUID id, @PathVariable UUID cardId) {
         deleteCardUseCase.execute(cardId);
     }
+
+    /**
+     * createTestPayment
+     * <p>
+     * API endpoint for simulating card transaction
+     * </p>
+     *
+     * @param body contains payment data
+     */
+    @PostMapping("/cards/test-card-payment")
+    public ResponseEntity<String> createTestPayment(@Valid @RequestBody TestCardPaymentDto body) {
+        System.out.println(123);
+        testCardPaymentUseCase.execute(body);
+        return ResponseEntity.ok("Test payment created");
+    }
+
 }
