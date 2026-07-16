@@ -1,3 +1,6 @@
 Simulating methods:
 - Add money to treasury financial account
 - Test card payment
+
+Enable tunnel:
+cloudflared tunnel --url http://localhost:3000

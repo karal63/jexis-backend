@@ -14,6 +14,7 @@ public record CreateCardTransactionDto(
         TransactionStatus status,
         TransactionDirection direction,
         String cardId,
+        String authorizationId,
         String merchantName,
         String merchantCategory,
         String merchantCity,

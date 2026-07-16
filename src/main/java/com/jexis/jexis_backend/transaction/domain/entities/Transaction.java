@@ -1,5 +1,6 @@
 package com.jexis.jexis_backend.transaction.domain.entities;
 
+import com.jexis.jexis_backend.authorization.domain.entities.Authorization;
 import com.jexis.jexis_backend.card.domain.entities.Card;
 import com.jexis.jexis_backend.transaction.domain.enums.PaymentMethod;
 import com.jexis.jexis_backend.transaction.domain.enums.TransactionDirection;
@@ -66,8 +67,9 @@ public class Transaction {
     @JoinColumn(name = "card_id", referencedColumnName = "id")
     private Card card;
 
-//    @Column()
-//    private String authorizationId;
+    @ManyToOne
+    @JoinColumn(name = "authorization_id", referencedColumnName = "id")
+    private Authorization authorization;
 
     @Column
     private String merchantName;
@@ -216,6 +218,14 @@ public class Transaction {
 
     public void setCard(Card card) {
         this.card = card;
+    }
+
+    public Authorization getAuthorization() {
+        return authorization;
+    }
+
+    public void setAuthorization(Authorization authorization) {
+        this.authorization = authorization;
     }
 
     public String getMerchantName() {
