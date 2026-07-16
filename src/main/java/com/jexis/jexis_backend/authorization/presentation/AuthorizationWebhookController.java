@@ -67,8 +67,6 @@ public class AuthorizationWebhookController {
 
         Authorization authorization = (Authorization) object;
 
-        System.out.println(authorization.toString());
-
         CreateAuthorizationDto dto = new CreateAuthorizationDto(
                 authorization.getCard().getFinancialAccount(),
                 authorization.getId(),

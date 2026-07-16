@@ -59,13 +59,12 @@ public class CardWebhookController {
                         TransactionStatus.COMPLETED,
                         TransactionDirection.DEBIT,
                         issuingTransaction.getCard(),
+                        issuingTransaction.getAuthorization(),
                         issuingTransaction.getMerchantData().getName(),
                         issuingTransaction.getMerchantData().getCategory(),
                         issuingTransaction.getMerchantData().getCity(),
                         issuingTransaction.getMerchantData().getCountry()
                 );
-
-                System.out.println(issuingTransaction.toString());
 
                 createCardTransactionUseCase.execute(dto);
                 logger.info("STRIPE", "Issuing transaction created");
