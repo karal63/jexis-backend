@@ -1,7 +1,9 @@
 package com.jexis.jexis_backend.authorization.presentation;
 
 import com.jexis.jexis_backend.authorization.application.dto.CreateAuthorizationDto;
+import com.jexis.jexis_backend.authorization.application.dto.UpdateAuthorizationDto;
 import com.jexis.jexis_backend.authorization.application.useCases.CreateAuthorizationUseCase;
+import com.jexis.jexis_backend.authorization.application.useCases.UpdateAuthorizationUseCase;
 import com.jexis.jexis_backend.authorization.domain.enums.AuthorizationStatus;
 import com.jexis.jexis_backend.common.logging.AsyncLogger;
 import com.stripe.model.Event;
@@ -22,12 +24,15 @@ public class AuthorizationWebhookController {
     private String webhookSecret;
     private final AsyncLogger logger;
     private final CreateAuthorizationUseCase createAuthorizationUseCase;
+    private final UpdateAuthorizationUseCase updateAuthorizationUseCase;
 
     public AuthorizationWebhookController(
             AsyncLogger logger,
-            CreateAuthorizationUseCase createAuthorizationUseCase) {
+            CreateAuthorizationUseCase createAuthorizationUseCase,
+            UpdateAuthorizationUseCase updateAuthorizationUseCase) {
         this.logger = logger;
         this.createAuthorizationUseCase = createAuthorizationUseCase;
+        this.updateAuthorizationUseCase = updateAuthorizationUseCase;
     }
 
     @PostMapping
@@ -109,13 +114,10 @@ public class AuthorizationWebhookController {
 
         Authorization authorization = (Authorization) object;
 
-        CreateAuthorizationDto dto = new CreateAuthorizationDto(
-                authorization.getCard().getFinancialAccount(),
+        UpdateAuthorizationDto dto = new UpdateAuthorizationDto(
                 authorization.getId(),
-                authorization.getCard().getId(),
                 authorization.getApproved(),
                 authorization.getAmount(),
-                authorization.getCurrency(),
                 mapAuthorizationStatus(authorization.getStatus()),
                 authorization.getMerchantData().getName(),
                 authorization.getMerchantData().getCategory(),
@@ -123,7 +125,7 @@ public class AuthorizationWebhookController {
                 authorization.getMerchantData().getCountry()
         );
 
-        createAuthorizationUseCase.execute(dto);
+        updateAuthorizationUseCase.execute(dto);
         logger.info("STRIPE", "Issuing authorization updated");
     }
 
