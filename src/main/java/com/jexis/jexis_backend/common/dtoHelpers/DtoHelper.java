@@ -4,6 +4,8 @@ import org.springframework.stereotype.Service;
 
 import com.jexis.jexis_backend.account.application.dto.AccountResponseDto;
 import com.jexis.jexis_backend.account.domain.entities.Account;
+import com.jexis.jexis_backend.authorization.application.dto.AuthorizationResponseDto;
+import com.jexis.jexis_backend.authorization.domain.entities.Authorization;
 import com.jexis.jexis_backend.card.application.dto.CardResponseDto;
 import com.jexis.jexis_backend.card.domain.entities.Card;
 import com.jexis.jexis_backend.cardholder.application.dto.CardHolderResponseDto;
@@ -125,5 +127,22 @@ public class DtoHelper {
                 transaction.getMerchantCity(),
                 transaction.getMerchantCountry(),
                 transaction.getCreatedAt());
+    }
+
+    public AuthorizationResponseDto toAuthorizationDto(Authorization authorization) {
+        return new AuthorizationResponseDto(
+                authorization.getId(),
+                toWalletDto(authorization.getWallet()),
+                authorization.getStripeAuthorizationId(),
+                toCardDto(authorization.getCard()),
+                authorization.getApproved(),
+                authorization.getAmount(),
+                authorization.getCurrency(),
+                authorization.getStatus(),
+                authorization.getMerchantName(),
+                authorization.getMerchantCategory(),
+                authorization.getMerchantCity(),
+                authorization.getMerchantCountry(),
+                authorization.getCreatedAt());
     }
 }

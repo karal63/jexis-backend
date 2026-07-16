@@ -8,16 +8,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class UpdateAuthorizationUseCase {
     private final AuthorizationRepository authorizationRepository;
+    private final GetAuthorizationByStripeIdUseCase getAuthorizationByStripeIdUseCase;
 
-    public UpdateAuthorizationUseCase(AuthorizationRepository authorizationRepository) {
+    public UpdateAuthorizationUseCase(AuthorizationRepository authorizationRepository, GetAuthorizationByStripeIdUseCase getAuthorizationByStripeIdUseCase) {
         this.authorizationRepository = authorizationRepository;
+        this.getAuthorizationByStripeIdUseCase = getAuthorizationByStripeIdUseCase;
     }
 
     public void execute(UpdateAuthorizationDto dto) {
-        Authorization authorization = authorizationRepository
-                .findByStripeAuthorizationId(dto.stripeAuthorizationId())
-                .orElseThrow(() -> new IllegalStateException(
-                        "Authorization not found for Stripe ID: " + dto.stripeAuthorizationId()));
+        Authorization authorization = getAuthorizationByStripeIdUseCase.execute(dto.stripeAuthorizationId());
 
         boolean hasChanges = false;
 

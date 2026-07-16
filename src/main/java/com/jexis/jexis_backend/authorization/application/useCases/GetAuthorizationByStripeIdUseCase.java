@@ -1,6 +1,7 @@
 package com.jexis.jexis_backend.authorization.application.useCases;
 
 import com.jexis.jexis_backend.authorization.domain.entities.Authorization;
+import com.jexis.jexis_backend.authorization.domain.exceptions.AuthorizationNotFoundException;
 import com.jexis.jexis_backend.authorization.infrastructure.AuthorizationRepository;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +14,6 @@ public class GetAuthorizationByStripeIdUseCase {
     }
 
     public Authorization execute(String stripeId) {
-        // TODO create custom exception
-        return repo.findByStripeAuthorizationId(stripeId).orElseThrow(IllegalAccessError::new);
+        return repo.findByStripeAuthorizationId(stripeId).orElseThrow(AuthorizationNotFoundException::new);
     }
 }
