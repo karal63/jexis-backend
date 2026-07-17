@@ -3,7 +3,8 @@ package com.jexis.jexis_backend.wallet.presentation;
 import java.util.List;
 import java.util.UUID;
 
-import com.jexis.jexis_backend.wallet.application.dto.AddReceivedCreditsDto;
+import com.jexis.jexis_backend.stripe.application.useCases.StripeOutboundTransferUseCase;
+import com.jexis.jexis_backend.wallet.application.dto.*;
 import com.jexis.jexis_backend.wallet.application.useCases.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +22,6 @@ import com.jexis.jexis_backend.account.application.useCases.GetAccountUseCase;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.auth.application.dto.AuthUser;
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
-import com.jexis.jexis_backend.wallet.application.dto.CreateWalletDto;
-import com.jexis.jexis_backend.wallet.application.dto.EditWalletDto;
-import com.jexis.jexis_backend.wallet.application.dto.WalletResponseDto;
 import com.jexis.jexis_backend.wallet.domain.entities.Wallet;
 
 import jakarta.validation.Valid;
@@ -57,11 +55,13 @@ public class WalletController {
     private final DtoHelper dtoHelper;
     private final GetAccountWalletsUseCase getAccountWalletsUseCase;
     private final AddMoneyUseCase addMoneyUseCase;
+    private final CreateOutboundTransferUseCase createOutboundTransferUseCase;
 
     public WalletController(GetAllWalletsUseCase getAllWalletsUseCase, GetAccountUseCase getAccountUseCase,
                             CreateWalletUseCase createWalletUseCase, GetWalletUseCase getWalletUseCase,
                             EditWalletUseCase editWalletUseCase, CloseWalletUseCase deleteWalletUseCase,
-                            DtoHelper dtoHelper, GetAccountWalletsUseCase getAccountWalletsUseCase, AddMoneyUseCase addMoneyUseCase) {
+                            DtoHelper dtoHelper, GetAccountWalletsUseCase getAccountWalletsUseCase, AddMoneyUseCase addMoneyUseCase,
+                            CreateOutboundTransferUseCase createOutboundTransferUseCase) {
         this.getAllWalletsUseCase = getAllWalletsUseCase;
         this.getAccountUseCase = getAccountUseCase;
         this.createWalletUseCase = createWalletUseCase;
@@ -71,6 +71,7 @@ public class WalletController {
         this.dtoHelper = dtoHelper;
         this.getAccountWalletsUseCase = getAccountWalletsUseCase;
         this.addMoneyUseCase = addMoneyUseCase;
+        this.createOutboundTransferUseCase = createOutboundTransferUseCase;
     }
 
     /**
@@ -143,6 +144,13 @@ public class WalletController {
         return ResponseEntity.ok("Wallet has been closed");
     }
 
+    @PostMapping("/wallets/{id}/create-outbound-transfer")
+    @PreAuthorize("@walletAuthorization.canCreateOutboundTransfers(authentication.principal.id(), #id)")
+    public ResponseEntity<?> createOutboundTransfer(@PathVariable UUID id, @Valid @RequestBody CreateOutboundTransferDto body) {
+        createOutboundTransferUseCase.execute(id, body);
+        return ResponseEntity.ok("Outbound transfer has been created");
+    }
+
     /**
      * AddMoney
      * Allows to add money to selected financial account
@@ -157,4 +165,5 @@ public class WalletController {
         addMoneyUseCase.execute(id, walletId, body);
         return ResponseEntity.ok("Money has been added");
     }
+
 }

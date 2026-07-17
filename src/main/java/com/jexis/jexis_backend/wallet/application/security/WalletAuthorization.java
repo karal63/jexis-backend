@@ -54,4 +54,15 @@ public class WalletAuthorization {
         return hasRoleUseCase.execute(userId, accountId, Role.OWNER)
                 && wallet.getAccount().getId().equals(accountId);
     }
+
+    public boolean canCreateOutboundTransfers(UUID userId, UUID walletId) {
+        System.out.println(userId);
+        System.out.println(walletId);
+        Wallet wallet = getWalletUseCase.execute(walletId);
+        System.out.println(wallet.toString());
+        UUID accountId = wallet.getAccount().getId();
+
+        return hasRoleUseCase.execute(userId, accountId, Role.OWNER)
+                && wallet.getAccount().getId().equals(accountId);
+    }
 }
