@@ -53,8 +53,8 @@ public class SynchronizeOutboundTransfer {
                     treasuryTransaction.getId(),
                     transfer.getId(),
                     TransactionType.INBOUND_TRANSFER,
-                    transfer.getAmount(),
-                    transfer.getCurrency(),
+                    treasuryTransaction.getAmount(),
+                    treasuryTransaction.getCurrency(),
                     TransactionStatus.COMPLETED,
                     TransactionDirection.CREDIT
             );

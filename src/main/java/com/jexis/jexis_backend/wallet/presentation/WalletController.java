@@ -6,6 +6,7 @@ import java.util.UUID;
 import com.jexis.jexis_backend.stripe.application.useCases.StripeOutboundTransferUseCase;
 import com.jexis.jexis_backend.wallet.application.dto.*;
 import com.jexis.jexis_backend.wallet.application.useCases.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -44,6 +45,7 @@ import jakarta.validation.Valid;
  */
 @RestController
 @RequestMapping("/")
+@RequiredArgsConstructor
 public class WalletController {
 
     private final GetAllWalletsUseCase getAllWalletsUseCase;
@@ -56,23 +58,7 @@ public class WalletController {
     private final GetAccountWalletsUseCase getAccountWalletsUseCase;
     private final AddMoneyUseCase addMoneyUseCase;
     private final CreateOutboundTransferUseCase createOutboundTransferUseCase;
-
-    public WalletController(GetAllWalletsUseCase getAllWalletsUseCase, GetAccountUseCase getAccountUseCase,
-                            CreateWalletUseCase createWalletUseCase, GetWalletUseCase getWalletUseCase,
-                            EditWalletUseCase editWalletUseCase, CloseWalletUseCase deleteWalletUseCase,
-                            DtoHelper dtoHelper, GetAccountWalletsUseCase getAccountWalletsUseCase, AddMoneyUseCase addMoneyUseCase,
-                            CreateOutboundTransferUseCase createOutboundTransferUseCase) {
-        this.getAllWalletsUseCase = getAllWalletsUseCase;
-        this.getAccountUseCase = getAccountUseCase;
-        this.createWalletUseCase = createWalletUseCase;
-        this.getWalletUseCase = getWalletUseCase;
-        this.editWalletUseCase = editWalletUseCase;
-        this.deleteWalletUseCase = deleteWalletUseCase;
-        this.dtoHelper = dtoHelper;
-        this.getAccountWalletsUseCase = getAccountWalletsUseCase;
-        this.addMoneyUseCase = addMoneyUseCase;
-        this.createOutboundTransferUseCase = createOutboundTransferUseCase;
-    }
+    private final CancelOutboundTransferUseCase cancelOutboundTransferUseCase;
 
     /**
      * Retrieves all wallets available in the system.
@@ -149,6 +135,13 @@ public class WalletController {
     public ResponseEntity<?> createOutboundTransfer(@PathVariable UUID id, @Valid @RequestBody CreateOutboundTransferDto body) {
         createOutboundTransferUseCase.execute(id, body);
         return ResponseEntity.ok("Outbound transfer has been created");
+    }
+
+    @PostMapping("/wallets/cancel-outbound-transfer/{transactionId}")
+    @PreAuthorize("@walletAuthorization.canCancelOutboundTransfers(authentication.principal.id(), #transactionId)")
+    public ResponseEntity<?> cancelOutboundTransfer(@PathVariable UUID transactionId) {
+        cancelOutboundTransferUseCase.execute(transactionId);
+        return ResponseEntity.ok("Outbound transfer has been canceled");
     }
 
     /**
