@@ -24,7 +24,7 @@ public class Transaction {
     @JoinColumn(name = "wallet_id", referencedColumnName = "id", nullable = false)
     private Wallet wallet;
 
-    @Column()
+    @Column(unique = true)
     private String stripeObjectId;
 
     @Column()
@@ -61,6 +61,9 @@ public class Transaction {
     @Column
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
+
+    @Column
+    private LocalDateTime expectedArrivalDate;
 
     // card payments
     @ManyToOne
@@ -266,5 +269,13 @@ public class Transaction {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getExpectedArrivalDate() {
+        return expectedArrivalDate;
+    }
+
+    public void setExpectedArrivalDate(LocalDateTime expectedArrivalDate) {
+        this.expectedArrivalDate = expectedArrivalDate;
     }
 }
