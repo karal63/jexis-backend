@@ -1,6 +1,7 @@
 package com.jexis.jexis_backend.transaction.application.useCases;
 
 import com.jexis.jexis_backend.transaction.domain.entities.Transaction;
+    import com.jexis.jexis_backend.transaction.domain.exceptions.TransactionNotFoundException;
 import com.jexis.jexis_backend.transaction.infrastructure.TransactionRepository;
 import com.stripe.model.Event;
 import com.stripe.model.treasury.OutboundTransfer;
@@ -20,7 +21,7 @@ public class UpdateOutboundTransferExpectedArrivalDateUseCase {
 
     public void execute(OutboundTransfer transfer) {
         Transaction transaction = repo.findByStripeObjectId(transfer.getId())
-                .orElseThrow(() -> new IllegalStateException("Transaction not found for transfer: " + transfer.getId()));
+                .orElseThrow(TransactionNotFoundException::new);
 
         if (transfer.getExpectedArrivalDate() != null) {
             transaction.setExpectedArrivalDate(

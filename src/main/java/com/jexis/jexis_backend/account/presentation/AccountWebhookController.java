@@ -2,6 +2,7 @@ package com.jexis.jexis_backend.account.presentation;
 
 import com.jexis.jexis_backend.account.application.useCases.EditAccountUseCase;
 import com.jexis.jexis_backend.common.logging.AsyncLogger;
+import com.jexis.jexis_backend.externalAccount.application.useCases.DeleteExternalAccountUseCase;
 import com.jexis.jexis_backend.externalAccount.application.useCases.SynchronizeExternalAccountUseCase;
 import com.stripe.model.BankAccount;
 import com.stripe.model.Event;
@@ -21,6 +22,7 @@ public class AccountWebhookController {
     private final EditAccountUseCase editAccountUseCase;
     private final AsyncLogger logger;
     private final SynchronizeExternalAccountUseCase synchronizeExternalAccountUseCase;
+    private final DeleteExternalAccountUseCase deleteExternalAccountUseCase;
 
     @PostMapping
     public ResponseEntity<String> handleWebhook(
@@ -46,6 +48,8 @@ public class AccountWebhookController {
                 break;
             case "account.external_account.deleted":
                 logger.info("STRIPE_WEBHOOK", "account.external_account.deleted webhook arrived");
+                BankAccount deletedData = (BankAccount) event.getDataObjectDeserializer().getObject().orElseThrow();
+                deleteExternalAccountUseCase.execute(deletedData.getId());
                 break;
             case "account.external_account.updated":
                 logger.info("STRIPE_WEBHOOK", "account.external_account.updated webhook arrived");
