@@ -3,9 +3,15 @@ package com.jexis.jexis_backend.transaction.application.useCases;
 import com.jexis.jexis_backend.stripe.application.useCases.GetStripeTransactionUseCase;
 import com.jexis.jexis_backend.transaction.application.dto.CreateBankTransactionDto;
 import com.jexis.jexis_backend.transaction.domain.entities.Transaction;
+import com.jexis.jexis_backend.transaction.domain.enums.PaymentMethod;
+import com.jexis.jexis_backend.transaction.domain.enums.TransactionDirection;
+import com.jexis.jexis_backend.transaction.domain.enums.TransactionStatus;
+import com.jexis.jexis_backend.transaction.domain.enums.TransactionType;
 import com.jexis.jexis_backend.transaction.infrastructure.TransactionRepository;
 import com.jexis.jexis_backend.wallet.application.useCases.GetWalletByFAIdUseCase;
 import com.jexis.jexis_backend.wallet.domain.entities.Wallet;
+import com.stripe.model.Event;
+import com.stripe.model.treasury.ReceivedCredit;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,26 +27,26 @@ public class CreateBankTransactionUseCase {
         this.repo = repo;
     }
 
-    public void execute(CreateBankTransactionDto dto) {
-        com.stripe.model.treasury.Transaction treasuryTransaction = getStripeTransactionUseCase.execute(dto.accountId(), dto.transactionId());
+    public void execute(String accountId, ReceivedCredit credit) {
+        com.stripe.model.treasury.Transaction treasuryTransaction = getStripeTransactionUseCase.execute(accountId, credit.getTransaction());
 
-        Wallet wallet = getWalletByFAIdUseCase.execute(dto.financialAccountId());
+        Wallet wallet = getWalletByFAIdUseCase.execute(credit.getFinancialAccount());
 
         Transaction transaction = new Transaction(
                 wallet,
                 treasuryTransaction.getId(),
-                dto.stripeObjectId(),
-                dto.type(),
-                treasuryTransaction.getAmount(),
-                treasuryTransaction.getCurrency(),
-                dto.status(),
-                dto.direction()
+                credit.getId(),
+                TransactionType.INBOUND_TRANSFER,
+                credit.getAmount(),
+                credit.getCurrency(),
+                TransactionStatus.COMPLETED,
+                TransactionDirection.CREDIT
         );
 
-        transaction.setBankName(dto.bankName());
-        transaction.setBankAccountLast4(dto.bankAccountLast4());
-        transaction.setRoutingNumber(dto.routingNumber());
-        transaction.setPaymentMethod(dto.paymentMethod());
+        transaction.setBankName(credit.getInitiatingPaymentMethodDetails().getUsBankAccount().getBankName());
+        transaction.setBankAccountLast4(credit.getInitiatingPaymentMethodDetails().getUsBankAccount().getLast4());
+        transaction.setRoutingNumber(credit.getInitiatingPaymentMethodDetails().getUsBankAccount().getRoutingNumber());
+        transaction.setPaymentMethod(PaymentMethod.valueOf(credit.getNetwork().toUpperCase()));
 
         repo.save(transaction);
     }
