@@ -1,6 +1,7 @@
 package com.jexis.jexis_backend.account.application.useCases;
 
 import com.jexis.jexis_backend.stripe.application.useCases.RetrieveAccountByIdUseCase;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import com.jexis.jexis_backend.account.application.dto.EditAccountDto;
@@ -19,21 +20,14 @@ import com.jexis.jexis_backend.user.infrastructure.UserRepository;
  * Author: Leo
  */
 @Service
+@RequiredArgsConstructor
 public class EditAccountUseCase {
     AccountRepository accountRepo;
     UserRepository userRepo;
     private final DtoHelper dtoHelper;
     private final GetAccountUseCase getAccountUseCase;
     private final RetrieveAccountByIdUseCase retrieveAccountByIdUseCase;
-
-    public EditAccountUseCase(AccountRepository accountRepo, UserRepository userRepo, DtoHelper dtoHelper, GetAccountUseCase getAccountUseCase,
-                              RetrieveAccountByIdUseCase retrieveAccountByIdUseCase) {
-        this.accountRepo = accountRepo;
-        this.userRepo = userRepo;
-        this.dtoHelper = dtoHelper;
-        this.getAccountUseCase = getAccountUseCase;
-        this.retrieveAccountByIdUseCase = retrieveAccountByIdUseCase;
-    }
+    private final GetAccountByStripeIdUseCase getAccountByStripeIdUseCase;
 
     /**
      * Handles account editing.
@@ -47,7 +41,7 @@ public class EditAccountUseCase {
      */
     public void execute(String accountId) {
         com.stripe.model.Account stripeAccount = retrieveAccountByIdUseCase.execute(accountId);
-        Account dbAccount = accountRepo.findByConnectAccountIdAndIsDeletedFalse(stripeAccount.getId()).orElseThrow(AccountNotFoundException::new);
+        Account dbAccount = getAccountByStripeIdUseCase.execute(stripeAccount.getId());
 
         dbAccount.setFirstName(stripeAccount.getIndividual().getFirstName());
         dbAccount.setLastName(stripeAccount.getIndividual().getLastName());

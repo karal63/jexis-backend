@@ -16,4 +16,10 @@ This project is a backend API, so use Postman to test the endpoints.
 
 Ta aplikacja jest przede wszystkim narzędziem do obsługi żądań HTTP wysyłanych za pomocą Postmana. Jej głównym celem jest uruchomienie backendu lokalnie i testowanie poszczególnych endpointów, aby sprawdzić, jak działa interfejs API oraz jak poszczególne moduły współpracują ze sobą. Dzięki takiemu podejściu można łatwo weryfikować logikę biznesową, autoryzację, integrację z bazą danych i poprawność odpowiedzi zwracanych przez aplikację.
 
-<!-- TODO: include in project postman config file like in intern logger -->
+[Postman Collection](postman-collection.json) - Setup and test APIs with pre-configured requests
+
+## Contribution
+
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+If you have a suggestion that would not normally require a commit, feel free to open an issue with an `enhancement` label instead of a commit.
