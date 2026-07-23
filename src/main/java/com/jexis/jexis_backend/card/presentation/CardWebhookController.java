@@ -3,6 +3,7 @@ package com.jexis.jexis_backend.card.presentation;
 import com.jexis.jexis_backend.common.logging.AsyncLogger;
 import com.jexis.jexis_backend.transaction.application.dto.CreateCardTransactionDto;
 import com.jexis.jexis_backend.transaction.application.useCases.CreateCardTransactionUseCase;
+import com.jexis.jexis_backend.transaction.application.useCases.UpdateCardTransactionUseCase;
 import com.jexis.jexis_backend.transaction.domain.enums.TransactionDirection;
 import com.jexis.jexis_backend.transaction.domain.enums.TransactionStatus;
 import com.jexis.jexis_backend.transaction.domain.enums.TransactionType;
@@ -24,6 +25,7 @@ public class CardWebhookController {
     private String webhookSecret;
     private final AsyncLogger logger;
     private final CreateCardTransactionUseCase createCardTransactionUseCase;
+    private final UpdateCardTransactionUseCase updateCardTransactionUseCase;
 
     @PostMapping
     public ResponseEntity<String> handleWebhook(
@@ -69,6 +71,7 @@ public class CardWebhookController {
                 Transaction updatedTransaction = (Transaction) event.getDataObjectDeserializer()
                         .getObject().orElseThrow(() -> new IllegalStateException("Unable to deserialize object"));
 
+                updateCardTransactionUseCase.execute(updatedTransaction);
 
                 break;
         }
