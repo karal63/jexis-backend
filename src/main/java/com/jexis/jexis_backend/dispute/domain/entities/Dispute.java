@@ -1,5 +1,6 @@
 package com.jexis.jexis_backend.dispute.domain.entities;
 
+import com.jexis.jexis_backend.dispute.application.dto.DisputeReason;
 import com.jexis.jexis_backend.dispute.domain.enums.DisputeStatus;
 import com.jexis.jexis_backend.transaction.domain.entities.Transaction;
 import com.jexis.jexis_backend.wallet.domain.entities.Wallet;
@@ -56,12 +57,7 @@ public class Dispute {
 
     @Getter
     @Setter
-    private String reason;
-
-    @Getter
-    @Setter
-    @Column
-    private String evidenceDueBy;
+    private DisputeReason reason;
 
     @Getter
     @Setter
@@ -71,4 +67,17 @@ public class Dispute {
     @Getter
     @Setter
     private LocalDateTime resolvedAt;
+
+    public Dispute() {
+    }
+
+    public Dispute(String stripeDisputeId, Transaction transaction, Wallet wallet, Long amount, String currency, DisputeStatus status, DisputeReason reason) {
+        this.stripeDisputeId = stripeDisputeId;
+        this.transaction = transaction;
+        this.wallet = wallet;
+        this.amount = amount;
+        this.currency = currency;
+        this.status = status;
+        this.reason = reason;
+    }
 }

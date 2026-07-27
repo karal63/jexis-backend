@@ -40,6 +40,7 @@ public class CreateCardTransactionUseCase {
 
         Wallet wallet = getWalletByFAIdUseCase.execute(treasuryTransaction.getFinancialAccount());
         Card card = getCardByStripeIdUseCase.execute(dto.cardId());
+
         Authorization authorization = getAuthorizationByStripeIdUseCase.execute(dto.authorizationId());
 
         Transaction transaction = new Transaction(
