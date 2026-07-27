@@ -1,8 +1,7 @@
-package com.jexis.jexis_backend.stripe.application.useCases;
+package com.jexis.jexis_backend.stripe.application.useCases.createStripeDispute;
 
 import com.jexis.jexis_backend.dispute.application.dto.CreateDisputeDto;
 import com.jexis.jexis_backend.dispute.application.dto.DisputeReason;
-import com.jexis.jexis_backend.dispute.application.useCases.CreateDisputeCanceledUseCase;
 import com.stripe.StripeClient;
 import com.stripe.exception.StripeException;
 import com.stripe.model.issuing.Dispute;
@@ -15,9 +14,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CreateStripeDisputeUseCase {
     private final StripeClient client;
-    private final CreateDisputeCanceledUseCase createDisputeCanceledUseCase;
+    private final CreateStripeDisputeCanceledUseCase createStripeDisputeCanceledUseCase;
+    private final CreateStripeDisputeFraudulentUseCase createStripeDisputeFraudulentUseCase;
 
-    public Dispute execute(CreateDisputeDto body, String connectAccountId, String transactionId, String debitId) {
+    public Dispute execute(CreateDisputeDto body, String connectAccountId, String transactionId) {
         try {
             RequestOptions requestOptions =
                     RequestOptions.builder().setStripeAccount(connectAccountId).build();
@@ -27,18 +27,14 @@ public class CreateStripeDisputeUseCase {
 
             params.setAmount(body.amount());
             params.setTransaction(transactionId);
-//            params.setTreasury(
-//                    DisputeCreateParams.Treasury.builder().setReceivedDebit(debitId).build()
-//            );
 
             DisputeCreateParams.Evidence.Builder builder = DisputeCreateParams.Evidence.builder();
 
             builder.setReason(mapReason(body.disputeEvidence().reason()));
 
             switch (body.disputeEvidence().reason()) {
-                case canceled -> {
-                    createDisputeCanceledUseCase.execute(body, builder);
-                }
+                case canceled -> createStripeDisputeCanceledUseCase.execute(body, builder);
+                case fraudulent -> createStripeDisputeFraudulentUseCase.execute(body, builder);
             }
 
             params.setEvidence(builder.build());

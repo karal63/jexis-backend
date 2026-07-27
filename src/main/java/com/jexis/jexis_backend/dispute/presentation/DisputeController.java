@@ -15,8 +15,8 @@ public class DisputeController {
     private final CreateDisputeUseCase createDisputeUseCase;
 
     @PostMapping("/dispute/create")
-    public void create(@Valid @RequestBody CreateDisputeDto body) {
-        createDisputeUseCase.execute(body);
+    public Dispute create(@Valid @RequestBody CreateDisputeDto body) {
+        return createDisputeUseCase.execute(body);
     }
 }
 

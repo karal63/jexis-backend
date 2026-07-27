@@ -6,7 +6,7 @@ import com.jexis.jexis_backend.dispute.application.dto.CreateDisputeDto;
 import com.jexis.jexis_backend.dispute.domain.entities.Dispute;
 import com.jexis.jexis_backend.dispute.domain.enums.DisputeStatus;
 import com.jexis.jexis_backend.dispute.infrastructure.DisputeRepository;
-import com.jexis.jexis_backend.stripe.application.useCases.CreateStripeDisputeUseCase;
+import com.jexis.jexis_backend.stripe.application.useCases.createStripeDispute.CreateStripeDisputeUseCase;
 import com.jexis.jexis_backend.transaction.application.useCases.GetTransactionUseCase;
 import com.jexis.jexis_backend.transaction.domain.entities.Transaction;
 import com.jexis.jexis_backend.wallet.application.useCases.GetWalletUseCase;
@@ -23,11 +23,11 @@ public class CreateDisputeUseCase {
     private final GetWalletUseCase getWalletUseCase;
     private final DisputeRepository repo;
 
-    public void execute(CreateDisputeDto body) {
+    public Dispute execute(CreateDisputeDto body) {
         Account account = getAccountUseCase.execute(body.accountId());
         Transaction transaction = getTransactionUseCase.execute(body.transactionId());
 
-        com.stripe.model.issuing.Dispute stripeDispute = createStripeDisputeUseCase.execute(body, account.getConnectAccountId(), transaction.getStripeObjectId(), transaction.getStripeObjectId());
+        com.stripe.model.issuing.Dispute stripeDispute = createStripeDisputeUseCase.execute(body, account.getConnectAccountId(), transaction.getStripeObjectId());
 
         Wallet wallet = getWalletUseCase.execute(transaction.getWallet().getId());
 
@@ -41,6 +41,6 @@ public class CreateDisputeUseCase {
                 body.disputeEvidence().reason()
         );
 
-        repo.save(dispute);
+        return repo.save(dispute);
     }
 }
