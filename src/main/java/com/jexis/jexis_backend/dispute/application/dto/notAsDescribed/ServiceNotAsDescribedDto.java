@@ -5,9 +5,9 @@ import jakarta.validation.constraints.NotNull;
 
 public record ServiceNotAsDescribedDto(
         String additionalDocumentation,
-        @NotNull String canceled_at,
+        @NotNull Long canceledAt,
         @NotNull String cancellationReason,
         @NotNull String explanation,
-        @NotNull String receivedAt
+        @NotNull Long receivedAt
 ) {
 }

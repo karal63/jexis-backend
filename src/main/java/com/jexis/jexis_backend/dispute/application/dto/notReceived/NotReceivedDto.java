@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record NotReceivedDto(
         String additional_documentation,
-        @NotNull String expectedAt,
+        @NotNull Long expectedAt,
         @NotNull String explanation,
         @NotNull String productDescription,
         @NotNull ProductType productType

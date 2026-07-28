@@ -15,7 +15,13 @@ import org.springframework.stereotype.Service;
 public class CreateStripeDisputeUseCase {
     private final StripeClient client;
     private final CreateStripeDisputeCanceledUseCase createStripeDisputeCanceledUseCase;
+    private final CreateStripeDisputeDuplicateUseCase createStripeDisputeDuplicateUseCase;
     private final CreateStripeDisputeFraudulentUseCase createStripeDisputeFraudulentUseCase;
+    private final CreateStripeDisputeMerchandiseNotAsDescribedUseCase createStripeDisputeMerchandiseNotAsDescribedUseCase;
+    private final CreateStripeDisputeNoValidAuthorizationUseCase createStripeDisputeNoValidAuthorizationUseCase;
+    private final CreateStripeDisputeNotReceivedUseCase createStripeDisputeNotReceivedUseCase;
+    private final CreateStripeDisputeOtherUseCase createStripeDisputeOtherUseCase;
+    private final CreateStripeDisputeServiceNotAsDescribedUseCase createStripeDisputeServiceNotAsDescribedUseCase;
 
     public Dispute execute(CreateDisputeDto body, String connectAccountId, String transactionId) {
         try {
@@ -34,7 +40,13 @@ public class CreateStripeDisputeUseCase {
 
             switch (body.disputeEvidence().reason()) {
                 case canceled -> createStripeDisputeCanceledUseCase.execute(body, builder);
+                case duplicate -> createStripeDisputeDuplicateUseCase.execute(body, builder);
                 case fraudulent -> createStripeDisputeFraudulentUseCase.execute(body, builder);
+                case merchandise_not_as_described -> createStripeDisputeMerchandiseNotAsDescribedUseCase.execute(body, builder);
+                case no_valid_authorization -> createStripeDisputeNoValidAuthorizationUseCase.execute(body, builder);
+                case not_received -> createStripeDisputeNotReceivedUseCase.execute(body, builder);
+                case other -> createStripeDisputeOtherUseCase.execute(body, builder);
+                case service_not_as_described -> createStripeDisputeServiceNotAsDescribedUseCase.execute(body, builder);
             }
 
             params.setEvidence(builder.build());

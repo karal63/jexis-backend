@@ -20,4 +20,25 @@ public class DisputeHelper {
             case successful ->  DisputeCreateParams.Evidence.Canceled.ReturnStatus.SUCCESSFUL;
         };
     }
+
+    public DisputeCreateParams.Evidence.NotReceived.ProductType mapNotReceivedProductType(ProductType productType) {
+        return switch (productType) {
+            case merchandise -> DisputeCreateParams.Evidence.NotReceived.ProductType.MERCHANDISE;
+            case service -> DisputeCreateParams.Evidence.NotReceived.ProductType.SERVICE;
+        };
+    }
+
+    public DisputeCreateParams.Evidence.Other.ProductType mapOtherProductType(ProductType productType) {
+        return switch (productType) {
+            case merchandise -> DisputeCreateParams.Evidence.Other.ProductType.MERCHANDISE;
+            case service -> DisputeCreateParams.Evidence.Other.ProductType.SERVICE;
+        };
+    }
+
+    public DisputeCreateParams.Evidence.MerchandiseNotAsDescribed.ReturnStatus mapMerchandiseReturnStatus(ReturnStatus returnStatus) {
+        return switch (returnStatus) {
+            case merchant_rejected -> DisputeCreateParams.Evidence.MerchandiseNotAsDescribed.ReturnStatus.MERCHANT_REJECTED;
+            case successful -> DisputeCreateParams.Evidence.MerchandiseNotAsDescribed.ReturnStatus.SUCCESSFUL;
+        };
+    }
 }
