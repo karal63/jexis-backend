@@ -5,6 +5,7 @@ import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.dispute.application.dto.CreateDisputeDto;
 import com.jexis.jexis_backend.dispute.domain.entities.Dispute;
 import com.jexis.jexis_backend.dispute.domain.enums.DisputeStatus;
+import com.jexis.jexis_backend.dispute.domain.exceptions.DisputeExistsException;
 import com.jexis.jexis_backend.dispute.infrastructure.DisputeRepository;
 import com.jexis.jexis_backend.stripe.application.useCases.createStripeDispute.CreateStripeDisputeUseCase;
 import com.jexis.jexis_backend.transaction.application.useCases.GetTransactionUseCase;
@@ -26,6 +27,10 @@ public class CreateDisputeUseCase {
     public Dispute execute(CreateDisputeDto body) {
         Account account = getAccountUseCase.execute(body.accountId());
         Transaction transaction = getTransactionUseCase.execute(body.transactionId());
+
+        if (transaction.getDispute() != null) {
+            throw new DisputeExistsException();
+        }
 
         com.stripe.model.issuing.Dispute stripeDispute = createStripeDisputeUseCase.execute(body, account.getConnectAccountId(), transaction.getStripeObjectId());
 
