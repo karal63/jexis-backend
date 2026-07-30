@@ -10,8 +10,8 @@ import java.util.UUID;
 public record DisputeResponseDto(
         UUID id,
         TransactionResponseDto transactionId,
-        WalletResponseDto walletId,
-        String stripeDisputeId,
+        WalletResponseDto wallet,
+        String stripeDispute,
         Long amount,
         String currency,
         DisputeStatus status,
