@@ -44,27 +44,9 @@ public class WalletWebhookController {
                         .getDataObjectDeserializer()
                         .getObject()
                         .orElseThrow();
-                System.out.println(createdReceivedCredits.toString());
 
                 createBankTransactionUseCase.execute(event.getAccount(), createdReceivedCredits);
                 logger.info("STRIPE_WEBHOOK", "Received treasury credit created");
-                break;
-            case "treasury.received_credit.failed":
-                logger.info("STRIPE_WEBHOOK", "Webhook received credit failed arrived");
-                ReceivedCredit failedReceivedCredits = (ReceivedCredit) event
-                        .getDataObjectDeserializer()
-                        .getObject()
-                        .orElseThrow();
-                System.out.println(failedReceivedCredits.toString());
-                break;
-            case "treasury.received_credit.succeeded":
-                logger.info("STRIPE_WEBHOOK", "Webhook received credit succeeded arrived");
-                ReceivedCredit succeededReceivedCredits = (ReceivedCredit) event
-                        .getDataObjectDeserializer()
-                        .getObject()
-                        .orElseThrow();
-
-                System.out.println(succeededReceivedCredits.toString());
                 break;
             case "treasury.outbound_transfer.created":
                 logger.info("STRIPE_WEBHOOK", "Webhook outbound transfer created");

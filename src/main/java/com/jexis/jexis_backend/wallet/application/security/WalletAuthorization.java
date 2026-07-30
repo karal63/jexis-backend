@@ -2,6 +2,8 @@ package com.jexis.jexis_backend.wallet.application.security;
 
 import java.util.UUID;
 
+import com.jexis.jexis_backend.externalAccount.application.useCases.GetExternalAccountUseCase;
+import com.jexis.jexis_backend.externalAccount.domain.entities.ExternalAccount;
 import com.jexis.jexis_backend.transaction.application.useCases.GetTransactionUseCase;
 import com.jexis.jexis_backend.transaction.domain.entities.Transaction;
 import com.jexis.jexis_backend.wallet.application.useCases.GetWalletUseCase;
@@ -18,6 +20,7 @@ public class WalletAuthorization {
     private final HasRoleUseCase hasRoleUseCase;
     private final GetWalletUseCase getWalletUseCase;
     private final GetTransactionUseCase getTransactionUseCase;
+    private final GetExternalAccountUseCase getExternalAccountUseCase;
 
     public boolean canView(UUID userId, UUID accountId) {
         return hasRoleUseCase.execute(userId, accountId, Role.OWNER)
@@ -55,11 +58,12 @@ public class WalletAuthorization {
                 && wallet.getAccount().getId().equals(accountId);
     }
 
-    public boolean canCreateOutboundTransfers(UUID userId, UUID walletId) {
+    public boolean canCreateOutboundTransfers(UUID userId, UUID walletId, UUID externalAccountId) {
         Wallet wallet = getWalletUseCase.execute(walletId);
         UUID accountId = wallet.getAccount().getId();
+        ExternalAccount externalAccount = getExternalAccountUseCase.execute(externalAccountId);
 
-        return hasRoleUseCase.execute(userId, accountId, Role.OWNER);
+        return hasRoleUseCase.execute(userId, accountId, Role.OWNER) && externalAccount.getAccount().getId().equals(accountId);
     }
 
     public boolean canCancelOutboundTransfers(UUID userId, UUID transactionId) {
