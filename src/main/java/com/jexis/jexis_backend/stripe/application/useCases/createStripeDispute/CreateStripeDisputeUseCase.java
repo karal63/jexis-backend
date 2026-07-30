@@ -53,7 +53,7 @@ public class CreateStripeDisputeUseCase {
 
             return client.v1().issuing().disputes().create(params.build(), requestOptions);
         } catch (StripeException e) {
-            throw new RuntimeException("Stripe error when creating dispute: " + e);
+            throw new RuntimeException("Stripe error when creating dispute: ", e);
         }
     }
 

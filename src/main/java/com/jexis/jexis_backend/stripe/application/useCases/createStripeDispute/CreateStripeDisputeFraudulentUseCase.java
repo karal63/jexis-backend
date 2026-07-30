@@ -16,7 +16,7 @@ public class CreateStripeDisputeFraudulentUseCase {
         builder.setFraudulent(
                 DisputeCreateParams.Evidence.Fraudulent.builder()
                         .setExplanation(evidence.explanation())
-                        .setAdditionalDocumentation(evidence.additional_documentation() == null ? null : evidence.additional_documentation())
+                        .setAdditionalDocumentation(evidence.additionalDocumentation() == null ? null : evidence.additionalDocumentation())
                         .build()
         );
     }

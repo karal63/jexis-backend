@@ -131,8 +131,7 @@ public class Transaction {
 
     @Getter
     @Setter
-    @OneToOne
-    @JoinColumn(name = "dispute_id", referencedColumnName = "id")
+    @OneToOne(mappedBy = "transactions")
     private Dispute dispute;
 
     @Getter

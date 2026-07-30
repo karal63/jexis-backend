@@ -17,7 +17,7 @@ public class CreateStripeDisputeNotReceivedUseCase {
 
         builder.setNotReceived(
                 DisputeCreateParams.Evidence.NotReceived.builder()
-                        .setAdditionalDocumentation(evidence.additional_documentation() == null ? null :evidence.additional_documentation())
+                        .setAdditionalDocumentation(evidence.additionalDocumentation() == null ? null : evidence.additionalDocumentation())
                         .setExpectedAt(evidence.expectedAt())
                         .setExplanation(evidence.explanation())
                         .setProductDescription(evidence.productDescription())

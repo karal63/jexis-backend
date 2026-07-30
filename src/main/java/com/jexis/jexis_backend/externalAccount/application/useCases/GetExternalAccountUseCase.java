@@ -13,7 +13,7 @@ import java.util.UUID;
 public class GetExternalAccountUseCase {
     private final ExternalAccountRepository repo;
 
-    public ExternalAccount execute(UUID accountId) {
-        return repo.findById(accountId).orElseThrow(ExternalAccountNotFoundException::new);
+    public ExternalAccount execute(UUID externalAccountId) {
+        return repo.findById(externalAccountId).orElseThrow(ExternalAccountNotFoundException::new);
     }
 }

@@ -1,5 +1,6 @@
 package com.jexis.jexis_backend.transaction.application.useCases;
 
+import com.jexis.jexis_backend.common.logging.AsyncLogger;
 import com.jexis.jexis_backend.dispute.domain.entities.Dispute;
 import com.jexis.jexis_backend.dispute.infrastructure.DisputeRepository;
 import com.jexis.jexis_backend.transaction.domain.entities.Transaction;
@@ -14,6 +15,7 @@ import java.util.Optional;
 public class UpdateCardTransactionUseCase {
     private final TransactionRepository transactionRepository;
     private final DisputeRepository disputeRepository;
+    private final AsyncLogger asyncLogger;
 
     public void execute(com.stripe.model.issuing.Transaction issuingTransaction) {
         Optional<Transaction> transaction = transactionRepository.findByStripeObjectId(issuingTransaction.getId());
@@ -30,7 +32,7 @@ public class UpdateCardTransactionUseCase {
 
             transactionRepository.save(transaction.get());
         } else {
-            System.out.println("Transaction that you wanted to update doesnt exist");
+            asyncLogger.info("STRIPE_WEBHOOK", "Issuing transaction update received for unknown transaction: " + issuingTransaction.getId());
         }
     }
 }
