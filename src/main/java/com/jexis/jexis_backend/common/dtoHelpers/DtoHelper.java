@@ -10,6 +10,8 @@ import com.jexis.jexis_backend.card.application.dto.CardResponseDto;
 import com.jexis.jexis_backend.card.domain.entities.Card;
 import com.jexis.jexis_backend.cardholder.application.dto.CardHolderResponseDto;
 import com.jexis.jexis_backend.cardholder.domain.entities.CardHolder;
+import com.jexis.jexis_backend.dispute.application.dto.DisputeResponseDto;
+import com.jexis.jexis_backend.dispute.domain.entities.Dispute;
 import com.jexis.jexis_backend.member.application.dto.MemberResponseDto;
 import com.jexis.jexis_backend.member.domain.entities.Member;
 import com.jexis.jexis_backend.transaction.application.dto.TransactionResponseDto;
@@ -144,5 +146,19 @@ public class DtoHelper {
                 authorization.getMerchantCity(),
                 authorization.getMerchantCountry(),
                 authorization.getCreatedAt());
+    }
+
+    public DisputeResponseDto toDisputeDto(Dispute dispute) {
+        return new DisputeResponseDto(
+                dispute.getId(),
+                toTransactionDto(dispute.getTransaction()),
+                toWalletDto(dispute.getWallet()),
+                dispute.getStripeDisputeId(),
+                dispute.getAmount(),
+                dispute.getCurrency(),
+                dispute.getStatus(),
+                dispute.getReason(),
+                dispute.getCreatedAt(),
+                dispute.getResolvedAt());
     }
 }

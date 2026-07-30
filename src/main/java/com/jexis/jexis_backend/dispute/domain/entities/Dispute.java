@@ -57,6 +57,7 @@ public class Dispute {
 
     @Getter
     @Setter
+    @Enumerated(EnumType.STRING)
     private DisputeReason reason;
 
     @Getter
