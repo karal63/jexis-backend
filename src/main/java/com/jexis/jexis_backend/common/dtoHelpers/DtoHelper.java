@@ -12,6 +12,8 @@ import com.jexis.jexis_backend.cardholder.application.dto.CardHolderResponseDto;
 import com.jexis.jexis_backend.cardholder.domain.entities.CardHolder;
 import com.jexis.jexis_backend.dispute.application.dto.DisputeResponseDto;
 import com.jexis.jexis_backend.dispute.domain.entities.Dispute;
+import com.jexis.jexis_backend.externalAccount.application.dto.ExternalAccountResponseDto;
+import com.jexis.jexis_backend.externalAccount.domain.entities.ExternalAccount;
 import com.jexis.jexis_backend.member.application.dto.MemberResponseDto;
 import com.jexis.jexis_backend.member.domain.entities.Member;
 import com.jexis.jexis_backend.transaction.application.dto.TransactionResponseDto;
@@ -160,5 +162,18 @@ public class DtoHelper {
                 dispute.getReason(),
                 dispute.getCreatedAt(),
                 dispute.getResolvedAt());
+    }
+
+    public ExternalAccountResponseDto toExternalAccountDto(ExternalAccount externalAccount) {
+        return new ExternalAccountResponseDto(
+                externalAccount.getId(),
+                toAccountDto(externalAccount.getAccount()),
+                externalAccount.getStripeExternalAccountId(),
+                externalAccount.getBankName(),
+                externalAccount.getLast4(),
+                externalAccount.getCountry(),
+                externalAccount.getCurrency(),
+                externalAccount.isDefault(),
+                externalAccount.getCreatedAt());
     }
 }

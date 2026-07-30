@@ -131,7 +131,7 @@ public class Transaction {
 
     @Getter
     @Setter
-    @OneToOne(mappedBy = "transactions")
+    @OneToOne(mappedBy = "transaction")
     private Dispute dispute;
 
     @Getter
