@@ -2,6 +2,7 @@ package com.jexis.jexis_backend.transaction.application.useCases;
 
 import com.jexis.jexis_backend.authorization.application.useCases.GetAuthorizationByStripeIdUseCase;
 import com.jexis.jexis_backend.authorization.domain.entities.Authorization;
+import com.jexis.jexis_backend.authorization.infrastructure.AuthorizationRepository;
 import com.jexis.jexis_backend.card.application.useCases.GetCardByStripeIdUseCase;
 import com.jexis.jexis_backend.card.domain.entities.Card;
 import com.jexis.jexis_backend.stripe.application.useCases.GetStripeDebitTransactionUseCase;
@@ -12,9 +13,13 @@ import com.jexis.jexis_backend.transaction.infrastructure.TransactionRepository;
 import com.jexis.jexis_backend.wallet.application.useCases.GetWalletByFAIdUseCase;
 import com.jexis.jexis_backend.wallet.domain.entities.Wallet;
 import com.stripe.model.treasury.ReceivedDebit;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
+@RequiredArgsConstructor
 public class CreateCardTransactionUseCase {
     private final GetStripeTransactionUseCase getStripeTransactionUseCase;
     private final GetStripeDebitTransactionUseCase getStripeDebitTransactionUseCase;
@@ -23,17 +28,6 @@ public class CreateCardTransactionUseCase {
     private final GetCardByStripeIdUseCase  getCardByStripeIdUseCase;
     private final GetAuthorizationByStripeIdUseCase  getAuthorizationByStripeIdUseCase;
 
-    public CreateCardTransactionUseCase(GetWalletByFAIdUseCase getWalletByFAIdUseCase, TransactionRepository repo,  GetStripeTransactionUseCase getStripeTransactionUseCase,
-                                        GetCardByStripeIdUseCase  getCardByStripeIdUseCase, GetStripeDebitTransactionUseCase getStripeDebitTransactionUseCase,
-                                        GetAuthorizationByStripeIdUseCase  getAuthorizationByStripeIdUseCase) {
-        this.getWalletByFAIdUseCase = getWalletByFAIdUseCase;
-        this.repo = repo;
-        this.getStripeTransactionUseCase = getStripeTransactionUseCase;
-        this.getCardByStripeIdUseCase = getCardByStripeIdUseCase;
-        this.getStripeDebitTransactionUseCase = getStripeDebitTransactionUseCase;
-        this.getAuthorizationByStripeIdUseCase = getAuthorizationByStripeIdUseCase;
-    }
-
     public void execute(CreateCardTransactionDto dto) {
         ReceivedDebit receivedDebit = getStripeDebitTransactionUseCase.execute(dto.accountId(), dto.debitTransactionId());
         com.stripe.model.treasury.Transaction treasuryTransaction = getStripeTransactionUseCase.execute(dto.accountId(), receivedDebit.getTransaction());
@@ -41,7 +35,11 @@ public class CreateCardTransactionUseCase {
         Wallet wallet = getWalletByFAIdUseCase.execute(treasuryTransaction.getFinancialAccount());
         Card card = getCardByStripeIdUseCase.execute(dto.cardId());
 
-        Authorization authorization = getAuthorizationByStripeIdUseCase.execute(dto.authorizationId());
+        Optional<Authorization> authorization = Optional.empty();
+
+        if (dto.authorizationId() != null) {
+            authorization = Optional.of(getAuthorizationByStripeIdUseCase.execute(dto.authorizationId()));
+        }
 
         Transaction transaction = new Transaction(
                 wallet,
@@ -55,13 +53,12 @@ public class CreateCardTransactionUseCase {
         );
 
         transaction.setCard(card);
-        transaction.setAuthorization(authorization);
+        transaction.setAuthorization(authorization.orElse(null));
         transaction.setMerchantName(dto.merchantName());
         transaction.setMerchantCategory(dto.merchantCategory());
         transaction.setMerchantCity(dto.merchantCity());
         transaction.setMerchantCountry(dto.merchantCountry());
 
         repo.save(transaction);
-
     }
 }
