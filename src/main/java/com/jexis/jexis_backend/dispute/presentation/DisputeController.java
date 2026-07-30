@@ -32,6 +32,7 @@ public class DisputeController {
     private final DtoHelper dtoHelper;
 
     @PostMapping("/dispute/create")
+    @PreAuthorize("@disputeAuthorization.canCreateDispute(authentication.principal.id(), #body.transactionId())")
     public Dispute create(@Valid @RequestBody CreateDisputeDto body) {
         return createDisputeUseCase.execute(body);
     }
