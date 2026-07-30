@@ -2,12 +2,15 @@ package com.jexis.jexis_backend.transaction.domain.entities;
 
 import com.jexis.jexis_backend.authorization.domain.entities.Authorization;
 import com.jexis.jexis_backend.card.domain.entities.Card;
+import com.jexis.jexis_backend.dispute.domain.entities.Dispute;
 import com.jexis.jexis_backend.transaction.domain.enums.PaymentMethod;
 import com.jexis.jexis_backend.transaction.domain.enums.TransactionDirection;
 import com.jexis.jexis_backend.transaction.domain.enums.TransactionStatus;
 import com.jexis.jexis_backend.transaction.domain.enums.TransactionType;
 import com.jexis.jexis_backend.wallet.domain.entities.Wallet;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -16,80 +19,128 @@ import java.util.UUID;
 @Entity
 @Table(name = "transactions")
 public class Transaction {
+    @Getter
+    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Getter
+    @Setter
     @ManyToOne
     @JoinColumn(name = "wallet_id", referencedColumnName = "id", nullable = false)
     private Wallet wallet;
 
+    @Getter
+    @Setter
     @Column(unique = true)
     private String stripeObjectId;
 
+    @Getter
+    @Setter
     @Column()
     private String stripeTransactionId;
 
+    @Getter
+    @Setter
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private TransactionType type;
 
+    @Getter
+    @Setter
     @Column(nullable = false)
     private Long amount;
 
+    @Getter
+    @Setter
     @Column(nullable = false)
     private String currency;
 
+    @Getter
+    @Setter
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private TransactionStatus status;
 
+    @Getter
+    @Setter
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private TransactionDirection direction;
 
     // bank payments
+    @Getter
+    @Setter
     @Column
     private String bankName;
 
+    @Getter
+    @Setter
     @Column
     private String bankAccountLast4;
 
+    @Getter
+    @Setter
     @Column
     private String routingNumber;
 
+    @Getter
+    @Setter
     @Column
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
 
+    @Getter
+    @Setter
     @Column
     private LocalDateTime expectedArrivalDate;
 
     // card payments
+    @Getter
+    @Setter
     @ManyToOne
     @JoinColumn(name = "card_id", referencedColumnName = "id")
     private Card card;
 
+    @Getter
+    @Setter
     @ManyToOne
     @JoinColumn(name = "authorization_id", referencedColumnName = "id")
     private Authorization authorization;
 
+    @Getter
+    @Setter
     @Column
     private String merchantName;
 
+    @Getter
+    @Setter
     @Column
     private String merchantCategory;
 
+    @Getter
+    @Setter
     @Column
     private String merchantCity;
 
+    @Getter
+    @Setter
     @Column
     private String merchantCountry;
 
+    @Getter
+    @Setter
+    @OneToOne(mappedBy = "transactions")
+    private Dispute dispute;
+
+    @Getter
+    @Setter
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    public Transaction() {}
+    public Transaction() {
+    }
 
     public Transaction(
             Wallet wallet,
@@ -108,174 +159,5 @@ public class Transaction {
         this.currency = currency;
         this.status = status;
         this.direction = direction;
-    }
-
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public Wallet getWallet() {
-        return wallet;
-    }
-
-    public void setWallet(Wallet wallet) {
-        this.wallet = wallet;
-    }
-
-    public String getStripeObjectId() {
-        return stripeObjectId;
-    }
-
-    public void setStripeObjectId(String stripeObjectId) {
-        this.stripeObjectId = stripeObjectId;
-    }
-
-    public String getStripeTransactionId() {
-        return stripeTransactionId;
-    }
-
-    public void setStripeTransactionId(String stripeTransactionId) {
-        this.stripeTransactionId = stripeTransactionId;
-    }
-
-    public TransactionType getType() {
-        return type;
-    }
-
-    public void setType(TransactionType type) {
-        this.type = type;
-    }
-
-    public Long getAmount() {
-        return amount;
-    }
-
-    public void setAmount(Long amount) {
-        this.amount = amount;
-    }
-
-    public String getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(String currency) {
-        this.currency = currency;
-    }
-
-    public TransactionStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(TransactionStatus status) {
-        this.status = status;
-    }
-
-    public TransactionDirection getDirection() {
-        return direction;
-    }
-
-    public void setDirection(TransactionDirection direction) {
-        this.direction = direction;
-    }
-
-    public String getBankName() {
-        return bankName;
-    }
-
-    public void setBankName(String bankName) {
-        this.bankName = bankName;
-    }
-
-    public String getBankAccountLast4() {
-        return bankAccountLast4;
-    }
-
-    public void setBankAccountLast4(String bankAccountLast4) {
-        this.bankAccountLast4 = bankAccountLast4;
-    }
-
-    public String getRoutingNumber() {
-        return routingNumber;
-    }
-
-    public void setRoutingNumber(String routingNumber) {
-        this.routingNumber = routingNumber;
-    }
-
-    public PaymentMethod getPaymentMethod() {
-        return paymentMethod;
-    }
-
-    public void setPaymentMethod(PaymentMethod paymentMethod) {
-        this.paymentMethod = paymentMethod;
-    }
-
-    public Card getCard() {
-        return card;
-    }
-
-    public void setCard(Card card) {
-        this.card = card;
-    }
-
-    public Authorization getAuthorization() {
-        return authorization;
-    }
-
-    public void setAuthorization(Authorization authorization) {
-        this.authorization = authorization;
-    }
-
-    public String getMerchantName() {
-        return merchantName;
-    }
-
-    public void setMerchantName(String merchantName) {
-        this.merchantName = merchantName;
-    }
-
-    public String getMerchantCategory() {
-        return merchantCategory;
-    }
-
-    public void setMerchantCategory(String merchantCategory) {
-        this.merchantCategory = merchantCategory;
-    }
-
-    public String getMerchantCity() {
-        return merchantCity;
-    }
-
-    public void setMerchantCity(String merchantCity) {
-        this.merchantCity = merchantCity;
-    }
-
-    public String getMerchantCountry() {
-        return merchantCountry;
-    }
-
-    public void setMerchantCountry(String merchantCountry) {
-        this.merchantCountry = merchantCountry;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getExpectedArrivalDate() {
-        return expectedArrivalDate;
-    }
-
-    public void setExpectedArrivalDate(LocalDateTime expectedArrivalDate) {
-        this.expectedArrivalDate = expectedArrivalDate;
     }
 }

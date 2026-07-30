@@ -131,7 +131,7 @@ public class WalletController {
     }
 
     @PostMapping("/wallets/{id}/create-outbound-transfer")
-    @PreAuthorize("@walletAuthorization.canCreateOutboundTransfers(authentication.principal.id(), #id)")
+    @PreAuthorize("@walletAuthorization.canCreateOutboundTransfers(authentication.principal.id(), #id, #body.externalAccountId())")
     public ResponseEntity<?> createOutboundTransfer(@PathVariable UUID id, @Valid @RequestBody CreateOutboundTransferDto body) {
         createOutboundTransferUseCase.execute(id, body);
         return ResponseEntity.ok("Outbound transfer has been created");

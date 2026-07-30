@@ -40,12 +40,12 @@ public class WalletWebhookController {
         switch (event.getType()) {
             case "treasury.received_credit.created":
                 logger.info("STRIPE_WEBHOOK", "Webhook received credit created");
-                ReceivedCredit receivedCreditsTransfer = (ReceivedCredit) event
+                ReceivedCredit createdReceivedCredits = (ReceivedCredit) event
                         .getDataObjectDeserializer()
                         .getObject()
                         .orElseThrow();
 
-                createBankTransactionUseCase.execute(event.getAccount(), receivedCreditsTransfer);
+                createBankTransactionUseCase.execute(event.getAccount(), createdReceivedCredits);
                 logger.info("STRIPE_WEBHOOK", "Received treasury credit created");
                 break;
             case "treasury.outbound_transfer.created":

@@ -2,6 +2,8 @@ package com.jexis.jexis_backend.wallet.application.dto;
 
 import jakarta.validation.constraints.NotNull;
 
+import java.util.UUID;
+
 public record CreateOutboundTransferDto(
         @NotNull(message = "Amount is required")
         Long amount,
@@ -13,6 +15,6 @@ public record CreateOutboundTransferDto(
         String description,
 
         @NotNull(message = "External account id is required")
-        String externalAccountId // TODO later change to UUID
+        UUID externalAccountId
 ) {
 }
