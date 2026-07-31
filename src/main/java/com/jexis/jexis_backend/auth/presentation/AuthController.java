@@ -2,21 +2,14 @@ package com.jexis.jexis_backend.auth.presentation;
 
 import java.time.Duration;
 
-import com.jexis.jexis_backend.auth.application.dto.RequestPasswordResetDto;
-import com.jexis.jexis_backend.auth.application.useCases.RequestPasswordResetUseCase;
+import com.jexis.jexis_backend.auth.application.dto.*;
+import com.jexis.jexis_backend.auth.application.useCases.*;
 import com.jexis.jexis_backend.passwordResetToken.application.useCases.CreatePasswordResetTokenUseCase;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.jexis.jexis_backend.auth.application.dto.LoginDto;
-import com.jexis.jexis_backend.auth.application.dto.LoginResult;
-import com.jexis.jexis_backend.auth.application.dto.SignupResult;
-import com.jexis.jexis_backend.auth.application.dto.TokenPair;
-import com.jexis.jexis_backend.auth.application.useCases.LoginUseCase;
-import com.jexis.jexis_backend.auth.application.useCases.RefreshTokensUseCase;
-import com.jexis.jexis_backend.auth.application.useCases.SignupUseCase;
 import com.jexis.jexis_backend.user.application.dto.CreateDto;
 import jakarta.validation.Valid;
 
@@ -38,17 +31,19 @@ public class AuthController {
 
     private final CreatePasswordResetTokenUseCase createPasswordResetTokenUseCase;
     private final RequestPasswordResetUseCase requestPasswordResetUseCase;
+    private final ConfirmPasswordResetUseCase confirmPasswordResetUseCase;
     public SignupUseCase signupUseCase;
     public LoginUseCase loginUseCase;
     public RefreshTokensUseCase refreshTokensUseCase;
 
     public AuthController(SignupUseCase signupUseCase, LoginUseCase loginUseCase,
-                          RefreshTokensUseCase refreshTokensUseCase, CreatePasswordResetTokenUseCase createPasswordResetTokenUseCase, RequestPasswordResetUseCase requestPasswordResetUseCase) {
+                          RefreshTokensUseCase refreshTokensUseCase, CreatePasswordResetTokenUseCase createPasswordResetTokenUseCase, RequestPasswordResetUseCase requestPasswordResetUseCase, ConfirmPasswordResetUseCase confirmPasswordResetUseCase) {
         this.signupUseCase = signupUseCase;
         this.loginUseCase = loginUseCase;
         this.refreshTokensUseCase = refreshTokensUseCase;
         this.createPasswordResetTokenUseCase = createPasswordResetTokenUseCase;
         this.requestPasswordResetUseCase = requestPasswordResetUseCase;
+        this.confirmPasswordResetUseCase = confirmPasswordResetUseCase;
     }
 
     /**
@@ -204,7 +199,8 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password/confirm")
-    public ResponseEntity<String> confirmPasswordReset(@Valid @RequestBody RequestPasswordResetDto body) {
-        return ResponseEntity.ok("We sent you a password reset link.");
+    public ResponseEntity<String> confirmPasswordReset(@Valid @RequestBody ConfirmPasswordResetDto body) {
+        confirmPasswordResetUseCase.execute(body);
+        return ResponseEntity.ok("Password changed successfully.");
     }
 }
