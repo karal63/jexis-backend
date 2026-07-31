@@ -1,11 +1,13 @@
 package com.jexis.jexis_backend.user.presentation;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
 import com.jexis.jexis_backend.user.application.dto.*;
 import com.jexis.jexis_backend.user.application.useCases.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -45,6 +47,7 @@ public class UserController {
     private final RequestPasswordChangeUseCase requestPasswordChangeUseCase;
     private final SendActivationLinkUseCase sendActivationLinkUseCase;
     private final ActivateUserUseCase activateUserUseCase;
+    private @Value("${application.origin}") String applicationOrigin;
 
     /**
      * Returns a list of all users.
@@ -149,8 +152,10 @@ public class UserController {
     }
 
     @GetMapping("/user/activate")
-    public ResponseEntity<String> sendActivationLink(@RequestParam String token) {
+    public ResponseEntity<Void> sendActivationLink(@RequestParam String token) {
         activateUserUseCase.execute(token);
-        return ResponseEntity.ok("User activated successfully.");
+
+        String redirectUrl = "%s/dashboard".formatted(applicationOrigin);
+        return ResponseEntity.status(302).location(URI.create(redirectUrl)).build();
     }
 }

@@ -49,9 +49,6 @@ public class EditUserUseCase {
         if (body.getLastName() != null) {
             user.setLastName(body.getLastName());
         }
-        if (body.getEmail() != null) {
-            user.setEmail(body.getEmail());
-        }
         if (body.getPhoneNumber() != null) {
             user.setPhoneNumber(body.getPhoneNumber());
         }

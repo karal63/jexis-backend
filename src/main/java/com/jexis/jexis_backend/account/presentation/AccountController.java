@@ -127,8 +127,7 @@ public class AccountController {
      */
     @PostMapping("/accounts/create")
     public AccountResponseDto create(@AuthenticationPrincipal AuthUser user) {
-        User foundUser = getUserUseCase.execute(user.id());
-        return createAccountUseCase.execute(foundUser);
+        return createAccountUseCase.execute(user);
     }
 
     /**
