@@ -1,13 +1,11 @@
 package com.jexis.jexis_backend.user.application.useCases;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
 import com.jexis.jexis_backend.user.application.dto.EditDto;
 import com.jexis.jexis_backend.user.domain.entities.User;
-import com.jexis.jexis_backend.user.domain.exceptions.UserNotFoundException;
 import com.jexis.jexis_backend.user.infrastructure.UserRepository;
 
 /*
@@ -56,9 +54,6 @@ public class EditUserUseCase {
         }
         if (body.getPhoneNumber() != null) {
             user.setPhoneNumber(body.getPhoneNumber());
-        }
-        if (body.getPassword() != null) {
-            user.setPassword(body.getPassword());
         }
         return repo.save(user);
     }
