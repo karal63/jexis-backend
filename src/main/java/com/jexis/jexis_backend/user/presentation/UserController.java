@@ -3,7 +3,10 @@ package com.jexis.jexis_backend.user.presentation;
 import java.util.List;
 import java.util.UUID;
 
+import com.jexis.jexis_backend.user.application.dto.*;
+import com.jexis.jexis_backend.user.application.useCases.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -14,17 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
-import com.jexis.jexis_backend.user.application.dto.AdminCreateDto;
-import com.jexis.jexis_backend.user.application.dto.ChangePasswordDto;
-import com.jexis.jexis_backend.user.application.dto.CreateDto;
-import com.jexis.jexis_backend.user.application.dto.EditDto;
-import com.jexis.jexis_backend.user.application.dto.UserResponseDto;
-import com.jexis.jexis_backend.user.application.useCases.CreateUserUseCase;
-import com.jexis.jexis_backend.user.application.useCases.ChangePasswordUseCase;
-import com.jexis.jexis_backend.user.application.useCases.DeleteUserUseCase;
-import com.jexis.jexis_backend.user.application.useCases.EditUserUseCase;
-import com.jexis.jexis_backend.user.application.useCases.GetUserUseCase;
-import com.jexis.jexis_backend.user.application.useCases.GetUsersUseCase;
 import jakarta.validation.Valid;
 
 /**
@@ -55,6 +47,8 @@ public class UserController {
     private final ChangePasswordUseCase changePasswordUseCase;
     private final GetUserUseCase getUserUseCase;
     private final DtoHelper dtoHelper;
+    private final ConfirmPasswordResetUseCase confirmPasswordResetUseCase;
+    private final RequestPasswordChangeUseCase requestPasswordChangeUseCase;
 
     /**
      * Returns a list of all users.
@@ -146,8 +140,15 @@ public class UserController {
         return dtoHelper.toUserDto(changePasswordUseCase.execute(id, passwordDto.getPassword()));
     }
 
-//    @GetMapping("/reset-password")
-//    public void resetPasswordLinkClicked(@PathVariable UUID userId) {
-//        //
-//    }
+    @PostMapping("/users/change-password")
+    public ResponseEntity<String> requestPasswordReset(@Valid @RequestBody RequestPasswordChangeDto body) {
+        requestPasswordChangeUseCase.execute(body);
+        return ResponseEntity.ok("We sent your password reset link to your email");
+    }
+
+    @PostMapping("/users/reset-password/confirm")
+    public ResponseEntity<String> confirmPasswordReset(@Valid @RequestBody ConfirmPasswordResetDto body) {
+        confirmPasswordResetUseCase.execute(body);
+        return ResponseEntity.ok("Password changed successfully.");
+    }
 }

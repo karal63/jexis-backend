@@ -25,8 +25,8 @@ public class CreatePasswordResetTokenUseCase {
     private final GetUserByEmailUseCase getUserByEmailUseCase;
     private final EmailService emailService;
 
-    public void execute(RequestPasswordResetDto dto) {
-        Optional<User> user = getUserByEmailUseCase.execute(dto.email());
+    public void execute(String email) {
+        Optional<User> user = getUserByEmailUseCase.execute(email);
 
         if (user.isPresent()) {
             byte[] bytes = new byte[32]; // 256 bits

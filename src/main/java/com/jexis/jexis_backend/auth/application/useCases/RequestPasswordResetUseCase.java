@@ -11,6 +11,6 @@ public class RequestPasswordResetUseCase {
     private final CreatePasswordResetTokenUseCase createPasswordResetTokenUseCase;
 
     public void execute(RequestPasswordResetDto body) {
-        createPasswordResetTokenUseCase.execute(body);
+        createPasswordResetTokenUseCase.execute(body.email());
     }
 }

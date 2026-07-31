@@ -5,6 +5,7 @@ import java.time.Duration;
 import com.jexis.jexis_backend.auth.application.dto.*;
 import com.jexis.jexis_backend.auth.application.useCases.*;
 import com.jexis.jexis_backend.passwordResetToken.application.useCases.CreatePasswordResetTokenUseCase;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -27,24 +28,12 @@ import jakarta.validation.Valid;
  */
 @RestController
 @RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthController {
-
-    private final CreatePasswordResetTokenUseCase createPasswordResetTokenUseCase;
     private final RequestPasswordResetUseCase requestPasswordResetUseCase;
-    private final ConfirmPasswordResetUseCase confirmPasswordResetUseCase;
-    public SignupUseCase signupUseCase;
-    public LoginUseCase loginUseCase;
-    public RefreshTokensUseCase refreshTokensUseCase;
-
-    public AuthController(SignupUseCase signupUseCase, LoginUseCase loginUseCase,
-                          RefreshTokensUseCase refreshTokensUseCase, CreatePasswordResetTokenUseCase createPasswordResetTokenUseCase, RequestPasswordResetUseCase requestPasswordResetUseCase, ConfirmPasswordResetUseCase confirmPasswordResetUseCase) {
-        this.signupUseCase = signupUseCase;
-        this.loginUseCase = loginUseCase;
-        this.refreshTokensUseCase = refreshTokensUseCase;
-        this.createPasswordResetTokenUseCase = createPasswordResetTokenUseCase;
-        this.requestPasswordResetUseCase = requestPasswordResetUseCase;
-        this.confirmPasswordResetUseCase = confirmPasswordResetUseCase;
-    }
+    public final SignupUseCase signupUseCase;
+    public final LoginUseCase loginUseCase;
+    public final RefreshTokensUseCase refreshTokensUseCase;
 
     /**
      * Endpoint to create a new account (signup).
@@ -192,15 +181,9 @@ public class AuthController {
                 .body(result.user());
     }
 
-    @PostMapping("/reset-password")
+    @PostMapping("/forgot-password")
     public ResponseEntity<String> resetPasswordLinkClicked(@Valid @RequestBody RequestPasswordResetDto body) {
         requestPasswordResetUseCase.execute(body);
         return ResponseEntity.ok("We sent you a password reset link.");
-    }
-
-    @PostMapping("/reset-password/confirm")
-    public ResponseEntity<String> confirmPasswordReset(@Valid @RequestBody ConfirmPasswordResetDto body) {
-        confirmPasswordResetUseCase.execute(body);
-        return ResponseEntity.ok("Password changed successfully.");
     }
 }

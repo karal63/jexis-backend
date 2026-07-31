@@ -1,8 +1,6 @@
-package com.jexis.jexis_backend.auth.application.dto;
+package com.jexis.jexis_backend.user.application.dto;
 
 import jakarta.validation.constraints.NotNull;
-
-import java.util.UUID;
 
 public record ConfirmPasswordResetDto(
         @NotNull String token,
