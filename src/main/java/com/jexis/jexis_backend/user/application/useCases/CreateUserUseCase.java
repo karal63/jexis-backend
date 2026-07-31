@@ -1,8 +1,13 @@
 package com.jexis.jexis_backend.user.application.useCases;
 
+import java.security.SecureRandom;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
+import com.jexis.jexis_backend.common.hashUtils.HashUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,15 +30,13 @@ import com.jexis.jexis_backend.user.infrastructure.UserRepository;
  * Author: Leo
  */
 @Service
+@RequiredArgsConstructor
 public class CreateUserUseCase {
     private final UserRepository repo;
     private final AsyncLogger logger;
     private final Argon2PasswordEncoder argon = new Argon2PasswordEncoder(16, 32, 1, 60000, 10);
-
-    public CreateUserUseCase(UserRepository repo, AsyncLogger logger) {
-        this.repo = repo;
-        this.logger = logger;
-    }
+    private final SecureRandom RANDOM = new SecureRandom();
+    private final SendActivationLinkUseCase sendActivationLinkUseCase;
 
     /*
      * Creates a new user
@@ -58,16 +61,19 @@ public class CreateUserUseCase {
             }
         }
 
-        if (existingUser.isPresent()) {
-            logger.info("USER", "User creation failed: email or phoneNumber already exists " + body.getEmail());
-            throw new EmailExistsException();
-        }
+        byte[] bytes = new byte[32]; // 256 bits
+        RANDOM.nextBytes(bytes);
+        String activationToken = HexFormat.of().formatHex(bytes);
+        String hashedActivationLink = HashUtils.sha256(activationToken);
 
-        body.setPassword(argon.encode(body.getPassword()));
+        String hashedPassword = argon.encode(body.getPassword());
 
         User savedUser = repo
                 .save(new User(body.getFirstName(), body.getLastName(), body.getEmail(), body.getPhoneNumber(),
-                        body.getPassword(), roles));
+                        hashedPassword, hashedActivationLink, roles));
+
+        sendActivationLinkUseCase.execute(savedUser, activationToken);
+
         logger.info("USER", "User created successfully: " + savedUser.getEmail());
         return savedUser;
     }

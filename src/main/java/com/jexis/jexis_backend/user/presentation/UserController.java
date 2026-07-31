@@ -8,13 +8,7 @@ import com.jexis.jexis_backend.user.application.useCases.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
 import jakarta.validation.Valid;
@@ -49,6 +43,8 @@ public class UserController {
     private final DtoHelper dtoHelper;
     private final ConfirmPasswordResetUseCase confirmPasswordResetUseCase;
     private final RequestPasswordChangeUseCase requestPasswordChangeUseCase;
+    private final SendActivationLinkUseCase sendActivationLinkUseCase;
+    private final ActivateUserUseCase activateUserUseCase;
 
     /**
      * Returns a list of all users.
@@ -150,5 +146,11 @@ public class UserController {
     public ResponseEntity<String> confirmPasswordReset(@Valid @RequestBody ConfirmPasswordResetDto body) {
         confirmPasswordResetUseCase.execute(body);
         return ResponseEntity.ok("Password changed successfully.");
+    }
+
+    @GetMapping("/user/activate")
+    public ResponseEntity<String> sendActivationLink(@RequestParam String token) {
+        activateUserUseCase.execute(token);
+        return ResponseEntity.ok("User activated successfully.");
     }
 }
