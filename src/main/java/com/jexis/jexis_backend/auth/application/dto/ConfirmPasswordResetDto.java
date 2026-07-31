@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
 public record ConfirmPasswordResetDto(
-        @NotNull UUID tokenId,
         @NotNull String token,
         @NotNull String password
         ) {

@@ -2,6 +2,7 @@ package com.jexis.jexis_backend.auth.application.useCases;
 
 import com.jexis.jexis_backend.auth.application.dto.ConfirmPasswordResetDto;
 import com.jexis.jexis_backend.auth.domain.exception.InvalidPasswordResetTokenException;
+import com.jexis.jexis_backend.passwordResetToken.application.useCases.GetPasswordResetTokenByTokenUseCase;
 import com.jexis.jexis_backend.passwordResetToken.application.useCases.GetPasswordResetTokenUseCase;
 import com.jexis.jexis_backend.passwordResetToken.application.useCases.UsePasswordResetTokenUseCase;
 import com.jexis.jexis_backend.passwordResetToken.domain.entities.PasswordResetToken;
@@ -13,17 +14,12 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class ConfirmPasswordResetUseCase {
-    private final Argon2PasswordEncoder argon = new Argon2PasswordEncoder(16, 32, 1, 60000, 10);
-    private final GetPasswordResetTokenUseCase getPasswordResetTokenUseCase;
     private final ChangePasswordUseCase changePasswordUseCase;
     private final UsePasswordResetTokenUseCase usePasswordResetTokenUseCase;
+    private final GetPasswordResetTokenByTokenUseCase getPasswordResetTokenByTokenUseCase;
 
     public void execute(ConfirmPasswordResetDto body) {
-        PasswordResetToken passwordResetToken = getPasswordResetTokenUseCase.execute(body.tokenId());
-
-        if (!argon.matches(body.token(), passwordResetToken.getTokenHash())) {
-            throw new InvalidPasswordResetTokenException();
-        }
+        PasswordResetToken passwordResetToken = getPasswordResetTokenByTokenUseCase.execute(body.token());
 
         changePasswordUseCase.execute(passwordResetToken.getUser().getId(), body.password());
         usePasswordResetTokenUseCase.execute(passwordResetToken.getId());
