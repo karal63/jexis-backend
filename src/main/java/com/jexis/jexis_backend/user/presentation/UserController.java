@@ -1,20 +1,16 @@
 package com.jexis.jexis_backend.user.presentation;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
 import com.jexis.jexis_backend.user.application.dto.*;
 import com.jexis.jexis_backend.user.application.useCases.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
 import jakarta.validation.Valid;
@@ -49,6 +45,9 @@ public class UserController {
     private final DtoHelper dtoHelper;
     private final ConfirmPasswordResetUseCase confirmPasswordResetUseCase;
     private final RequestPasswordChangeUseCase requestPasswordChangeUseCase;
+    private final SendActivationLinkUseCase sendActivationLinkUseCase;
+    private final ActivateUserUseCase activateUserUseCase;
+    private @Value("${application.origin}") String applicationOrigin;
 
     /**
      * Returns a list of all users.
@@ -150,5 +149,13 @@ public class UserController {
     public ResponseEntity<String> confirmPasswordReset(@Valid @RequestBody ConfirmPasswordResetDto body) {
         confirmPasswordResetUseCase.execute(body);
         return ResponseEntity.ok("Password changed successfully.");
+    }
+
+    @GetMapping("/user/activate")
+    public ResponseEntity<Void> sendActivationLink(@RequestParam String token) {
+        activateUserUseCase.execute(token);
+
+        String redirectUrl = "%s/dashboard".formatted(applicationOrigin);
+        return ResponseEntity.status(302).location(URI.create(redirectUrl)).build();
     }
 }

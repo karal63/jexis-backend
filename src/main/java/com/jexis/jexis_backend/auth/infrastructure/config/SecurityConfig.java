@@ -32,7 +32,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/swagger-ui/**", "/swagger-ui.html",
                                 "/v3/api-docs/**",
-                                "/webjars/**", "/webhooks/**")
+                                "/webjars/**", "/webhooks/**", "/user/activate", "/users/reset-password/confirm")
                         .permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exception -> exception
