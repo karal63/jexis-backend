@@ -80,7 +80,6 @@ public class CreateCardUseCase {
                 CardStatus.valueOf(stripeCard.getStatus()), stripeCard.getBrand(), stripeCard.getType(),
                 stripeCard.getCurrency(), stripeCard.getExpYear());
 
-        Card saved = cardRepo.save(card);
-        return saved;
+        return cardRepo.save(card);
     }
 }
