@@ -21,6 +21,7 @@ import com.jexis.jexis_backend.auth.application.dto.AuthUser;
 import com.jexis.jexis_backend.card.application.dto.CardResponseDto;
 import com.jexis.jexis_backend.card.application.dto.CreateCardDto;
 import com.jexis.jexis_backend.card.application.dto.EditCardDto;
+import com.jexis.jexis_backend.card.application.dto.ReplaceCardDto;
 import com.jexis.jexis_backend.card.domain.entities.Card;
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
 
@@ -46,6 +47,7 @@ public class CardController {
     private final CreateCardUseCase createCardUseCase;
     private final EditCardUseCase editCardUseCase;
     private final DeleteCardUseCase deleteCardUseCase;
+    private final ReplaceCardUseCase replaceCardUseCase;
     private final DtoHelper dtoHelper;
     private final GetAccountCardsUseCase getAccountCardsUseCase;
     private final TestCardPaymentUseCase testCardPaymentUseCase;
@@ -56,6 +58,7 @@ public class CardController {
             CreateCardUseCase createCardUseCase,
             EditCardUseCase editCardUseCase,
             DeleteCardUseCase deleteCardUseCase,
+            ReplaceCardUseCase replaceCardUseCase,
             DtoHelper dtoHelper,
             GetAccountCardsUseCase getAccountCardsUseCase,
             TestCardPaymentUseCase testCardPaymentUseCase) {
@@ -64,6 +67,7 @@ public class CardController {
         this.createCardUseCase = createCardUseCase;
         this.editCardUseCase = editCardUseCase;
         this.deleteCardUseCase = deleteCardUseCase;
+        this.replaceCardUseCase = replaceCardUseCase;
         this.dtoHelper = dtoHelper;
         this.getAccountCardsUseCase = getAccountCardsUseCase;
         this.testCardPaymentUseCase = testCardPaymentUseCase;
@@ -131,6 +135,14 @@ public class CardController {
     @PreAuthorize("@cardAuthorization.canEdit(authentication.principal.id(), #id, #cardId)")
     public CardResponseDto edit(@PathVariable UUID id, @PathVariable UUID cardId, @Valid @RequestBody EditCardDto body) {
         Card card = editCardUseCase.execute(cardId, body);
+        return dtoHelper.toCardDto(card);
+    }
+
+    @PostMapping("/accounts/{id}/cards/{cardId}/replace")
+    @PreAuthorize("@cardAuthorization.canEdit(authentication.principal.id(), #id, #cardId)")
+    public CardResponseDto replace(@PathVariable UUID id, @PathVariable UUID cardId,
+            @Valid @RequestBody ReplaceCardDto body) {
+        Card card = replaceCardUseCase.execute(cardId, body);
         return dtoHelper.toCardDto(card);
     }
 
