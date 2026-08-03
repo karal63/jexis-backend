@@ -2,8 +2,13 @@ package com.jexis.jexis_backend.dispute.presentation;
 
 import com.jexis.jexis_backend.dispute.application.useCases.SynchronizeDisputeUseCase;
 import com.jexis.jexis_backend.common.logging.AsyncLogger;
+import com.jexis.jexis_backend.stripe.application.useCases.GetStripeDebitTransactionUseCase;
+import com.jexis.jexis_backend.stripe.application.useCases.GetStripeTransactionUseCase;
+import com.jexis.jexis_backend.wallet.application.useCases.SyncBalanceUseCase;
 import com.stripe.model.Event;
 import com.stripe.model.issuing.Dispute;
+import com.stripe.model.issuing.Transaction;
+import com.stripe.model.treasury.ReceivedDebit;
 import com.stripe.net.Webhook;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +19,9 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/webhooks/disputes")
 public class DisputeWebhookController {
+    private final SyncBalanceUseCase syncBalanceUseCase;
+    private final GetStripeTransactionUseCase getStripeTransactionUseCase;
+    private final GetStripeDebitTransactionUseCase getStripeDebitTransactionUseCase;
     @Value("${stripe.webhook.secret.dispute}")
     private String webhookSecret;
     private final AsyncLogger logger;
@@ -50,16 +58,14 @@ public class DisputeWebhookController {
                 Dispute submittedDispute = (Dispute) event.getDataObjectDeserializer().getObject().orElseThrow(() -> new IllegalStateException("Unable to deserialize object"));
                 synchronizeDisputeUseCase.synchronize(submittedDispute);
                 break;
-//            case "issuing_dispute.funds_reinstated":
-//                logger.info("STRIPE_WEBHOOK", "Funds reinstated for a dispute");
-//                Dispute reinstatedDispute = (Dispute) event.getDataObjectDeserializer().getObject().orElseThrow(() -> new IllegalStateException("Unable to deserialize object"));
-//                System.out.println(reinstatedDispute.toString());
-//                break;
-//            case "issuing_dispute.funds_rescinded":
-//                logger.info("STRIPE_WEBHOOK", "Funds rescinded for a dispute");
-//                Dispute rescindedDispute = (Dispute) event.getDataObjectDeserializer().getObject().orElseThrow(() -> new IllegalStateException("Unable to deserialize object"));
-//                System.out.println(rescindedDispute.toString());
-//                break;
+            case "issuing_dispute.funds_reinstated":
+                logger.info("STRIPE_WEBHOOK", "Funds reinstated for a dispute");
+                Dispute reinstatedDispute = (Dispute) event.getDataObjectDeserializer().getObject().orElseThrow(() -> new IllegalStateException("Unable to deserialize object"));
+
+                ReceivedDebit receivedDebit = getStripeDebitTransactionUseCase.execute(event.getAccount(), reinstatedDispute.getTreasury().getReceivedDebit());
+
+                syncBalanceUseCase.execute(event.getAccount(), receivedDebit.getFinancialAccount());
+                break;
         }
         return ResponseEntity.ok().body("Success");
     }

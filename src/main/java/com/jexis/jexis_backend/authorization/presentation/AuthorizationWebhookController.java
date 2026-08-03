@@ -6,6 +6,7 @@ import com.jexis.jexis_backend.authorization.application.useCases.CreateAuthoriz
 import com.jexis.jexis_backend.authorization.application.useCases.UpdateAuthorizationUseCase;
 import com.jexis.jexis_backend.authorization.domain.enums.AuthorizationStatus;
 import com.jexis.jexis_backend.common.logging.AsyncLogger;
+import com.jexis.jexis_backend.wallet.application.useCases.SyncBalanceUseCase;
 import com.stripe.model.Event;
 import com.stripe.model.StripeObject;
 import com.stripe.model.issuing.Authorization;
@@ -20,6 +21,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/webhooks/authorizations")
 public class AuthorizationWebhookController {
+    private final SyncBalanceUseCase syncBalanceUseCase;
     @Value("${stripe.webhook.secret.authorization}")
     private String webhookSecret;
     private final AsyncLogger logger;
@@ -29,10 +31,11 @@ public class AuthorizationWebhookController {
     public AuthorizationWebhookController(
             AsyncLogger logger,
             CreateAuthorizationUseCase createAuthorizationUseCase,
-            UpdateAuthorizationUseCase updateAuthorizationUseCase) {
+            UpdateAuthorizationUseCase updateAuthorizationUseCase, SyncBalanceUseCase syncBalanceUseCase) {
         this.logger = logger;
         this.createAuthorizationUseCase = createAuthorizationUseCase;
         this.updateAuthorizationUseCase = updateAuthorizationUseCase;
+        this.syncBalanceUseCase = syncBalanceUseCase;
     }
 
     @PostMapping
@@ -66,7 +69,7 @@ public class AuthorizationWebhookController {
                 .getObject().orElseThrow(() -> new IllegalStateException("Unable to deserialize object"));
 
         Authorization authorization = (Authorization) object;
-
+        
         CreateAuthorizationDto dto = new CreateAuthorizationDto(
                 authorization.getCard().getFinancialAccount(),
                 authorization.getId(),
