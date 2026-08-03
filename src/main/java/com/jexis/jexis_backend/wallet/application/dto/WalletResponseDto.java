@@ -10,7 +10,7 @@ public record WalletResponseDto(
         UUID id,
         String name,
         AccountResponseDto account,
-        BigDecimal availableBalance,
+        Integer availableBalance,
         LocalDateTime createdAt,
         LocalDateTime updatedAt) {
 

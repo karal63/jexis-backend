@@ -21,7 +21,7 @@ public class SyncBalanceUseCase {
 
         Wallet wallet = getWalletByFAIdUseCase.execute(financialAccount.getId());
 
-        wallet.setAvailableBalance(BigDecimal.valueOf(financialAccount.getBalance().getCash().get("usd")));
+        wallet.setAvailableBalance(financialAccount.getBalance().getCash().get("usd").intValue());
         repo.save(wallet);
     }
 }
