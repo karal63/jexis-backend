@@ -11,6 +11,7 @@ import com.jexis.jexis_backend.transaction.application.dto.CreateCardTransaction
 import com.jexis.jexis_backend.transaction.domain.entities.Transaction;
 import com.jexis.jexis_backend.transaction.infrastructure.TransactionRepository;
 import com.jexis.jexis_backend.wallet.application.useCases.GetWalletByFAIdUseCase;
+import com.jexis.jexis_backend.wallet.application.useCases.SyncBalanceUseCase;
 import com.jexis.jexis_backend.wallet.domain.entities.Wallet;
 import com.stripe.model.treasury.ReceivedDebit;
 import lombok.RequiredArgsConstructor;
@@ -27,11 +28,13 @@ public class CreateCardTransactionUseCase {
     private final TransactionRepository repo;
     private final GetCardByStripeIdUseCase  getCardByStripeIdUseCase;
     private final GetAuthorizationByStripeIdUseCase  getAuthorizationByStripeIdUseCase;
+    private final SyncBalanceUseCase syncBalanceUseCase;
 
     public void execute(CreateCardTransactionDto dto) {
         ReceivedDebit receivedDebit = getStripeDebitTransactionUseCase.execute(dto.accountId(), dto.debitTransactionId());
         com.stripe.model.treasury.Transaction treasuryTransaction = getStripeTransactionUseCase.execute(dto.accountId(), receivedDebit.getTransaction());
-
+        syncBalanceUseCase.execute(dto.accountId(), treasuryTransaction.getFinancialAccount());
+        
         Wallet wallet = getWalletByFAIdUseCase.execute(treasuryTransaction.getFinancialAccount());
         Card card = getCardByStripeIdUseCase.execute(dto.cardId());
 

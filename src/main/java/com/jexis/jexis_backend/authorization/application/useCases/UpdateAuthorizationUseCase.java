@@ -3,16 +3,19 @@ package com.jexis.jexis_backend.authorization.application.useCases;
 import com.jexis.jexis_backend.authorization.application.dto.UpdateAuthorizationDto;
 import com.jexis.jexis_backend.authorization.domain.entities.Authorization;
 import com.jexis.jexis_backend.authorization.infrastructure.AuthorizationRepository;
+import com.jexis.jexis_backend.wallet.application.useCases.SyncBalanceUseCase;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UpdateAuthorizationUseCase {
     private final AuthorizationRepository authorizationRepository;
     private final GetAuthorizationByStripeIdUseCase getAuthorizationByStripeIdUseCase;
+    private final SyncBalanceUseCase syncBalanceUseCase;
 
-    public UpdateAuthorizationUseCase(AuthorizationRepository authorizationRepository, GetAuthorizationByStripeIdUseCase getAuthorizationByStripeIdUseCase) {
+    public UpdateAuthorizationUseCase(AuthorizationRepository authorizationRepository, GetAuthorizationByStripeIdUseCase getAuthorizationByStripeIdUseCase, SyncBalanceUseCase syncBalanceUseCase) {
         this.authorizationRepository = authorizationRepository;
         this.getAuthorizationByStripeIdUseCase = getAuthorizationByStripeIdUseCase;
+        this.syncBalanceUseCase = syncBalanceUseCase;
     }
 
     public void execute(UpdateAuthorizationDto dto) {
@@ -60,6 +63,7 @@ public class UpdateAuthorizationUseCase {
         }
 
         if (hasChanges) {
+            syncBalanceUseCase.execute(authorization.getWallet().getStripeFinancialAccountId(), authorization.getWallet().getStripeFinancialAccountId());
             authorizationRepository.save(authorization);
         }
     }

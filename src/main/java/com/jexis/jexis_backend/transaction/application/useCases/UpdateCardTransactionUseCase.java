@@ -5,6 +5,7 @@ import com.jexis.jexis_backend.dispute.domain.entities.Dispute;
 import com.jexis.jexis_backend.dispute.infrastructure.DisputeRepository;
 import com.jexis.jexis_backend.transaction.domain.entities.Transaction;
 import com.jexis.jexis_backend.transaction.infrastructure.TransactionRepository;
+import com.jexis.jexis_backend.wallet.application.useCases.SyncBalanceUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,12 +17,18 @@ public class UpdateCardTransactionUseCase {
     private final TransactionRepository transactionRepository;
     private final DisputeRepository disputeRepository;
     private final AsyncLogger asyncLogger;
+    private final SyncBalanceUseCase syncBalanceUseCase;
 
     public void execute(com.stripe.model.issuing.Transaction issuingTransaction) {
         Optional<Transaction> transaction = transactionRepository.findByStripeObjectId(issuingTransaction.getId());
         Optional<Dispute> dispute = disputeRepository.findByStripeDisputeId(issuingTransaction.getDispute());
 
         if (transaction.isPresent()) {
+            syncBalanceUseCase.execute(
+                    transaction.get().getWallet().getAccount().getConnectAccountId(),
+                    transaction.get().getWallet().getStripeFinancialAccountId()
+            );
+
             transaction.get().setAmount(issuingTransaction.getAmount());
             transaction.get().setCurrency(issuingTransaction.getCurrency());
             transaction.get().setMerchantName(issuingTransaction.getMerchantData().getName());
