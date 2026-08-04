@@ -1,7 +1,8 @@
 package com.jexis.jexis_backend.account.application.useCases;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.jexis.jexis_backend.account.domain.entities.Account;
@@ -10,9 +11,9 @@ import com.jexis.jexis_backend.account.infrastructure.AccountRepository;
 /**
  * GetAccountsUseCase
  *
- * This service class implements the use case for retrieving all existing
- * accounts. It contains only the business logic related to fetching accounts,
- * such as interacting with the repository to fetch the data.
+ * This service class implements the use case for retrieving accounts with
+ * pagination and optional search. Returns a Page<Account> so callers can
+ * access paging metadata.
  *
  * Author: Leo
  */
@@ -25,14 +26,21 @@ public class GetAccountsUseCase {
     }
 
     /**
-     * Handles fetching all accounts.
+     * Fetch paginated accounts, optionally filtered by search term.
      *
-     * Calls the repository to fetch all accounts and returns the list of
-     * accounts.
-     *
-     * @return list of all accounts
+     * @param page 1-based page number
+     * @param pageSize size of page
+     * @param search optional search string
+     * @return paginated accounts
      */
-    public List<Account> execute() {
-        return repo.findAll();
+    public Page<Account> execute(int page, int pageSize, String search) {
+        int p = Math.max(0, page - 1);
+        Pageable pageable = PageRequest.of(p, pageSize);
+
+        if (search == null || search.isBlank()) {
+            return repo.findAllByIsDeletedFalse(pageable);
+        }
+
+        return repo.searchAll(search.trim(), pageable);
     }
 }

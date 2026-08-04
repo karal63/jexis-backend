@@ -4,27 +4,25 @@ import java.util.List;
 import java.util.UUID;
 
 import com.jexis.jexis_backend.account.application.dto.GetUpdateLinkDto;
+import com.jexis.jexis_backend.account.application.dto.PaginatedAccountsResponseDto;
 import com.jexis.jexis_backend.account.application.useCases.*;
 import com.stripe.model.AccountLink;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jexis.jexis_backend.account.application.dto.AccountResponseDto;
-import com.jexis.jexis_backend.account.application.dto.EditAccountDto;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.auth.application.dto.AuthUser;
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
 import com.jexis.jexis_backend.user.application.useCases.GetUserUseCase;
-import com.jexis.jexis_backend.user.domain.entities.User;
-
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.data.domain.Page;
 
 /**
  * AccountController
@@ -40,64 +38,66 @@ import org.springframework.web.bind.annotation.RequestBody;
  */
 @RestController
 @RequestMapping("/")
+@RequiredArgsConstructor
 public class AccountController {
     private final CreateAccountUseCase createAccountUseCase;
     private final DeleteAccountUseCase deleteAccountUseCase;
     private final GetAccountsUseCase getAccountsUseCase;
     private final GetAccountUseCase getAccountUseCase;
-    private final EditAccountUseCase editAccountUseCase;
-    private final GetUserUseCase getUserUseCase;
     private final DtoHelper dtoHelper;
     private final GetUserAccountsUseCase getUserAccountsUseCase;
     private final GetUpdateLinkUseCase getUpdateLinkUseCase;
 
-    public AccountController(
-            CreateAccountUseCase createAccount,
-            DeleteAccountUseCase deleteAccount,
-            GetAccountsUseCase getAccounts,
-            GetAccountUseCase getAccount,
-            EditAccountUseCase editAccount, GetUserUseCase getUserUseCase,
-            DtoHelper dtoHelper,
-            GetUserAccountsUseCase getUserAccountsUseCase,
-            GetUpdateLinkUseCase getUpdateLinkUseCase) {
-        this.createAccountUseCase = createAccount;
-        this.deleteAccountUseCase = deleteAccount;
-        this.getAccountsUseCase = getAccounts;
-        this.getAccountUseCase = getAccount;
-        this.editAccountUseCase = editAccount;
-        this.getUserUseCase = getUserUseCase;
-        this.dtoHelper = dtoHelper;
-        this.getUserAccountsUseCase = getUserAccountsUseCase;
-        this.getUpdateLinkUseCase = getUpdateLinkUseCase;
+    /**
+     * Returns a paginated list of accounts for admins.
+     * Supports query params: page (1-based), pageSize, search
+     * Endpoint: GET /admin/accounts
+     */
+    @GetMapping("/admin/accounts")
+    @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
+    public PaginatedAccountsResponseDto getAll(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int pageSize,
+            @RequestParam(required = false) String search) {
+        Page<Account> accountsPage = getAccountsUseCase.execute(page, pageSize, search);
+
+        List<AccountResponseDto> items = accountsPage
+                .stream()
+                .map(dtoHelper::toAccountDto)
+                .toList();
+
+        return new PaginatedAccountsResponseDto(
+                items,
+                page,
+                pageSize,
+                accountsPage.getTotalElements(),
+                accountsPage.getTotalPages());
     }
 
     /**
-     * Returns a list of all accounts.
-     * This endpoint retrieves all existing accounts by delegating to the
-     * getAccountsUseCase, which interacts with the repository to fetch the data.
-     * Endpoint: GET /admin/accounts
-     *
-     * @return list of all accounts
+     * Returns a paginated list of accounts for the authenticated user.
+     * Supports query params: page (1-based), pageSize, search
+     * Endpoint: GET /accounts
      */
+    @GetMapping("/accounts")
+    public PaginatedAccountsResponseDto getUserAccounts(
+            @AuthenticationPrincipal AuthUser authUser,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int pageSize,
+            @RequestParam(required = false) String search) {
+        Page<Account> accountsPage = getUserAccountsUseCase.execute(authUser.id(), page, pageSize, search);
 
-    @GetMapping("/admin/accounts")
-    @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
-    public List<AccountResponseDto> getAll() {
-        List<Account> accounts = getAccountsUseCase.execute();
-        return accounts
+        List<AccountResponseDto> items = accountsPage
                 .stream()
                 .map(dtoHelper::toAccountDto)
                 .toList();
-    }
 
-    @GetMapping("/users/{id}/accounts")
-    @PreAuthorize("@accountAuthorization.canViewAll(authentication.principal.id(), #id)")
-    public List<AccountResponseDto> getUserAccounts(@PathVariable UUID id) {
-        List<Account> accounts = getUserAccountsUseCase.execute(id);
-        return accounts
-                .stream()
-                .map(dtoHelper::toAccountDto)
-                .toList();
+        return new PaginatedAccountsResponseDto(
+                items,
+                page,
+                pageSize,
+                accountsPage.getTotalElements(),
+                accountsPage.getTotalPages());
     }
 
     /**
