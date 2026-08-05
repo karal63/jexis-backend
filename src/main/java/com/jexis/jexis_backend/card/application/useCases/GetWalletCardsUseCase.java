@@ -9,14 +9,14 @@ import com.jexis.jexis_backend.card.domain.entities.Card;
 import com.jexis.jexis_backend.card.infrastructure.CardRepository;
 
 @Service
-public class GetAccountCardsUseCase {
+public class GetWalletCardsUseCase {
     private final CardRepository cardRepo;
 
-    public GetAccountCardsUseCase(CardRepository cardRepo) {
+    public GetWalletCardsUseCase(CardRepository cardRepo) {
         this.cardRepo = cardRepo;
     }
 
-    public List<Card> execute(UUID accountId) {
-        return cardRepo.findByCardHolderAccountIdAndIsDeletedFalse(accountId);
+    public List<Card> execute(UUID walletId) {
+        return cardRepo.findAllByTreasuryAccountIdAndIsDeletedFalse(walletId);
     }
 }
