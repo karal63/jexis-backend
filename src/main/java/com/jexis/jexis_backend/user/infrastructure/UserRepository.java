@@ -23,19 +23,19 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     Optional<User> findByActivationTokenHash(String token);
 
-    @Query(value = """
-            SELECT *
-            FROM users u
-            WHERE
-            (:search IS NULL
-                OR lower(CAST(u.id AS text)) LIKE concat('%', lower(CAST(:search AS text)), '%')
-                OR lower(u.first_name) LIKE concat('%', lower(CAST(:search AS text)), '%')
-                OR lower(u.last_name) LIKE concat('%', lower(CAST(:search AS text)), '%')
+    @Query("""
+            SELECT u FROM User u
+            WHERE (
+                :search IS NULL
+                OR lower(CAST(u.id AS string)) LIKE concat('%', lower(CAST(:search AS text)), '%')
+                OR lower(u.firstName) LIKE concat('%', lower(CAST(:search AS text)), '%')
+                OR lower(u.lastName) LIKE concat('%', lower(CAST(:search AS text)), '%')
                 OR lower(u.email) LIKE concat('%', lower(CAST(:search AS text)), '%')
-                OR lower(u.phone_number) LIKE concat('%', lower(CAST(:search AS text)), '%'))
-            AND (:role IS NULL OR CAST(:role AS text) = ANY(u.roles))
-            AND (:isActivated IS NULL OR u.is_activated = :isActivated)
-            """, nativeQuery = true)
+                OR lower(u.phoneNumber) LIKE concat('%', lower(CAST(:search AS text)), '%')
+            )
+            AND (:role IS NULL OR :role MEMBER OF u.roles)
+            AND (:isActivated IS NULL OR u.isActivated = :isActivated)
+            """)
     Page<User> findUsersWithFilters(
             Pageable pageable,
             @Param("search") String search,

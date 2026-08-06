@@ -1,6 +1,7 @@
 package com.jexis.jexis_backend.user.domain.entities;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -60,9 +61,14 @@ public class User {
 
     @Getter
     @Setter
-    @Column(nullable = false)
+    @ElementCollection(targetClass = UserRole.class, fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id")
+    )
     @Enumerated(EnumType.STRING)
-    private List<UserRole> roles;
+    @Column(name = "role")
+    private List<UserRole> roles = new ArrayList<>();
 
     @Getter
     @Setter
