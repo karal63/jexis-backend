@@ -55,9 +55,20 @@ public class MemberController {
 
     @GetMapping("/admin/members")
     @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
-    public List<MemberResponseDto> listAccountMembers() {
-        List<Member> members = getMembersUseCase.execute();
-        return members.stream().map(dtoHelper::toMemberDto).toList();
+    public com.jexis.jexis_backend.member.application.dto.MemberPageResponseDto listAccountMembers(
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "1") int page,
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "20") int pageSize,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String search,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) com.jexis.jexis_backend.member.domain.enums.Role role,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String sortBy,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String sortDirection) {
+        org.springframework.data.domain.Page<com.jexis.jexis_backend.member.domain.entities.Member> membersPage = getMembersUseCase.execute(page,
+                pageSize, search, role, sortBy, sortDirection);
+        java.util.List<com.jexis.jexis_backend.member.application.dto.MemberResponseDto> items = membersPage.getContent().stream()
+                .map(dtoHelper::toMemberDto)
+                .toList();
+        return new com.jexis.jexis_backend.member.application.dto.MemberPageResponseDto(items, page, pageSize,
+                membersPage.getTotalElements(), membersPage.getTotalPages());
     }
 
     @PostMapping("/members/add")
@@ -69,9 +80,20 @@ public class MemberController {
 
     @GetMapping("/accounts/{id}/members")
     @PreAuthorize("@memberAuthorization.canView(authentication.principal.id(), #id)")
-    public List<MemberResponseDto> getMembersByAccount(@PathVariable UUID id) {
-        List<Member> member = getAccountMembersUseCase.execute(id);
-        return member.stream().map(dtoHelper::toMemberDto).toList();
+    public com.jexis.jexis_backend.member.application.dto.MemberPageResponseDto getMembersByAccount(@PathVariable UUID id,
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "1") int page,
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "20") int pageSize,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String search,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) com.jexis.jexis_backend.member.domain.enums.Role role,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String sortBy,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String sortDirection) {
+        org.springframework.data.domain.Page<com.jexis.jexis_backend.member.domain.entities.Member> membersPage = getAccountMembersUseCase.execute(id,
+                page, pageSize, search, role, sortBy, sortDirection);
+        java.util.List<com.jexis.jexis_backend.member.application.dto.MemberResponseDto> items = membersPage.getContent().stream()
+                .map(dtoHelper::toMemberDto)
+                .toList();
+        return new com.jexis.jexis_backend.member.application.dto.MemberPageResponseDto(items, page, pageSize,
+                membersPage.getTotalElements(), membersPage.getTotalPages());
     }
 
     @GetMapping("/accounts/{id}/members/{memberId}")
