@@ -14,6 +14,7 @@ import com.jexis.jexis_backend.transaction.application.dto.TransactionResponseDt
 import com.jexis.jexis_backend.transaction.application.useCases.GetTransactionUseCase;
 import com.jexis.jexis_backend.transaction.application.useCases.GetTransactionsUseCase;
 import com.jexis.jexis_backend.transaction.application.useCases.GetWalletTransactionsUseCase;
+import com.jexis.jexis_backend.transaction.application.useCases.GetCardTransactionsUseCase;
 import com.jexis.jexis_backend.transaction.domain.entities.Transaction;
 
 /**
@@ -39,16 +40,19 @@ public class TransactionController {
     private final GetTransactionUseCase getTransactionUseCase;
     private final GetTransactionsUseCase getTransactionsUseCase;
     private final GetWalletTransactionsUseCase getWalletTransactionsUseCase;
+    private final GetCardTransactionsUseCase getCardTransactionsUseCase;
     private final DtoHelper dtoHelper;
 
     public TransactionController(
             GetTransactionUseCase getTransactionUseCase,
             GetTransactionsUseCase getTransactionsUseCase,
             GetWalletTransactionsUseCase getWalletTransactionsUseCase,
+            GetCardTransactionsUseCase getCardTransactionsUseCase,
             DtoHelper dtoHelper) {
         this.getTransactionUseCase = getTransactionUseCase;
         this.getTransactionsUseCase = getTransactionsUseCase;
         this.getWalletTransactionsUseCase = getWalletTransactionsUseCase;
+        this.getCardTransactionsUseCase = getCardTransactionsUseCase;
         this.dtoHelper = dtoHelper;
     }
 
@@ -94,4 +98,20 @@ public class TransactionController {
                 .map(dtoHelper::toTransactionDto)
                 .toList();
     }
+
+    /**
+     * Retrieves all transactions for a specific card.
+     * Endpoint: GET /cards/{cardId}/transactions
+     *
+     * @param cardId the unique identifier of the card
+     * @return list of transactions for the card
+     */
+    @GetMapping("/cards/{cardId}/transactions")
+    @PreAuthorize("@cardAuthorization.canView(authentication.principal.id(), #cardId)")
+    public List<TransactionResponseDto> getCardTransactions(@PathVariable UUID cardId) {
+        return getCardTransactionsUseCase.execute(cardId).stream()
+                .map(dtoHelper::toTransactionDto)
+                .toList();
+    }
 }
+

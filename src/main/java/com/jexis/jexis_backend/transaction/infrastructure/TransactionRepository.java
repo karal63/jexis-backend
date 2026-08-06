@@ -9,5 +9,6 @@ import java.util.UUID;
 
 public interface TransactionRepository extends JpaRepository<Transaction, UUID> {
     List<Transaction> findByWalletId(UUID walletId);
+    List<Transaction> findByCardId(UUID cardId);
     Optional<Transaction> findByStripeObjectId(String stripeObjectId);
 }
