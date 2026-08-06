@@ -17,31 +17,38 @@ public interface AuthorizationRepository extends JpaRepository<Authorization, UU
     Optional<Authorization> findByStripeAuthorizationId(String stripeAuthorizationId);
 
     @Query("""
-        SELECT a FROM Authorization a 
-            WHERE 
-                (lower(a.merchantCategory) like lower(concat('%', :search, '%')) 
-                    OR lower(a.merchantName) like lower(concat('%', :search, '%'))
-                    OR lower(a.merchantCity) like lower(concat('%', :search, '%'))
-                    OR lower(a.merchantCountry) like lower(concat('%', :search, '%')))
-                    AND coalesce(a.approved, false) = :approved
+                            SELECT a FROM Authorization a 
+                            WHERE 
+                    (
+                        :search IS NULL 
+                        OR lower(a.merchantCategory) LIKE concat('%', CAST(:search AS text), '%') 
+                        OR lower(a.merchantName) LIKE concat('%', CAST(:search AS text), '%')
+                        OR lower(a.merchantCity) LIKE concat('%', CAST(:search AS text), '%')
+                        OR lower(a.merchantCountry) LIKE concat('%', CAST(:search AS text), '%')
+                    )
+                    AND (:approved IS NULL OR a.approved = :approved)
                     AND (:status IS NULL OR a.status = :status)
-    """)
+            """)
     Page<Authorization> findAuthorizationsWithFilters(
             Pageable pageable,
             @Param("search") String search,
             @Param("approved") Boolean approved,
-            @Param("status") AuthorizationStatus status);
+            @Param("status") AuthorizationStatus status
+    );
 
     @Query("""
-        SELECT a FROM Authorization a 
-            WHERE 
-                (lower(a.merchantCategory) like lower(concat('%', :search, '%')) 
-                    OR lower(a.merchantName) like lower(concat('%', :search, '%'))
-                    OR lower(a.merchantCity) like lower(concat('%', :search, '%'))
-                    OR lower(a.merchantCountry) like lower(concat('%', :search, '%')))
-                    AND coalesce(a.approved, false) = :approved
+                            SELECT a FROM Authorization a 
+                            WHERE 
+                    (
+                        :search IS NULL 
+                        OR lower(a.merchantCategory) LIKE concat('%', CAST(:search AS text), '%') 
+                        OR lower(a.merchantName) LIKE concat('%', CAST(:search AS text), '%')
+                        OR lower(a.merchantCity) LIKE concat('%', CAST(:search AS text), '%')
+                        OR lower(a.merchantCountry) LIKE concat('%', CAST(:search AS text), '%')
+                    )
+                    AND (:approved IS NULL OR a.approved = :approved)
                     AND (:status IS NULL OR a.status = :status)
-    """)
+            """)
     Page<Authorization> findWalletAuthorizationsWithFilters(
             @Param("walletId") UUID walletId,
             Pageable pageable,
