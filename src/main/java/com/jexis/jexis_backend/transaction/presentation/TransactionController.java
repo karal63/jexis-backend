@@ -3,11 +3,13 @@ package com.jexis.jexis_backend.transaction.presentation;
 import java.util.List;
 import java.util.UUID;
 
+import com.jexis.jexis_backend.transaction.application.dto.TransactionPageResponseDto;
+import com.jexis.jexis_backend.transaction.domain.enums.TransactionDirection;
+import com.jexis.jexis_backend.transaction.domain.enums.TransactionStatus;
+import com.jexis.jexis_backend.transaction.domain.enums.TransactionType;
+import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
 import com.jexis.jexis_backend.transaction.application.dto.TransactionResponseDto;
@@ -64,10 +66,18 @@ public class TransactionController {
      */
     @GetMapping("/admin/transactions")
     @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
-    public List<TransactionResponseDto> getAllTransactions() {
-        return getTransactionsUseCase.execute().stream()
-                .map(dtoHelper::toTransactionDto)
-                .toList();
+    public TransactionPageResponseDto getAllTransactions(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int pageSize,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) TransactionType type,
+            @RequestParam(required = false) TransactionStatus status,
+            @RequestParam(required = false) TransactionDirection direction,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDirection) {
+        Page<Transaction> pageResult =
+                getTransactionsUseCase.execute(page, pageSize, search, type, status, direction, sortBy, sortDirection);
+        return mapToPageResponse(pageResult, page, pageSize);
     }
 
     /**
@@ -93,10 +103,19 @@ public class TransactionController {
      */
     @GetMapping("/wallets/{walletId}/transactions")
     @PreAuthorize("@transactionAuthorization.canViewWallet(authentication.principal.id(), #walletId)")
-    public List<TransactionResponseDto> getWalletTransactions(@PathVariable UUID walletId) {
-        return getWalletTransactionsUseCase.execute(walletId).stream()
-                .map(dtoHelper::toTransactionDto)
-                .toList();
+    public TransactionPageResponseDto getWalletTransactions(
+            @PathVariable UUID walletId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int pageSize,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) TransactionType type,
+            @RequestParam(required = false) TransactionStatus status,
+            @RequestParam(required = false) TransactionDirection direction,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDirection) {
+        Page<Transaction> pageResult =
+                getWalletTransactionsUseCase.execute(walletId, page, pageSize, search, type, status, direction, sortBy, sortDirection);
+        return mapToPageResponse(pageResult, page, pageSize);
     }
 
     /**
@@ -108,10 +127,32 @@ public class TransactionController {
      */
     @GetMapping("/cards/{cardId}/transactions")
     @PreAuthorize("@cardAuthorization.canView(authentication.principal.id(), #cardId)")
-    public List<TransactionResponseDto> getCardTransactions(@PathVariable UUID cardId) {
-        return getCardTransactionsUseCase.execute(cardId).stream()
+    public TransactionPageResponseDto getCardTransactions(
+            @PathVariable UUID cardId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int pageSize,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) TransactionType type,
+            @RequestParam(required = false) TransactionStatus status,
+            @RequestParam(required = false) TransactionDirection direction,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDirection) {
+        Page<Transaction> pageResult =
+                getCardTransactionsUseCase.execute(cardId, page, pageSize, search, type, status, direction, sortBy, sortDirection);
+        return mapToPageResponse(pageResult, page, pageSize);
+    }
+
+    private TransactionPageResponseDto mapToPageResponse(Page<Transaction> transactionsPage, int page, int pageSize) {
+        List<TransactionResponseDto> items = transactionsPage.getContent().stream()
                 .map(dtoHelper::toTransactionDto)
                 .toList();
+        return new TransactionPageResponseDto(
+                items,
+                page,
+                pageSize,
+                transactionsPage.getTotalElements(),
+                transactionsPage.getTotalPages());
     }
 }
+
 
