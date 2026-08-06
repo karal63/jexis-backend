@@ -14,6 +14,6 @@ public class GetExternalAccountUseCase {
     private final ExternalAccountRepository repo;
 
     public ExternalAccount execute(UUID externalAccountId) {
-        return repo.findById(externalAccountId).orElseThrow(ExternalAccountNotFoundException::new);
+        return repo.findByIdAndIsDeletedFalse(externalAccountId).orElseThrow(ExternalAccountNotFoundException::new);
     }
 }
