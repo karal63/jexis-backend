@@ -43,7 +43,7 @@ public interface CardRepository extends JpaRepository<Card, UUID> {
 
     @Query("""
                 SELECT c FROM Card c
-                WHERE coalesce(c.isDeleted, false) = false
+                WHERE c.isDeleted = false
                   AND (
                       :search IS NULL 
                       OR lower(c.last4) LIKE concat('%', CAST(:search AS text), '%')

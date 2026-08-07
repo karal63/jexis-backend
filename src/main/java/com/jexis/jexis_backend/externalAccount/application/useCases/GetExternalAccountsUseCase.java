@@ -27,7 +27,7 @@ public class GetExternalAccountsUseCase {
     public Page<ExternalAccount> execute(int page, int pageSize, String search, Boolean isDefault, String sortBy,
             String sortDirection) {
         Pageable pageable = PageRequest.of(Math.max(0, page - 1), pageSize, buildSort(sortBy, sortDirection));
-        return externalAccountRepository.findExternalAccountsWithFilters(pageable, null, normalize(search), isDefault);
+        return externalAccountRepository.findExternalAccountsWithFilters(pageable, normalize(search), isDefault);
     }
 
     private Sort buildSort(String sortBy, String sortDirection) {

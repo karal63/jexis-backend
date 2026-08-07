@@ -26,19 +26,18 @@ public interface WalletRepository extends JpaRepository<Wallet, UUID> {
                 OR lower(CAST(w.id AS string)) LIKE concat('%', lower(CAST(:search AS text)), '%')
                 OR lower(w.name) LIKE concat('%', lower(CAST(:search AS text)), '%')
             )
-            AND w.isDeleted = false
             """)
     Page<Wallet> findWalletsWithFilters(Pageable pageable, @Param("search") String search);
 
     @Query("""
             SELECT w FROM Wallet w
             WHERE w.account.id = :accountId
+              AND w.isDeleted = false
               AND (
                 :search IS NULL
                 OR lower(CAST(w.id AS string)) LIKE concat('%', lower(CAST(:search AS text)), '%')
                 OR lower(w.name) LIKE concat('%', lower(CAST(:search AS text)), '%')
               )
-            AND w.isDeleted = false
             """)
     Page<Wallet> findAccountWalletsWithFilters(Pageable pageable, @Param("accountId") UUID accountId, @Param("search") String search);
 }

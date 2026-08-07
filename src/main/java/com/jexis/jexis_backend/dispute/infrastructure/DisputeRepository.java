@@ -17,23 +17,33 @@ public interface DisputeRepository extends JpaRepository<Dispute, UUID> {
 
     @Query("""
             SELECT d FROM Dispute d
-            WHERE (:cardId IS NULL OR d.transaction.card.id = :cardId)
-              AND (
+            WHERE (
                   :search IS NULL
                   OR lower(cast(d.id as text)) LIKE concat('%', lower(cast(:search as text)), '%')
               )
               AND (:reason IS NULL OR d.reason = :reason)
               AND (:status IS NULL OR d.status = :status)
-              AND (
-                  :walletName IS NULL
-                  OR lower(d.wallet.name) LIKE concat('%', lower(cast(:walletName as text)), '%')
-              )
             """)
     Page<Dispute> findDisputesWithFilters(
+            Pageable pageable,
+            @Param("search") String search,
+            @Param("reason") DisputeReason reason,
+            @Param("status") DisputeStatus status);
+
+    @Query("""
+                    SELECT d FROM Dispute d
+                    WHERE (:cardId IS NULL OR d.transaction.card.id = :cardId)
+                      AND (
+                          :search IS NULL
+                          OR lower(cast(d.id as text)) LIKE concat('%', lower(cast(:search as text)), '%')
+                      )
+                      AND (:reason IS NULL OR d.reason = :reason)
+                      AND (:status IS NULL OR d.status = :status)
+                    """)
+    Page<Dispute> findCardDisputesWithFilters(
             Pageable pageable,
             @Param("cardId") UUID cardId,
             @Param("search") String search,
             @Param("reason") DisputeReason reason,
-            @Param("status") DisputeStatus status,
-            @Param("walletName") String walletName);
+            @Param("status") DisputeStatus status);
 }

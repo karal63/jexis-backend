@@ -50,10 +50,9 @@ public class DisputeController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) DisputeReason reason,
             @RequestParam(required = false) DisputeStatus status,
-            @RequestParam(required = false) String walletName,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortDirection) {
-        Page<Dispute> disputesPage = getDisputesUseCase.execute(page, pageSize, search, reason, status, walletName,
+        Page<Dispute> disputesPage = getDisputesUseCase.execute(page, pageSize, search, reason, status,
                 sortBy, sortDirection);
         return mapToPageResponse(disputesPage, page, pageSize);
     }

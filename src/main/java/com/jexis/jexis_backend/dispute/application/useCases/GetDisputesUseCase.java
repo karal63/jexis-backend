@@ -19,10 +19,9 @@ public class GetDisputesUseCase {
     }
 
     public Page<Dispute> execute(int page, int pageSize, String search, DisputeReason reason, DisputeStatus status,
-            String walletName, String sortBy, String sortDirection) {
+            String sortBy, String sortDirection) {
         Pageable pageable = PageRequest.of(Math.max(0, page - 1), pageSize, buildSort(sortBy, sortDirection));
-        return disputeRepository.findDisputesWithFilters(pageable, null, normalize(search), reason, status,
-                normalize(walletName));
+        return disputeRepository.findDisputesWithFilters(pageable, normalize(search), reason, status);
     }
 
     private Sort buildSort(String sortBy, String sortDirection) {

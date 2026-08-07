@@ -29,7 +29,7 @@ public class GetAccountExternalAccountsUseCase {
     public Page<ExternalAccount> execute(UUID accountId, int page, int pageSize, String search, Boolean isDefault,
             String sortBy, String sortDirection) {
         Pageable pageable = PageRequest.of(Math.max(0, page - 1), pageSize, buildSort(sortBy, sortDirection));
-        return externalAccountRepository.findExternalAccountsWithFilters(pageable, accountId, normalize(search),
+        return externalAccountRepository.findAccountExternalAccountsWithFilters(pageable, accountId, normalize(search),
                 isDefault);
     }
 

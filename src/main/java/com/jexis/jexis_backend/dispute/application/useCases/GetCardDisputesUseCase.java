@@ -23,8 +23,7 @@ public class GetCardDisputesUseCase {
     public Page<Dispute> execute(UUID cardId, int page, int pageSize, String search, DisputeReason reason,
             DisputeStatus status, String walletName, String sortBy, String sortDirection) {
         Pageable pageable = PageRequest.of(Math.max(0, page - 1), pageSize, buildSort(sortBy, sortDirection));
-        return disputeRepository.findDisputesWithFilters(pageable, cardId, normalize(search), reason, status,
-                normalize(walletName));
+        return disputeRepository.findCardDisputesWithFilters(pageable, cardId, normalize(search), reason, status);
     }
 
     private Sort buildSort(String sortBy, String sortDirection) {

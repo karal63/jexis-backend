@@ -17,7 +17,23 @@ public interface ExternalAccountRepository extends JpaRepository<ExternalAccount
 
     @Query("""
             SELECT e FROM ExternalAccount e
-            WHERE coalesce(e.isDeleted, false) = false
+            WHERE (
+                  :search IS NULL
+                  OR lower(cast(e.id as text)) LIKE concat('%', lower(cast(:search as text)), '%')
+                  OR lower(e.bankName) LIKE concat('%', lower(cast(:search as text)), '%')
+                  OR lower(e.last4) LIKE concat('%', lower(cast(:search as text)), '%')
+                  OR lower(e.country) LIKE concat('%', lower(cast(:search as text)), '%')
+              )
+              AND (:isDefault IS NULL OR e.isDefault = :isDefault)
+            """)
+    Page<ExternalAccount> findExternalAccountsWithFilters(
+            Pageable pageable,
+            @Param("search") String search,
+            @Param("isDefault") Boolean isDefault);
+
+    @Query("""
+            SELECT e FROM ExternalAccount e
+            WHERE e.isDeleted = false
               AND (:accountId IS NULL OR e.account.id = :accountId)
               AND (
                   :search IS NULL
@@ -28,7 +44,7 @@ public interface ExternalAccountRepository extends JpaRepository<ExternalAccount
               )
               AND (:isDefault IS NULL OR e.isDefault = :isDefault)
             """)
-    Page<ExternalAccount> findExternalAccountsWithFilters(
+    Page<ExternalAccount> findAccountExternalAccountsWithFilters(
             Pageable pageable,
             @Param("accountId") UUID accountId,
             @Param("search") String search,

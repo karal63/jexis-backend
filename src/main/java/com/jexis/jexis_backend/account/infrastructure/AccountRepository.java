@@ -26,9 +26,24 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     Page<Account> findAllByOwnerIdAndIsDeletedFalse(UUID ownerId, Pageable pageable);
 
     // Search across firstName, lastName and email (case-insensitive)
-    @Query("select a from Account a where (coalesce(a.isDeleted, false) = false) and (lower(a.firstName) like lower(concat('%', :search, '%')) or lower(a.lastName) like lower(concat('%', :search, '%')) or lower(a.email) like lower(concat('%', :search, '%'))) ")
+    @Query("select a from Account a where (lower(a.firstName) like lower(concat('%', :search, '%')) or lower(a.lastName) like lower(concat('%', :search, '%')) or lower(a.email) like lower(concat('%', :search, '%'))) ")
     Page<Account> searchAll(@Param("search") String search, Pageable pageable);
 
     @Query("select a from Account a where (coalesce(a.isDeleted, false) = false) and a.owner.id = :ownerId and (lower(a.firstName) like lower(concat('%', :search, '%')) or lower(a.lastName) like lower(concat('%', :search, '%')) or lower(a.email) like lower(concat('%', :search, '%'))) ")
     Page<Account> searchByOwner(@Param("ownerId") UUID ownerId, @Param("search") String search, Pageable pageable);
+
+    @Query("""
+                select m.account from Member m
+                    where m.user.id = :userId
+                        and (
+                            :search is null
+                            or lower(m.account.firstName) like lower(concat('%', CAST(:search AS text), '%')) 
+                            or lower(m.account.lastName) like lower(concat('%', CAST(:search AS text), '%'))
+                            or lower(m.account.email) like lower(concat('%', CAST(:search AS text), '%'))
+                        ) and m.account.isDeleted = false
+            """)
+    Page<Account> searchAccountsByMember(
+            @Param("userId") UUID userId,
+            @Param("search") String search,
+            Pageable pageable);
 }

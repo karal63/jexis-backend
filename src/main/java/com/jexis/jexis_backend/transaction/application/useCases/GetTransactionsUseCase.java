@@ -34,6 +34,7 @@ public class GetTransactionsUseCase {
     public Page<Transaction> execute(int page, int pageSize, String search, TransactionType type, TransactionStatus status,
                                      TransactionDirection direction, String sortBy, String sortDirection) {
         Pageable pageable = PageRequest.of(Math.max(0, page - 1), pageSize, buildSort(sortBy, sortDirection));
+
         return repo.findTransactionsWithFilters(pageable, normalize(search), type, status, direction);
     }
 

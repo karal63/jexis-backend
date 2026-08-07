@@ -28,7 +28,6 @@ public class GetWalletCardsUseCase {
     public Page<Card> execute(UUID walletId, int page, int pageSize, String search, CardStatus status, String brand,
             String type, String sortBy, String sortDirection) {
         Pageable pageable = PageRequest.of(Math.max(0, page - 1), pageSize, buildSort(sortBy, sortDirection));
-        System.out.println(normalize(search));
         return cardRepo.findWalletCardsWithFilters(pageable, walletId, normalize(search), status, normalize(brand),
                 normalize(type));
     }

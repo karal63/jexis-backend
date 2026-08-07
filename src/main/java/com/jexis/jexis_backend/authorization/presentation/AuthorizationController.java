@@ -8,6 +8,7 @@ import com.jexis.jexis_backend.authorization.application.useCases.GetWalletAutho
 import com.jexis.jexis_backend.authorization.domain.entities.Authorization;
 import com.jexis.jexis_backend.authorization.domain.enums.AuthorizationStatus;
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -33,23 +34,12 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping("/")
+@RequiredArgsConstructor
 public class AuthorizationController {
-
     private final GetAuthorizationUseCase getAuthorizationUseCase;
     private final GetAuthorizationsUseCase getAuthorizationsUseCase;
     private final GetWalletAuthorizationsUseCase getWalletAuthorizationsUseCase;
     private final DtoHelper dtoHelper;
-
-    public AuthorizationController(
-            GetAuthorizationUseCase getAuthorizationUseCase,
-            GetAuthorizationsUseCase getAuthorizationsUseCase,
-            GetWalletAuthorizationsUseCase getWalletAuthorizationsUseCase,
-            DtoHelper dtoHelper) {
-        this.getAuthorizationUseCase = getAuthorizationUseCase;
-        this.getAuthorizationsUseCase = getAuthorizationsUseCase;
-        this.getWalletAuthorizationsUseCase = getWalletAuthorizationsUseCase;
-        this.dtoHelper = dtoHelper;
-    }
 
     /**
      * Retrieves all authorizations with pagination and filtering.
@@ -69,8 +59,10 @@ public class AuthorizationController {
             @RequestParam(defaultValue = "20") int pageSize,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Boolean approved,
-            @RequestParam(required = false) AuthorizationStatus status) {
-        Page<Authorization> authorizationPage = getAuthorizationsUseCase.execute(page, pageSize, search, approved, status);
+            @RequestParam(required = false) AuthorizationStatus status,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDirection) {
+        Page<Authorization> authorizationPage = getAuthorizationsUseCase.execute(page, pageSize, search, approved, status, sortBy, sortDirection);
         return mapToPageResponse(authorizationPage);
     }
 
@@ -108,8 +100,10 @@ public class AuthorizationController {
             @RequestParam(defaultValue = "20") int pageSize,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Boolean approved,
-            @RequestParam(required = false) AuthorizationStatus status) {
-        Page<Authorization> authorizationPage = getWalletAuthorizationsUseCase.execute(walletId, page, pageSize, search, approved, status);
+            @RequestParam(required = false) AuthorizationStatus status,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDirection) {
+        Page<Authorization> authorizationPage = getWalletAuthorizationsUseCase.execute(walletId, page, pageSize, search, approved, status,  sortBy, sortDirection);
         return mapToPageResponse(authorizationPage);
     }
 

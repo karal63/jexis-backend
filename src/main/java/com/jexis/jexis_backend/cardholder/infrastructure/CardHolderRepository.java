@@ -46,7 +46,7 @@ public interface CardHolderRepository extends JpaRepository<CardHolder, UUID> {
 
     @Query("""
             SELECT c FROM CardHolder c
-            WHERE coalesce(c.isDeleted, false) = false
+            WHERE c.isDeleted = false
               AND c.account.id = :accountId
               AND (
                   :search IS NULL

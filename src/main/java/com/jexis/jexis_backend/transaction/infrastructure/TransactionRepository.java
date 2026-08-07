@@ -45,8 +45,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
 
     @Query("""
             SELECT t FROM Transaction t
-            WHERE coalesce(t.wallet.id, null) = t.wallet.id
-              AND t.wallet.id = :walletId
+            WHERE t.wallet.id = :walletId
               AND (
                 :search IS NULL
                 OR lower(CAST(t.id AS string)) LIKE concat('%', lower(CAST(:search AS text)), '%')

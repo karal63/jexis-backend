@@ -3,6 +3,7 @@ package com.jexis.jexis_backend.account.application.useCases;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.jexis.jexis_backend.account.domain.entities.Account;
@@ -35,7 +36,10 @@ public class GetAccountsUseCase {
      */
     public Page<Account> execute(int page, int pageSize, String search) {
         int p = Math.max(0, page - 1);
-        Pageable pageable = PageRequest.of(p, pageSize);
+
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+
+        Pageable pageable = PageRequest.of(p, pageSize, sort);
 
         if (search == null || search.isBlank()) {
             return repo.findAllByIsDeletedFalse(pageable);

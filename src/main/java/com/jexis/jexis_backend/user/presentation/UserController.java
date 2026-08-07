@@ -6,8 +6,10 @@ import java.util.UUID;
 
 import com.jexis.jexis_backend.user.application.dto.*;
 import com.jexis.jexis_backend.user.application.useCases.*;
+import com.jexis.jexis_backend.user.domain.entities.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -61,7 +63,7 @@ public class UserController {
      */
     @GetMapping("/admin/users")
     @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
-    public com.jexis.jexis_backend.user.application.dto.UserPageResponseDto getUsers(
+    public UserPageResponseDto getUsers(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int pageSize,
             @RequestParam(required = false) String search,
@@ -69,7 +71,7 @@ public class UserController {
             @RequestParam(required = false) Boolean isActivated,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortDirection) {
-        org.springframework.data.domain.Page<com.jexis.jexis_backend.user.domain.entities.User> pageResult =
+        Page<User> pageResult =
                 getUsersUseCase.execute(page, pageSize, search, role, isActivated, sortBy, sortDirection);
         return mapToPageResponse(pageResult, page, pageSize);
     }
