@@ -7,6 +7,7 @@ import com.jexis.jexis_backend.stripe.application.useCases.StripeOutboundTransfe
 import com.jexis.jexis_backend.wallet.application.dto.*;
 import com.jexis.jexis_backend.wallet.application.useCases.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jexis.jexis_backend.account.application.useCases.GetAccountUseCase;
@@ -68,9 +70,14 @@ public class WalletController {
      */
     @GetMapping("/admin/wallets")
     @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
-    public List<WalletResponseDto> list() {
-        List<Wallet> wallets = getAllWalletsUseCase.execute();
-        return wallets.stream().map(dtoHelper::toWalletDto).toList();
+    public WalletPageResponseDto list(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int pageSize,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDirection) {
+        Page<Wallet> pageResult = getAllWalletsUseCase.execute(page, pageSize, search, sortBy, sortDirection);
+        return mapToPageResponse(pageResult, page, pageSize);
     }
 
     /**
@@ -90,9 +97,14 @@ public class WalletController {
 
     @GetMapping("/accounts/{id}/wallets")
     @PreAuthorize("@walletAuthorization.canView(authentication.principal.id(), #id)")
-    public List<WalletResponseDto> getWalletsByAccount(@PathVariable UUID id) {
-        List<Wallet> wallet = getAccountWalletsUseCase.execute(id);
-        return wallet.stream().map(dtoHelper::toWalletDto).toList();
+    public WalletPageResponseDto getWalletsByAccount(@PathVariable UUID id,
+                                                     @RequestParam(defaultValue = "1") int page,
+                                                     @RequestParam(defaultValue = "20") int pageSize,
+                                                     @RequestParam(required = false) String search,
+                                                     @RequestParam(required = false) String sortBy,
+                                                     @RequestParam(required = false) String sortDirection) {
+        Page<Wallet> pageResult = getAccountWalletsUseCase.execute(id, page, pageSize, search, sortBy, sortDirection);
+        return mapToPageResponse(pageResult, page, pageSize);
     }
 
     @GetMapping("/accounts/{id}/wallets/{walletId}")
@@ -157,6 +169,18 @@ public class WalletController {
     public ResponseEntity<?> addMoney(@PathVariable UUID id, @PathVariable UUID walletId, @Valid @RequestBody AddReceivedCreditsDto body) {
         addMoneyUseCase.execute(id, walletId, body);
         return ResponseEntity.ok("Money has been added");
+    }
+
+    private WalletPageResponseDto mapToPageResponse(Page<Wallet> walletsPage, int page, int pageSize) {
+        List<WalletResponseDto> items = walletsPage.getContent().stream()
+                .map(dtoHelper::toWalletDto)
+                .toList();
+        return new WalletPageResponseDto(
+                items,
+                page,
+                pageSize,
+                walletsPage.getTotalElements(),
+                walletsPage.getTotalPages());
     }
 
 }

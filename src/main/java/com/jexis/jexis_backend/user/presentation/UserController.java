@@ -6,8 +6,10 @@ import java.util.UUID;
 
 import com.jexis.jexis_backend.user.application.dto.*;
 import com.jexis.jexis_backend.user.application.useCases.*;
+import com.jexis.jexis_backend.user.domain.entities.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -61,8 +63,17 @@ public class UserController {
      */
     @GetMapping("/admin/users")
     @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
-    public List<UserResponseDto> getUsers() {
-        return getUsersUseCase.execute().stream().map(dtoHelper::toUserDto).toList();
+    public UserPageResponseDto getUsers(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int pageSize,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) com.jexis.jexis_backend.user.domain.enums.UserRole role,
+            @RequestParam(required = false) Boolean isActivated,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDirection) {
+        Page<User> pageResult =
+                getUsersUseCase.execute(page, pageSize, search, role, isActivated, sortBy, sortDirection);
+        return mapToPageResponse(pageResult, page, pageSize);
     }
 
     /**
@@ -157,5 +168,17 @@ public class UserController {
 
         String redirectUrl = "%s/dashboard".formatted(applicationOrigin);
         return ResponseEntity.status(302).location(URI.create(redirectUrl)).build();
+    }
+
+    private UserPageResponseDto mapToPageResponse(org.springframework.data.domain.Page<com.jexis.jexis_backend.user.domain.entities.User> usersPage, int page, int pageSize) {
+        java.util.List<UserResponseDto> items = usersPage.getContent().stream()
+                .map(dtoHelper::toUserDto)
+                .toList();
+        return new UserPageResponseDto(
+                items,
+                page,
+                pageSize,
+                usersPage.getTotalElements(),
+                usersPage.getTotalPages());
     }
 }

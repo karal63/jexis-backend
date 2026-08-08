@@ -15,27 +15,24 @@ import com.jexis.jexis_backend.transaction.infrastructure.TransactionRepository;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * GetTransactionsUseCase
- */
 @Service
-public class GetTransactionsUseCase {
+public class GetCardTransactionsUseCase {
 
     private final TransactionRepository repo;
 
-    public GetTransactionsUseCase(TransactionRepository transactionRepository) {
+    public GetCardTransactionsUseCase(TransactionRepository transactionRepository) {
         this.repo = transactionRepository;
     }
 
-    public List<Transaction> execute() {
-        return repo.findAll();
+    public List<Transaction> execute(UUID cardId) {
+        return repo.findByCardId(cardId);
     }
 
-    public Page<Transaction> execute(int page, int pageSize, String search, TransactionType type, TransactionStatus status,
-                                     TransactionDirection direction, String sortBy, String sortDirection) {
+    public Page<Transaction> execute(UUID cardId, int page, int pageSize,
+                                      String search, TransactionType type, TransactionStatus status,
+                                      TransactionDirection direction, String sortBy, String sortDirection) {
         Pageable pageable = PageRequest.of(Math.max(0, page - 1), pageSize, buildSort(sortBy, sortDirection));
-
-        return repo.findTransactionsWithFilters(pageable, normalize(search), type, status, direction);
+        return repo.findCardTransactionsWithFilters(pageable, cardId, normalize(search), type, status, direction);
     }
 
     private Sort buildSort(String sortBy, String sortDirection) {

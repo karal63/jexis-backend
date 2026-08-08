@@ -18,10 +18,6 @@ public class AccountAuthorization {
         this.canAccessUseCase = canAccessUseCase;
     }
 
-    public boolean canViewAll(UUID requestingUserId, UUID targetingUserId) {
-        return requestingUserId.equals(targetingUserId);
-    }
-
     public boolean canView(UUID userId, UUID accountId) {
         return canAccessUseCase.execute(userId, accountId);
     }

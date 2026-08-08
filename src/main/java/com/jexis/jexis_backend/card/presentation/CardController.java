@@ -5,9 +5,10 @@ import java.util.UUID;
 
 import com.jexis.jexis_backend.card.application.dto.TestCardPaymentDto;
 import com.jexis.jexis_backend.card.application.useCases.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,12 +18,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.jexis.jexis_backend.auth.application.dto.AuthUser;
+import com.jexis.jexis_backend.card.application.dto.CardPageResponseDto;
 import com.jexis.jexis_backend.card.application.dto.CardResponseDto;
 import com.jexis.jexis_backend.card.application.dto.CreateCardDto;
 import com.jexis.jexis_backend.card.application.dto.EditCardDto;
 import com.jexis.jexis_backend.card.application.dto.ReplaceCardDto;
 import com.jexis.jexis_backend.card.domain.entities.Card;
+import com.jexis.jexis_backend.card.domain.enums.CardStatus;
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
 
 import jakarta.validation.Valid;
@@ -41,6 +43,7 @@ import jakarta.validation.Valid;
  */
 @RestController
 @RequestMapping("/")
+@RequiredArgsConstructor
 public class CardController {
     private final GetAllCardsUseCase getAllCardsUseCase;
     private final GetCardUseCase getCardUseCase;
@@ -49,41 +52,23 @@ public class CardController {
     private final DeleteCardUseCase deleteCardUseCase;
     private final ReplaceCardUseCase replaceCardUseCase;
     private final DtoHelper dtoHelper;
-    private final GetAccountCardsUseCase getAccountCardsUseCase;
+    private final GetWalletCardsUseCase getWalletCardsUseCase;
     private final TestCardPaymentUseCase testCardPaymentUseCase;
 
-    public CardController(
-            GetAllCardsUseCase getAllCardsUseCase,
-            GetCardUseCase getCardUseCase,
-            CreateCardUseCase createCardUseCase,
-            EditCardUseCase editCardUseCase,
-            DeleteCardUseCase deleteCardUseCase,
-            ReplaceCardUseCase replaceCardUseCase,
-            DtoHelper dtoHelper,
-            GetAccountCardsUseCase getAccountCardsUseCase,
-            TestCardPaymentUseCase testCardPaymentUseCase) {
-        this.getAllCardsUseCase = getAllCardsUseCase;
-        this.getCardUseCase = getCardUseCase;
-        this.createCardUseCase = createCardUseCase;
-        this.editCardUseCase = editCardUseCase;
-        this.deleteCardUseCase = deleteCardUseCase;
-        this.replaceCardUseCase = replaceCardUseCase;
-        this.dtoHelper = dtoHelper;
-        this.getAccountCardsUseCase = getAccountCardsUseCase;
-        this.testCardPaymentUseCase = testCardPaymentUseCase;
-    }
-
-    /**
-     * Retrieves all cards available in the account.
-     * Endpoint: GET /card/list
-     *
-     * @return a list of all card entities
-     */
     @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
     @GetMapping("/admin/cards")
-    public List<CardResponseDto> list() {
-        List<Card> cards = getAllCardsUseCase.execute();
-        return cards.stream().map(dtoHelper::toCardDto).toList();
+    public CardPageResponseDto list(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int pageSize,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) CardStatus status,
+            @RequestParam(required = false) String brand,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDirection) {
+        Page<Card> cardsPage = getAllCardsUseCase.execute(page, pageSize, search, status, brand, type, sortBy,
+                sortDirection);
+        return mapToPageResponse(cardsPage, page, pageSize);
     }
 
     /**
@@ -101,23 +86,34 @@ public class CardController {
         return dtoHelper.toCardDto(card);
     }
 
-    @GetMapping("/accounts/{id}/cards")
+    @GetMapping("/wallets/{id}/cards")
     @PreAuthorize("@cardAuthorization.canViewAll(authentication.principal.id(), #id)")
-    public List<CardResponseDto> getCardsByAccount(@PathVariable UUID id) {
-        List<Card> cards = getAccountCardsUseCase.execute(id);
-        return cards.stream().map(dtoHelper::toCardDto).toList();
+    public CardPageResponseDto getCardsByAccount(
+            @PathVariable UUID id,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int pageSize,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) CardStatus status,
+            @RequestParam(required = false) String brand,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDirection) {
+        Page<Card> cardsPage = getWalletCardsUseCase.execute(id, page, pageSize, search, status, brand, type, sortBy,
+                sortDirection);
+        return mapToPageResponse(cardsPage, page, pageSize);
     }
 
     /**
      * Retrieves a single card by its identifier.
      * Endpoint: GET /card/list/{id}
      *
-     * @param id the unique identifier of the card to retrieve
      * @return the matching card entity
      */
-    @GetMapping("/accounts/{id}/cards/{cardId}")
-    @PreAuthorize("@cardAuthorization.canView(authentication.principal.id(), #id, #cardId)")
-    public CardResponseDto find(@PathVariable UUID id, @PathVariable UUID cardId) {
+
+    // Now work on below endpoints, change authorization
+    @GetMapping("/cards/{cardId}")
+    @PreAuthorize("@cardAuthorization.canView(authentication.principal.id(), #cardId)")
+    public CardResponseDto find(@PathVariable UUID cardId) {
         Card card = getCardUseCase.execute(cardId);
         return dtoHelper.toCardDto(card);
     }
@@ -127,20 +123,19 @@ public class CardController {
      *
      * Endpoint: PATCH /card/edit/{id}
      *
-     * @param id   the unique identifier of the card to update
      * @param body the card update payload
      * @return the updated card entity
      */
-    @PatchMapping("/accounts/{id}/cards/{cardId}/edit")
-    @PreAuthorize("@cardAuthorization.canEdit(authentication.principal.id(), #id, #cardId)")
-    public CardResponseDto edit(@PathVariable UUID id, @PathVariable UUID cardId, @Valid @RequestBody EditCardDto body) {
+    @PatchMapping("/cards/{cardId}/edit")
+    @PreAuthorize("@cardAuthorization.canEdit(authentication.principal.id(), #cardId)")
+    public CardResponseDto edit(@PathVariable UUID cardId, @Valid @RequestBody EditCardDto body) {
         Card card = editCardUseCase.execute(cardId, body);
         return dtoHelper.toCardDto(card);
     }
 
-    @PostMapping("/accounts/{id}/cards/{cardId}/replace")
-    @PreAuthorize("@cardAuthorization.canEdit(authentication.principal.id(), #id, #cardId)")
-    public CardResponseDto replace(@PathVariable UUID id, @PathVariable UUID cardId,
+    @PostMapping("/cards/{cardId}/replace")
+    @PreAuthorize("@cardAuthorization.canEdit(authentication.principal.id(), #cardId)")
+    public CardResponseDto replace(@PathVariable UUID cardId,
             @Valid @RequestBody ReplaceCardDto body) {
         Card card = replaceCardUseCase.execute(cardId, body);
         return dtoHelper.toCardDto(card);
@@ -150,12 +145,11 @@ public class CardController {
      * Deletes a card owned by the authenticated user.
      * Endpoint: POST /card/delete/{id}
      *
-     * @param id account id
      * @param cardId card id
      */
-    @PostMapping("/accounts/{id}/cards/{cardId}/delete")
-    @PreAuthorize("@cardAuthorization.canDelete(authentication.principal.id(), #id, #cardId)")
-    public void delete(@PathVariable UUID id, @PathVariable UUID cardId) {
+    @PostMapping("/cards/{cardId}/delete")
+    @PreAuthorize("@cardAuthorization.canDelete(authentication.principal.id(), #cardId)")
+    public void delete(@PathVariable UUID cardId) {
         deleteCardUseCase.execute(cardId);
     }
 
@@ -171,6 +165,18 @@ public class CardController {
     public ResponseEntity<String> createTestPayment(@Valid @RequestBody TestCardPaymentDto body) {
         testCardPaymentUseCase.execute(body);
         return ResponseEntity.ok("Test payment created");
+    }
+
+    private CardPageResponseDto mapToPageResponse(Page<Card> cardsPage, int page, int pageSize) {
+        List<CardResponseDto> items = cardsPage.getContent().stream()
+                .map(dtoHelper::toCardDto)
+                .toList();
+        return new CardPageResponseDto(
+                items,
+                page,
+                pageSize,
+                cardsPage.getTotalElements(),
+                cardsPage.getTotalPages());
     }
 
 }

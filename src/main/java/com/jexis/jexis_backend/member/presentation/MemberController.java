@@ -3,14 +3,14 @@ package com.jexis.jexis_backend.member.presentation;
 import java.util.List;
 import java.util.UUID;
 
+import com.jexis.jexis_backend.member.application.dto.MemberPageResponseDto;
+import com.jexis.jexis_backend.member.domain.enums.Role;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
 import com.jexis.jexis_backend.member.application.dto.CreateMemberDto;
@@ -23,10 +23,16 @@ import com.jexis.jexis_backend.member.application.useCases.GetMemberUseCase;
 import com.jexis.jexis_backend.member.application.useCases.GetMembersUseCase;
 import com.jexis.jexis_backend.member.application.useCases.RemoveMemberUseCase;
 import com.jexis.jexis_backend.member.domain.entities.Member;
+import com.jexis.jexis_backend.account.application.useCases.GetMemberAccountsUseCase;
+import com.jexis.jexis_backend.account.application.dto.PaginatedAccountsResponseDto;
+import com.jexis.jexis_backend.account.application.dto.AccountResponseDto;
+import com.jexis.jexis_backend.account.domain.entities.Account;
+import com.jexis.jexis_backend.auth.application.dto.AuthUser;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/")
+@RequiredArgsConstructor
 public class MemberController {
     private final GetMemberUseCase getMemberUseCase;
     private final GetMembersUseCase getMembersUseCase;
@@ -35,29 +41,26 @@ public class MemberController {
     private final RemoveMemberUseCase removeMemberUseCase;
     private final DtoHelper dtoHelper;
     private final GetAccountMembersUseCase getAccountMembersUseCase;
-
-    public MemberController(
-            GetMemberUseCase getMemberUseCase,
-            GetMembersUseCase getMembersUseCase,
-            AddMemberUseCase addMemberUseCase,
-            EditMemberUseCase editMemberUseCase,
-            RemoveMemberUseCase removeMemberUseCase,
-            DtoHelper dtoHelper,
-            GetAccountMembersUseCase getAccountMembersUseCase) {
-        this.getMemberUseCase = getMemberUseCase;
-        this.getMembersUseCase = getMembersUseCase;
-        this.addMemberUseCase = addMemberUseCase;
-        this.editMemberUseCase = editMemberUseCase;
-        this.removeMemberUseCase = removeMemberUseCase;
-        this.dtoHelper = dtoHelper;
-        this.getAccountMembersUseCase = getAccountMembersUseCase;
-    }
+    private final GetMemberAccountsUseCase getMemberAccountsUseCase;
 
     @GetMapping("/admin/members")
     @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
-    public List<MemberResponseDto> listAccountMembers() {
-        List<Member> members = getMembersUseCase.execute();
-        return members.stream().map(dtoHelper::toMemberDto).toList();
+    public MemberPageResponseDto listAccountMembers(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int pageSize,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Role role,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDirection) {
+        Page<Member> membersPage = getMembersUseCase.execute(page,
+                pageSize, search, role, sortBy, sortDirection);
+
+        List<MemberResponseDto> items = membersPage.getContent().stream()
+                .map(dtoHelper::toMemberDto)
+                .toList();
+
+        return new MemberPageResponseDto(items, page, pageSize,
+                membersPage.getTotalElements(), membersPage.getTotalPages());
     }
 
     @PostMapping("/members/add")
@@ -69,9 +72,42 @@ public class MemberController {
 
     @GetMapping("/accounts/{id}/members")
     @PreAuthorize("@memberAuthorization.canView(authentication.principal.id(), #id)")
-    public List<MemberResponseDto> getMembersByAccount(@PathVariable UUID id) {
-        List<Member> member = getAccountMembersUseCase.execute(id);
-        return member.stream().map(dtoHelper::toMemberDto).toList();
+    public MemberPageResponseDto getMembersByAccount(@PathVariable UUID id,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int pageSize,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Role role,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDirection) {
+        Page<Member> membersPage = getAccountMembersUseCase.execute(id,
+                page, pageSize, search, role, sortBy, sortDirection);
+
+        List<MemberResponseDto> items = membersPage.getContent().stream()
+                .map(dtoHelper::toMemberDto)
+                .toList();
+
+        return new MemberPageResponseDto(items, page, pageSize,
+                membersPage.getTotalElements(), membersPage.getTotalPages());
+    }
+
+    @GetMapping("/accounts/me")
+    public PaginatedAccountsResponseDto getMyAccounts(@AuthenticationPrincipal AuthUser authUser,
+                                                      @RequestParam(defaultValue = "1") int page,
+                                                      @RequestParam(defaultValue = "20") int pageSize,
+                                                      @RequestParam(required = false) String search) {
+        Page<Account> accountsPage = getMemberAccountsUseCase.execute(authUser.id(), page, pageSize, search);
+
+        List<AccountResponseDto> items = accountsPage
+                .stream()
+                .map(dtoHelper::toAccountDto)
+                .toList();
+
+        return new PaginatedAccountsResponseDto(
+                items,
+                page,
+                pageSize,
+                accountsPage.getTotalElements(),
+                accountsPage.getTotalPages());
     }
 
     @GetMapping("/accounts/{id}/members/{memberId}")
