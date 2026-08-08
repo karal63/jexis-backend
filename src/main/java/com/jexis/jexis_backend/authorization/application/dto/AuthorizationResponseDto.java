@@ -10,7 +10,6 @@ import java.util.UUID;
 public record AuthorizationResponseDto(
         UUID id,
         WalletResponseDto walletId,
-        String stripeAuthorizationId,
         CardResponseDto cardId,
         Boolean approved,
         Long amount,

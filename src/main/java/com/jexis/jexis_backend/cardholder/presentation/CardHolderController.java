@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jexis.jexis_backend.cardholder.application.dto.CardHolderPageResponseDto;
+import com.jexis.jexis_backend.cardholder.application.dto.CardHolderPageAdminResponseDto;
 import com.jexis.jexis_backend.cardholder.application.dto.CardHolderResponseDto;
 import com.jexis.jexis_backend.cardholder.application.dto.CreateCardHolderDto;
 import com.jexis.jexis_backend.cardholder.application.dto.EditCardHolderDto;
@@ -57,7 +58,7 @@ public class CardHolderController {
 
     @GetMapping("/admin/card-holders")
     @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
-    public CardHolderPageResponseDto list(
+    public CardHolderPageAdminResponseDto list(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int pageSize,
             @RequestParam(required = false) String search,
@@ -66,7 +67,7 @@ public class CardHolderController {
             @RequestParam(required = false) String sortDirection) {
         Page<CardHolder> cardHolders = getAllCardHoldersUseCase.execute(page, pageSize, search, status, sortBy,
                 sortDirection);
-        return mapToPageResponse(cardHolders, page, pageSize);
+        return mapToPageAdminResponse(cardHolders, page, pageSize);
     }
 
     @PostMapping("/card-holder/create")
@@ -120,6 +121,18 @@ public class CardHolderController {
                 .map(dtoHelper::toCardHolderDto)
                 .toList();
         return new CardHolderPageResponseDto(
+                items,
+                page,
+                pageSize,
+                cardHolderPage.getTotalElements(),
+                cardHolderPage.getTotalPages());
+    }
+
+    private CardHolderPageAdminResponseDto mapToPageAdminResponse(Page<CardHolder> cardHolderPage, int page, int pageSize) {
+        var items = cardHolderPage.getContent().stream()
+                .map(dtoHelper::toCardHolderAdminDto)
+                .toList();
+        return new CardHolderPageAdminResponseDto(
                 items,
                 page,
                 pageSize,

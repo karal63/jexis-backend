@@ -11,7 +11,6 @@ public record DisputeResponseDto(
         UUID id,
         TransactionResponseDto transaction,
         WalletResponseDto wallet,
-        String stripeDisputeId,
         Long amount,
         String currency,
         DisputeStatus status,

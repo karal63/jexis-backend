@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.jexis.jexis_backend.member.application.dto.MemberPageResponseDto;
+import com.jexis.jexis_backend.member.application.dto.MemberPageAdminResponseDto;
 import com.jexis.jexis_backend.member.domain.enums.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,7 @@ public class MemberController {
 
     @GetMapping("/admin/members")
     @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
-    public MemberPageResponseDto listAccountMembers(
+    public MemberPageAdminResponseDto listAccountMembers(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int pageSize,
             @RequestParam(required = false) String search,
@@ -55,12 +56,7 @@ public class MemberController {
         Page<Member> membersPage = getMembersUseCase.execute(page,
                 pageSize, search, role, sortBy, sortDirection);
 
-        List<MemberResponseDto> items = membersPage.getContent().stream()
-                .map(dtoHelper::toMemberDto)
-                .toList();
-
-        return new MemberPageResponseDto(items, page, pageSize,
-                membersPage.getTotalElements(), membersPage.getTotalPages());
+        return mapToPageAdminResponse(membersPage, page, pageSize);
     }
 
     @PostMapping("/members/add")
@@ -68,6 +64,22 @@ public class MemberController {
     public MemberResponseDto add(@Valid @RequestBody CreateMemberDto body) {
         Member member = addMemberUseCase.execute(body);
         return dtoHelper.toMemberDto(member);
+    }
+
+    private MemberPageResponseDto mapToPageResponse(Page<Member> membersPage, int page, int pageSize) {
+        List<MemberResponseDto> items = membersPage.getContent().stream()
+                .map(dtoHelper::toMemberDto)
+                .toList();
+        return new MemberPageResponseDto(items, page, pageSize,
+                membersPage.getTotalElements(), membersPage.getTotalPages());
+    }
+
+    private MemberPageAdminResponseDto mapToPageAdminResponse(Page<Member> membersPage, int page, int pageSize) {
+        var items = membersPage.getContent().stream()
+                .map(dtoHelper::toMemberAdminDto)
+                .toList();
+        return new MemberPageAdminResponseDto(items, page, pageSize,
+                membersPage.getTotalElements(), membersPage.getTotalPages());
     }
 
     @GetMapping("/accounts/{id}/members")
