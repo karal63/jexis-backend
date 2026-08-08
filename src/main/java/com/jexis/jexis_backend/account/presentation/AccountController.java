@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import com.jexis.jexis_backend.account.application.dto.GetUpdateLinkDto;
 import com.jexis.jexis_backend.account.application.dto.PaginatedAccountsResponseDto;
+import com.jexis.jexis_backend.account.application.dto.PaginatedAccountsAdminResponseDto;
 import com.jexis.jexis_backend.account.application.useCases.*;
 import com.stripe.model.AccountLink;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jexis.jexis_backend.account.application.dto.AccountResponseDto;
+import com.jexis.jexis_backend.account.application.dto.AccountAdminResponseDto;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.auth.application.dto.AuthUser;
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
@@ -55,18 +57,18 @@ public class AccountController {
      */
     @GetMapping("/admin/accounts")
     @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
-    public PaginatedAccountsResponseDto getAll(
+    public PaginatedAccountsAdminResponseDto getAll(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int pageSize,
             @RequestParam(required = false) String search) {
         Page<Account> accountsPage = getAccountsUseCase.execute(page, pageSize, search);
 
-        List<AccountResponseDto> items = accountsPage
+        List<AccountAdminResponseDto> items = accountsPage
                 .stream()
-                .map(dtoHelper::toAccountDto)
+                .map(dtoHelper::toAccountAdminDto)
                 .toList();
 
-        return new PaginatedAccountsResponseDto(
+        return new PaginatedAccountsAdminResponseDto(
                 items,
                 page,
                 pageSize,

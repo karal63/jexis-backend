@@ -20,8 +20,6 @@ import java.util.UUID;
 public record TransactionResponseDto(
         UUID id,
         WalletResponseDto walletId,
-        String stripeTransactionId,
-        String stripeObjectId,
         TransactionType type,
         Long amount,
         String currency,

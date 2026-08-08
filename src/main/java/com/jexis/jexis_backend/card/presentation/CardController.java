@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jexis.jexis_backend.card.application.dto.CardPageResponseDto;
+import com.jexis.jexis_backend.card.application.dto.CardPageAdminResponseDto;
 import com.jexis.jexis_backend.card.application.dto.CardResponseDto;
 import com.jexis.jexis_backend.card.application.dto.CreateCardDto;
 import com.jexis.jexis_backend.card.application.dto.EditCardDto;
@@ -57,7 +58,7 @@ public class CardController {
 
     @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
     @GetMapping("/admin/cards")
-    public CardPageResponseDto list(
+    public CardPageAdminResponseDto list(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int pageSize,
             @RequestParam(required = false) String search,
@@ -68,7 +69,7 @@ public class CardController {
             @RequestParam(required = false) String sortDirection) {
         Page<Card> cardsPage = getAllCardsUseCase.execute(page, pageSize, search, status, brand, type, sortBy,
                 sortDirection);
-        return mapToPageResponse(cardsPage, page, pageSize);
+        return mapToPageAdminResponse(cardsPage, page, pageSize);
     }
 
     /**
@@ -172,6 +173,18 @@ public class CardController {
                 .map(dtoHelper::toCardDto)
                 .toList();
         return new CardPageResponseDto(
+                items,
+                page,
+                pageSize,
+                cardsPage.getTotalElements(),
+                cardsPage.getTotalPages());
+    }
+
+    private CardPageAdminResponseDto mapToPageAdminResponse(Page<Card> cardsPage, int page, int pageSize) {
+        var items = cardsPage.getContent().stream()
+                .map(dtoHelper::toCardAdminDto)
+                .toList();
+        return new CardPageAdminResponseDto(
                 items,
                 page,
                 pageSize,

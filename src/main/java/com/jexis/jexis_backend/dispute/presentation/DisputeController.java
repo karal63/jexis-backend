@@ -3,6 +3,7 @@ package com.jexis.jexis_backend.dispute.presentation;
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
 import com.jexis.jexis_backend.dispute.application.dto.CreateDisputeDto;
 import com.jexis.jexis_backend.dispute.application.dto.DisputePageResponseDto;
+import com.jexis.jexis_backend.dispute.application.dto.DisputePageAdminResponseDto;
 import com.jexis.jexis_backend.dispute.application.dto.DisputeReason;
 import com.jexis.jexis_backend.dispute.application.dto.DisputeResponseDto;
 import com.jexis.jexis_backend.dispute.application.useCases.CreateDisputeUseCase;
@@ -44,7 +45,7 @@ public class DisputeController {
 
     @GetMapping("/admin/disputes")
     @PreAuthorize("@disputeAuthorization.canViewAll(authentication.principal.id())")
-    public DisputePageResponseDto getAllDisputes(
+    public DisputePageAdminResponseDto getAllDisputes(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int pageSize,
             @RequestParam(required = false) String search,
@@ -54,7 +55,7 @@ public class DisputeController {
             @RequestParam(required = false) String sortDirection) {
         Page<Dispute> disputesPage = getDisputesUseCase.execute(page, pageSize, search, reason, status,
                 sortBy, sortDirection);
-        return mapToPageResponse(disputesPage, page, pageSize);
+        return mapToPageAdminResponse(disputesPage, page, pageSize);
     }
 
     @GetMapping("/cards/{cardId}/disputes")
@@ -86,6 +87,18 @@ public class DisputeController {
                 .map(dtoHelper::toDisputeDto)
                 .toList();
         return new DisputePageResponseDto(
+                items,
+                page,
+                pageSize,
+                disputesPage.getTotalElements(),
+                disputesPage.getTotalPages());
+    }
+
+    private DisputePageAdminResponseDto mapToPageAdminResponse(Page<Dispute> disputesPage, int page, int pageSize) {
+        var items = disputesPage.getContent().stream()
+                .map(dtoHelper::toDisputeAdminDto)
+                .toList();
+        return new DisputePageAdminResponseDto(
                 items,
                 page,
                 pageSize,

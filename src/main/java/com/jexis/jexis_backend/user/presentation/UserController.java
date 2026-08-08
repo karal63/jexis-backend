@@ -63,7 +63,7 @@ public class UserController {
      */
     @GetMapping("/admin/users")
     @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
-    public UserPageResponseDto getUsers(
+    public UserPageAdminResponseDto getUsers(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int pageSize,
             @RequestParam(required = false) String search,
@@ -73,7 +73,7 @@ public class UserController {
             @RequestParam(required = false) String sortDirection) {
         Page<User> pageResult =
                 getUsersUseCase.execute(page, pageSize, search, role, isActivated, sortBy, sortDirection);
-        return mapToPageResponse(pageResult, page, pageSize);
+        return mapToPageAdminResponse(pageResult, page, pageSize);
     }
 
     /**
@@ -86,8 +86,8 @@ public class UserController {
      */
     @GetMapping("/admin/users/{id}")
     @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
-    public UserResponseDto getUser(@PathVariable UUID id) {
-        return dtoHelper.toUserDto(getUserUseCase.execute(id));
+    public UserAdminResponseDto getUser(@PathVariable UUID id) {
+        return dtoHelper.toUserAdminDto(getUserUseCase.execute(id));
     }
 
     /**
@@ -100,10 +100,10 @@ public class UserController {
      */
     @PostMapping("/admin/users/create")
     @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
-    public UserResponseDto createUsers(@Valid @RequestBody AdminCreateDto body) {
+    public UserAdminResponseDto createUsers(@Valid @RequestBody AdminCreateDto body) {
         CreateDto dto = new CreateDto(body.getFirstName(), body.getLastName(), body.getEmail(), body.getPhoneNumber(),
                 body.getPassword());
-        return dtoHelper.toUserDto(createUserUseCase.execute(dto, body.getRoles()));
+        return dtoHelper.toUserAdminDto(createUserUseCase.execute(dto, body.getRoles()));
     }
 
     /**
@@ -146,8 +146,8 @@ public class UserController {
      */
     @PatchMapping("/admin/users/{id}/password")
     @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
-    public UserResponseDto changePassword(@Valid @RequestBody ChangePasswordDto passwordDto, @PathVariable UUID id) {
-        return dtoHelper.toUserDto(changePasswordUseCase.execute(id, passwordDto.getPassword()));
+    public UserAdminResponseDto changePassword(@Valid @RequestBody ChangePasswordDto passwordDto, @PathVariable UUID id) {
+        return dtoHelper.toUserAdminDto(changePasswordUseCase.execute(id, passwordDto.getPassword()));
     }
 
     @PostMapping("/users/change-password")
@@ -168,6 +168,18 @@ public class UserController {
 
         String redirectUrl = "%s/dashboard".formatted(applicationOrigin);
         return ResponseEntity.status(302).location(URI.create(redirectUrl)).build();
+    }
+
+    private UserPageAdminResponseDto mapToPageAdminResponse(org.springframework.data.domain.Page<com.jexis.jexis_backend.user.domain.entities.User> usersPage, int page, int pageSize) {
+        java.util.List<UserAdminResponseDto> items = usersPage.getContent().stream()
+                .map(dtoHelper::toUserAdminDto)
+                .toList();
+        return new UserPageAdminResponseDto(
+                items,
+                page,
+                pageSize,
+                usersPage.getTotalElements(),
+                usersPage.getTotalPages());
     }
 
     private UserPageResponseDto mapToPageResponse(org.springframework.data.domain.Page<com.jexis.jexis_backend.user.domain.entities.User> usersPage, int page, int pageSize) {

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.jexis.jexis_backend.transaction.application.dto.TransactionPageResponseDto;
+import com.jexis.jexis_backend.transaction.application.dto.TransactionPageAdminResponseDto;
 import com.jexis.jexis_backend.transaction.domain.enums.TransactionDirection;
 import com.jexis.jexis_backend.transaction.domain.enums.TransactionStatus;
 import com.jexis.jexis_backend.transaction.domain.enums.TransactionType;
@@ -66,7 +67,7 @@ public class TransactionController {
      */
     @GetMapping("/admin/transactions")
     @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
-    public TransactionPageResponseDto getAllTransactions(
+    public TransactionPageAdminResponseDto getAllTransactions(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int pageSize,
             @RequestParam(required = false) String search,
@@ -77,7 +78,7 @@ public class TransactionController {
             @RequestParam(required = false) String sortDirection) {
         Page<Transaction> pageResult =
                 getTransactionsUseCase.execute(page, pageSize, search, type, status, direction, sortBy, sortDirection);
-        return mapToPageResponse(pageResult, page, pageSize);
+        return mapToPageAdminResponse(pageResult, page, pageSize);
     }
 
     /**
@@ -153,6 +154,17 @@ public class TransactionController {
                 transactionsPage.getTotalElements(),
                 transactionsPage.getTotalPages());
     }
-}
 
+    private TransactionPageAdminResponseDto mapToPageAdminResponse(Page<Transaction> transactionsPage, int page, int pageSize) {
+        var items = transactionsPage.getContent().stream()
+                .map(dtoHelper::toTransactionAdminDto)
+                .toList();
+        return new TransactionPageAdminResponseDto(
+                items,
+                page,
+                pageSize,
+                transactionsPage.getTotalElements(),
+                transactionsPage.getTotalPages());
+    }
+}
 

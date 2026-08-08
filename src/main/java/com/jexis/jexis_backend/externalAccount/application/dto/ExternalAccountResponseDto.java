@@ -8,7 +8,6 @@ import java.util.UUID;
 public record ExternalAccountResponseDto(
         UUID id,
         AccountResponseDto accountId,
-        String stripeExternalAccountId,
         String bankName,
         String last4,
         String country,

@@ -2,6 +2,7 @@ package com.jexis.jexis_backend.externalAccount.presentation;
 
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
 import com.jexis.jexis_backend.externalAccount.application.dto.ExternalAccountPageResponseDto;
+import com.jexis.jexis_backend.externalAccount.application.dto.ExternalAccountPageAdminResponseDto;
 import com.jexis.jexis_backend.externalAccount.application.dto.ExternalAccountResponseDto;
 import com.jexis.jexis_backend.externalAccount.application.useCases.GetAccountExternalAccountsUseCase;
 import com.jexis.jexis_backend.externalAccount.application.useCases.GetExternalAccountUseCase;
@@ -29,7 +30,7 @@ public class ExternalAccountController {
 
     @GetMapping("/admin/external-accounts")
     @PreAuthorize("@externalAccountAuthorization.canViewAll(authentication.principal.id())")
-    public ExternalAccountPageResponseDto getAllExternalAccounts(
+    public ExternalAccountPageAdminResponseDto getAllExternalAccounts(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int pageSize,
             @RequestParam(required = false) String search,
@@ -38,7 +39,7 @@ public class ExternalAccountController {
             @RequestParam(required = false) String sortDirection) {
         Page<ExternalAccount> externalAccountsPage = getExternalAccountsUseCase.execute(page, pageSize, search,
                 isDefault, sortBy, sortDirection);
-        return mapToPageResponse(externalAccountsPage, page, pageSize);
+        return mapToPageAdminResponse(externalAccountsPage, page, pageSize);
     }
 
     @GetMapping("/accounts/{accountId}/external-accounts")
@@ -68,6 +69,18 @@ public class ExternalAccountController {
         return new ExternalAccountPageResponseDto(
                 externalAccountsPage.getContent().stream()
                         .map(dtoHelper::toExternalAccountDto)
+                        .toList(),
+                page,
+                pageSize,
+                externalAccountsPage.getTotalElements(),
+                externalAccountsPage.getTotalPages());
+    }
+
+    private ExternalAccountPageAdminResponseDto mapToPageAdminResponse(Page<ExternalAccount> externalAccountsPage, int page,
+            int pageSize) {
+        return new ExternalAccountPageAdminResponseDto(
+                externalAccountsPage.getContent().stream()
+                        .map(dtoHelper::toExternalAccountAdminDto)
                         .toList(),
                 page,
                 pageSize,

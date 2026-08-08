@@ -1,6 +1,7 @@
 package com.jexis.jexis_backend.authorization.presentation;
 
 import com.jexis.jexis_backend.authorization.application.dto.AuthorizationPageResponseDto;
+import com.jexis.jexis_backend.authorization.application.dto.AuthorizationPageAdminResponseDto;
 import com.jexis.jexis_backend.authorization.application.dto.AuthorizationResponseDto;
 import com.jexis.jexis_backend.authorization.application.useCases.GetAuthorizationUseCase;
 import com.jexis.jexis_backend.authorization.application.useCases.GetAuthorizationsUseCase;
@@ -54,7 +55,7 @@ public class AuthorizationController {
      */
     @GetMapping("/admin/authorizations")
     @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
-    public AuthorizationPageResponseDto getAllAuthorizations(
+    public AuthorizationPageAdminResponseDto getAllAuthorizations(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int pageSize,
             @RequestParam(required = false) String search,
@@ -63,7 +64,7 @@ public class AuthorizationController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortDirection) {
         Page<Authorization> authorizationPage = getAuthorizationsUseCase.execute(page, pageSize, search, approved, status, sortBy, sortDirection);
-        return mapToPageResponse(authorizationPage);
+        return mapToPageAdminResponse(authorizationPage);
     }
 
     /**
@@ -112,6 +113,19 @@ public class AuthorizationController {
                 .map(dtoHelper::toAuthorizationDto)
                 .toList();
         return new AuthorizationPageResponseDto(
+                items,
+                authorizationPage.getNumber(),
+                authorizationPage.getSize(),
+                authorizationPage.getTotalElements(),
+                authorizationPage.getTotalPages()
+        );
+    }
+
+    private AuthorizationPageAdminResponseDto mapToPageAdminResponse(Page<Authorization> authorizationPage) {
+        var items = authorizationPage.getContent().stream()
+                .map(dtoHelper::toAuthorizationAdminDto)
+                .toList();
+        return new AuthorizationPageAdminResponseDto(
                 items,
                 authorizationPage.getNumber(),
                 authorizationPage.getSize(),

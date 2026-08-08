@@ -70,14 +70,14 @@ public class WalletController {
      */
     @GetMapping("/admin/wallets")
     @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
-    public WalletPageResponseDto list(
+    public WalletPageAdminResponseDto list(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int pageSize,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortDirection) {
         Page<Wallet> pageResult = getAllWalletsUseCase.execute(page, pageSize, search, sortBy, sortDirection);
-        return mapToPageResponse(pageResult, page, pageSize);
+        return mapToPageAdminResponse(pageResult, page, pageSize);
     }
 
     /**
@@ -169,6 +169,18 @@ public class WalletController {
     public ResponseEntity<?> addMoney(@PathVariable UUID id, @PathVariable UUID walletId, @Valid @RequestBody AddReceivedCreditsDto body) {
         addMoneyUseCase.execute(id, walletId, body);
         return ResponseEntity.ok("Money has been added");
+    }
+
+    private WalletPageAdminResponseDto mapToPageAdminResponse(Page<Wallet> walletsPage, int page, int pageSize) {
+        List<WalletAdminResponseDto> items = walletsPage.getContent().stream()
+                .map(dtoHelper::toWalletAdminDto)
+                .toList();
+        return new WalletPageAdminResponseDto(
+                items,
+                page,
+                pageSize,
+                walletsPage.getTotalElements(),
+                walletsPage.getTotalPages());
     }
 
     private WalletPageResponseDto mapToPageResponse(Page<Wallet> walletsPage, int page, int pageSize) {
