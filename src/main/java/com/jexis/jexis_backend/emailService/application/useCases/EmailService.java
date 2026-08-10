@@ -1,4 +1,4 @@
-package com.jexis.jexis_backend.common.emailService;
+package com.jexis.jexis_backend.emailService.application.useCases;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
