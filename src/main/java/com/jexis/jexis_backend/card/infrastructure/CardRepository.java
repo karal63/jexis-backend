@@ -44,6 +44,7 @@ public interface CardRepository extends JpaRepository<Card, UUID> {
     @Query("""
                 SELECT c FROM Card c
                 WHERE c.isDeleted = false
+                  AND c.treasuryAccount.id = :walletId
                   AND (
                       :search IS NULL 
                       OR lower(c.last4) LIKE concat('%', CAST(:search AS text), '%')

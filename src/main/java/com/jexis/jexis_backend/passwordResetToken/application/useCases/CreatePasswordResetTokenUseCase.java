@@ -1,7 +1,7 @@
 package com.jexis.jexis_backend.passwordResetToken.application.useCases;
 
-import com.jexis.jexis_backend.auth.application.dto.RequestPasswordResetDto;
-import com.jexis.jexis_backend.common.emailService.EmailService;
+import com.jexis.jexis_backend.emailService.infrastructure.messaging.EmailProducer;
+import com.jexis.jexis_backend.emailService.infrastructure.messaging.EmailTask;
 import com.jexis.jexis_backend.common.hashUtils.HashUtils;
 import com.jexis.jexis_backend.passwordResetToken.domain.entities.PasswordResetToken;
 import com.jexis.jexis_backend.passwordResetToken.infrastructure.PasswordResetTokenRepository;
@@ -23,7 +23,7 @@ public class CreatePasswordResetTokenUseCase {
     private final Argon2PasswordEncoder argon = new Argon2PasswordEncoder(16, 32, 1, 60000, 10);
     private final PasswordResetTokenRepository repo;
     private final GetUserByEmailUseCase getUserByEmailUseCase;
-    private final EmailService emailService;
+    private final EmailProducer emailProducer;
 
     public void execute(String email) {
         Optional<User> user = getUserByEmailUseCase.execute(email);
@@ -46,8 +46,8 @@ public class CreatePasswordResetTokenUseCase {
             // save token
             repo.save(passwordResetToken);
 
-            // send email with token to user
-            emailService.sendMail(
+            // send email task to RabbitMQ
+            emailProducer.sendEmailTask(new EmailTask(
                     user.get().getEmail(),
                     "Reset your password",
                     """
@@ -62,7 +62,7 @@ public class CreatePasswordResetTokenUseCase {
                     This link expires in 30 minutes.
 
                     If you didn't request this, ignore this email.""".formatted(user.get().getFirstName(), token)
-            );
+            ));
         }
 
     }
