@@ -3,6 +3,7 @@ package com.jexis.jexis_backend.plan.domain.entities;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.jexis.jexis_backend.entitlement.domain.entities.Entitlement;
@@ -31,6 +32,7 @@ public class PlanEntitlement {
 
     @ManyToOne
     @JoinColumn(name = "plan_id", nullable = false)
+    @JsonBackReference
     private Plan plan;
 
     @ManyToOne
