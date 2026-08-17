@@ -4,19 +4,12 @@ import java.util.List;
 import java.util.UUID;
 
 import com.jexis.jexis_backend.plan.application.dto.AddPlanEntitlementDto;
-import com.jexis.jexis_backend.plan.application.useCases.AddPlanEntitlementUseCase;
+import com.jexis.jexis_backend.plan.application.dto.UpdatePlanDto;
+import com.jexis.jexis_backend.plan.application.useCases.*;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.jexis.jexis_backend.plan.application.dto.CreatePlanDto;
-import com.jexis.jexis_backend.plan.application.useCases.CreatePlanUseCase;
-import com.jexis.jexis_backend.plan.application.useCases.GetAllPlansUseCase;
-import com.jexis.jexis_backend.plan.application.useCases.GetPlanEntitlementsUseCase;
 import com.jexis.jexis_backend.plan.domain.entities.Plan;
 import com.jexis.jexis_backend.plan.domain.entities.PlanEntitlement;
 
@@ -32,6 +25,8 @@ public class PlanController {
     private final GetAllPlansUseCase getAllPlansUseCase;
     private final GetPlanEntitlementsUseCase getPlanEntitlementsUseCase;
     private final AddPlanEntitlementUseCase addPlanEntitlementUseCase;
+    private final DeletePlanUseCase deletePlanUseCase;
+    private final UpdatePlanUseCase updatePlanUseCase;
 
     @PostMapping
     public Plan create(@Valid @RequestBody CreatePlanDto dto) {
@@ -41,6 +36,16 @@ public class PlanController {
     @GetMapping
     public List<Plan> list() {
         return getAllPlansUseCase.execute();
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable UUID id) {
+        deletePlanUseCase.execute(id);
+    }
+
+    @PatchMapping("/{id}")
+    public Plan update(@PathVariable UUID id, @Valid @RequestBody UpdatePlanDto dto) {
+        return updatePlanUseCase.execute(id, dto);
     }
 
     @GetMapping("/{id}/entitlements")

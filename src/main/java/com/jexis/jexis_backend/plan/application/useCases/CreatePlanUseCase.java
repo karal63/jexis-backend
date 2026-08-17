@@ -1,5 +1,7 @@
 package com.jexis.jexis_backend.plan.application.useCases;
 
+import com.jexis.jexis_backend.stripe.application.useCases.plan.product.CreateStripeProductUseCase;
+import com.stripe.model.Product;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,10 +15,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CreatePlanUseCase {
     private final PlanRepository planRepository;
+    private final CreateStripeProductUseCase createStripeProductUseCase;
 
     @Transactional
     public Plan execute(CreatePlanDto dto) {
+        Product stripeProduct = createStripeProductUseCase.execute(dto);
         Plan plan = new Plan(
+                stripeProduct.getId(),
                 dto.getName(),
                 dto.getCode(),
                 dto.getDescription(),
