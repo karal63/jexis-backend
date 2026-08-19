@@ -92,7 +92,7 @@ public class GlobalExceptionHandler {
                 new ValidationErrorResponse(
                         HttpStatus.BAD_REQUEST.value(),
                         "REQ_BODY_MISSING",
-                        "Request body is missing",
+                        ex.getMessage(),
                         null
                 ));
     }

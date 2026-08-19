@@ -3,15 +3,17 @@ package com.jexis.jexis_backend.plan.presentation;
 import java.util.List;
 import java.util.UUID;
 
+import com.jexis.jexis_backend.plan.application.dto.CreatePlanDto;
+import com.jexis.jexis_backend.plan.application.dto.CreatePriceDto;
 import com.jexis.jexis_backend.plan.application.dto.SavePlanEntitlementDto;
 import com.jexis.jexis_backend.plan.application.dto.UpdatePlanDto;
+import com.jexis.jexis_backend.plan.application.dto.UpdatePriceDto;
 import com.jexis.jexis_backend.plan.application.useCases.*;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
-import com.jexis.jexis_backend.plan.application.dto.CreatePlanDto;
 import com.jexis.jexis_backend.plan.domain.entities.Plan;
 import com.jexis.jexis_backend.plan.domain.entities.PlanEntitlement;
+import com.jexis.jexis_backend.plan.domain.entities.Price;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,10 @@ public class PlanController {
     private final SavePlanEntitlementsUseCase savePlanEntitlementsUseCase;
     private final DeletePlanUseCase deletePlanUseCase;
     private final UpdatePlanUseCase updatePlanUseCase;
+    private final GetPlanPricesUseCase getPlanPricesUseCase;
+    private final CreatePriceUseCase createPriceUseCase;
+    private final GetPriceUseCase getPriceUseCase;
+    private final UpdatePriceUseCase updatePriceUseCase;
 
     @PostMapping
     public Plan create(@Valid @RequestBody CreatePlanDto dto) {
@@ -56,5 +62,26 @@ public class PlanController {
     @PostMapping("/{id}/entitlements")
     public List<PlanEntitlement> savePlanEntitlements(@PathVariable UUID id, @Valid @RequestBody List<SavePlanEntitlementDto> dtos) {
         return savePlanEntitlementsUseCase.execute(id, dtos);
+    }
+
+    @GetMapping("/{id}/prices")
+    public List<Price> getPlanPrices(@PathVariable UUID id) {
+        return getPlanPricesUseCase.execute(id);
+    }
+
+    @PostMapping("/{id}/prices")
+    public Price createPrice(@PathVariable UUID id, @Valid @RequestBody CreatePriceDto dto) {
+        System.out.println("HERE");
+        return createPriceUseCase.execute(id, dto);
+    }
+
+    @GetMapping("/prices/{priceId}")
+    public Price getPrice(@PathVariable UUID priceId) {
+        return getPriceUseCase.execute(priceId);
+    }
+
+    @PatchMapping("/prices/{priceId}")
+    public Price updatePrice(@PathVariable UUID priceId, @Valid @RequestBody UpdatePriceDto dto) {
+        return updatePriceUseCase.execute(priceId, dto);
     }
 }
