@@ -3,9 +3,8 @@ package com.jexis.jexis_backend.plan.presentation;
 import java.util.List;
 import java.util.UUID;
 
-import com.jexis.jexis_backend.plan.application.dto.AddPlanEntitlementDto;
+import com.jexis.jexis_backend.plan.application.dto.SavePlanEntitlementDto;
 import com.jexis.jexis_backend.plan.application.dto.UpdatePlanDto;
-import com.jexis.jexis_backend.plan.application.dto.UpdatePlanEntitlementDto;
 import com.jexis.jexis_backend.plan.application.useCases.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -25,11 +24,9 @@ public class PlanController {
     private final CreatePlanUseCase createPlanUseCase;
     private final GetAllPlansUseCase getAllPlansUseCase;
     private final GetPlanEntitlementsUseCase getPlanEntitlementsUseCase;
-    private final AddPlanEntitlementUseCase addPlanEntitlementUseCase;
+    private final SavePlanEntitlementsUseCase savePlanEntitlementsUseCase;
     private final DeletePlanUseCase deletePlanUseCase;
     private final UpdatePlanUseCase updatePlanUseCase;
-    private final UpdatePlanEntitlementUseCase updatePlanEntitlementUseCase;
-    private final DeletePlanEntitlementUseCase deletePlanEntitlementUseCase;
 
     @PostMapping
     public Plan create(@Valid @RequestBody CreatePlanDto dto) {
@@ -57,17 +54,7 @@ public class PlanController {
     }
 
     @PostMapping("/{id}/entitlements")
-    public PlanEntitlement addPlanEntitlement(@PathVariable UUID id, @Valid @RequestBody AddPlanEntitlementDto dto) {
-        return addPlanEntitlementUseCase.execute(id, dto);
-    }
-
-    @PatchMapping("/{id}/entitlements/{entitlementId}")
-    public PlanEntitlement updatePlanEntitlement(@PathVariable UUID id, @PathVariable UUID entitlementId, @Valid @RequestBody UpdatePlanEntitlementDto dto) {
-        return updatePlanEntitlementUseCase.execute(entitlementId, dto);
-    }
-
-    @DeleteMapping("/{id}/entitlements/{entitlementId}")
-    public void deletePlanEntitlement(@PathVariable UUID id, @PathVariable UUID entitlementId) {
-        deletePlanEntitlementUseCase.execute(entitlementId);
+    public List<PlanEntitlement> savePlanEntitlements(@PathVariable UUID id, @Valid @RequestBody List<SavePlanEntitlementDto> dtos) {
+        return savePlanEntitlementsUseCase.execute(id, dtos);
     }
 }

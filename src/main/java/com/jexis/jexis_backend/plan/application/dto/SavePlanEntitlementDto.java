@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
-public record AddPlanEntitlementDto(
+public record SavePlanEntitlementDto(
         @NotNull UUID entitlementId,
         @NotBlank String value
 ) {
