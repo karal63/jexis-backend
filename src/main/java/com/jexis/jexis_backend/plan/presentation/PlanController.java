@@ -3,11 +3,8 @@ package com.jexis.jexis_backend.plan.presentation;
 import java.util.List;
 import java.util.UUID;
 
-import com.jexis.jexis_backend.plan.application.dto.CreatePlanDto;
-import com.jexis.jexis_backend.plan.application.dto.CreatePriceDto;
-import com.jexis.jexis_backend.plan.application.dto.SavePlanEntitlementDto;
-import com.jexis.jexis_backend.plan.application.dto.UpdatePlanDto;
-import com.jexis.jexis_backend.plan.application.dto.UpdatePriceDto;
+import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
+import com.jexis.jexis_backend.plan.application.dto.*;
 import com.jexis.jexis_backend.plan.application.useCases.*;
 import com.jexis.jexis_backend.plan.domain.entities.Plan;
 import com.jexis.jexis_backend.plan.domain.entities.PlanEntitlement;
@@ -31,8 +28,9 @@ public class PlanController {
     private final UpdatePlanUseCase updatePlanUseCase;
     private final GetPlanPricesUseCase getPlanPricesUseCase;
     private final CreatePriceUseCase createPriceUseCase;
-    private final GetPriceUseCase getPriceUseCase;
+    private final GetPlanPriceUseCase getPlanPriceUseCase;
     private final UpdatePriceUseCase updatePriceUseCase;
+    private final DtoHelper dtoHelper;
 
     @PostMapping
     public Plan create(@Valid @RequestBody CreatePlanDto dto) {
@@ -40,8 +38,9 @@ public class PlanController {
     }
 
     @GetMapping
-    public List<Plan> list() {
-        return getAllPlansUseCase.execute();
+    public List<PlanResponseDto> list() {
+        List<Plan> plans = getAllPlansUseCase.execute();
+        return plans.stream().map(dtoHelper::toPlanDto).toList();
     }
 
     @DeleteMapping("/{id}")
@@ -71,13 +70,12 @@ public class PlanController {
 
     @PostMapping("/{id}/prices")
     public Price createPrice(@PathVariable UUID id, @Valid @RequestBody CreatePriceDto dto) {
-        System.out.println("HERE");
         return createPriceUseCase.execute(id, dto);
     }
 
     @GetMapping("/prices/{priceId}")
     public Price getPrice(@PathVariable UUID priceId) {
-        return getPriceUseCase.execute(priceId);
+        return getPlanPriceUseCase.execute(priceId);
     }
 
     @PatchMapping("/prices/{priceId}")

@@ -51,6 +51,10 @@ public class Plan {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "default_price_id", referencedColumnName = "id")
+    private Price defaultPrice;
+
     public Plan(String stripePlanId, String name, String code, String description, boolean active) {
         this.stripePlanId = stripePlanId;
         this.name = name;

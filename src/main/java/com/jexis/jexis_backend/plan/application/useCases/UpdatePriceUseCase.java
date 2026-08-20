@@ -1,5 +1,6 @@
 package com.jexis.jexis_backend.plan.application.useCases;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -16,16 +17,23 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UpdatePriceUseCase {
     private final PriceRepository priceRepository;
-    private final GetPriceUseCase getPriceUseCase;
+    private final GetPlanPriceUseCase getPlanPriceUseCase;
     private final UpdateStripePriceUseCase updateStripePriceUseCase;
 
     @Transactional
     public Price execute(UUID id, UpdatePriceDto dto) {
-        Price price = getPriceUseCase.execute(id);
+        boolean changed = false;
 
-        price.setActive(dto.isActive());
+        Price price = getPlanPriceUseCase.execute(id);
 
-        updateStripePriceUseCase.execute(price.getStripePriceId(), dto);
+        if (dto.getActive() != null) {
+            price.setActive(dto.getActive());
+            changed = true;
+        }
+
+        if (changed) {
+            updateStripePriceUseCase.execute(price.getStripePriceId(), dto);
+        }
 
         return priceRepository.save(price);
     }

@@ -10,5 +10,5 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdatePriceDto {
-    private boolean active = true;
+    private Boolean active;
 }

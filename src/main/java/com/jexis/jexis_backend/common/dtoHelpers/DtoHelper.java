@@ -1,5 +1,7 @@
 package com.jexis.jexis_backend.common.dtoHelpers;
 
+import com.jexis.jexis_backend.plan.application.dto.PlanResponseDto;
+import com.jexis.jexis_backend.plan.domain.entities.Plan;
 import org.springframework.stereotype.Service;
 
 import com.jexis.jexis_backend.account.application.dto.AccountAdminResponseDto;
@@ -349,5 +351,17 @@ public class DtoHelper {
                 externalAccount.isDeleted(),
                 externalAccount.getDeletedAt(),
                 externalAccount.getCreatedAt());
+    }
+
+    public PlanResponseDto toPlanDto(Plan plan) {
+        return new PlanResponseDto(
+                plan.getId(),
+                plan.getName(),
+                plan.getCode(),
+                plan.getDescription(),
+                plan.isActive(),
+                plan.getCreatedAt(),
+                plan.getDefaultPrice()
+        );
     }
 }

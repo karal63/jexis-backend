@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class GetPriceUseCase {
+public class GetPlanPriceUseCase {
     private final PriceRepository priceRepository;
 
     public Price execute(UUID id) {

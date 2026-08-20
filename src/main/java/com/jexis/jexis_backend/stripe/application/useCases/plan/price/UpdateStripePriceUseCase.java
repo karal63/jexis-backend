@@ -14,10 +14,13 @@ public class UpdateStripePriceUseCase {
 
     public void execute(String stripePriceId, UpdatePriceDto dto) {
         try {
-            PriceUpdateParams params = PriceUpdateParams.builder()
-                    .setActive(dto.isActive())
-                    .build();
-            client.v1().prices().update(stripePriceId, params);
+            PriceUpdateParams.Builder params = PriceUpdateParams.builder();
+
+            if (dto.getActive() != null) {
+                params.setActive(dto.getActive());
+            }
+
+            client.v1().prices().update(stripePriceId, params.build());
         } catch (StripeException e) {
             throw new RuntimeException("Failed to update Stripe price: " + e.getMessage(), e);
         }

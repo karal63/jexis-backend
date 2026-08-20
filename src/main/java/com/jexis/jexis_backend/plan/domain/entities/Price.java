@@ -3,6 +3,7 @@ package com.jexis.jexis_backend.plan.domain.entities;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.Column;
@@ -29,6 +30,7 @@ public class Price {
 
     @ManyToOne
     @JoinColumn(name = "plan_id", nullable = false)
+    @JsonIgnore
     private Plan plan;
 
     @Column(nullable = false, unique = true)
