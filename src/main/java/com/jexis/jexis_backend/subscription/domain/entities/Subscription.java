@@ -5,20 +5,15 @@ import java.util.UUID;
 
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.plan.domain.entities.Plan;
+import com.jexis.jexis_backend.subscription.domain.enums.SubscriptionStatus;
+import com.stripe.param.SubscriptionUpdateParams;
+import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.jexis.jexis_backend.plan.domain.entities.Price;
 import com.jexis.jexis_backend.user.domain.entities.User;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -53,7 +48,8 @@ public class Subscription {
     private String stripeSubscriptionId;
 
     @Column(nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private SubscriptionStatus status;
 
     @Column(nullable = false)
     private LocalDateTime currentPeriodStart;
@@ -73,7 +69,7 @@ public class Subscription {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    public Subscription(User user, Account account, Plan plan, Price price, String stripeSubscriptionId, String status, LocalDateTime currentPeriodStart, LocalDateTime currentPeriodEnd, boolean cancelAtPeriodEnd) {
+    public Subscription(User user, Account account, Plan plan, Price price, String stripeSubscriptionId, SubscriptionStatus status, LocalDateTime currentPeriodStart, LocalDateTime currentPeriodEnd, boolean cancelAtPeriodEnd) {
         this.user = user;
         this.account = account;
         this.plan = plan;
