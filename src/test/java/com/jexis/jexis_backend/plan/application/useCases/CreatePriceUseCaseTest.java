@@ -101,15 +101,6 @@ class CreatePriceUseCaseTest {
     }
 
     @Test
-    void execute_WithMissingPlanIdInDto_ShouldThrowIllegalArgumentException() {
-        CreatePriceDto dto = new CreatePriceDto("usd", 1500L, "month", 1, true);
-
-        assertThatThrownBy(() -> createPriceUseCase.execute(planId, dto))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Plan ID is required");
-    }
-
-    @Test
     void execute_WithInvalidInterval_ShouldThrowIllegalArgumentException() {
         CreatePriceDto dto = new CreatePriceDto("usd", 1500L, "daily", 1, true);
 

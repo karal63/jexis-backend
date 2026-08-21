@@ -26,7 +26,7 @@ class GetPriceUseCaseTest {
     private PriceRepository priceRepository;
 
     @InjectMocks
-    private GetPriceUseCase getPriceUseCase;
+    private GetPlanPriceUseCase getPlanPriceUseCase;
 
     private UUID priceId;
     private Price price;
@@ -43,7 +43,7 @@ class GetPriceUseCaseTest {
     void execute_WhenPriceExists_ShouldReturnPrice() {
         when(priceRepository.findById(priceId)).thenReturn(Optional.of(price));
 
-        Price result = getPriceUseCase.execute(priceId);
+        Price result = getPlanPriceUseCase.execute(priceId);
 
         assertThat(result).isEqualTo(price);
         verify(priceRepository).findById(priceId);
@@ -53,7 +53,7 @@ class GetPriceUseCaseTest {
     void execute_WhenPriceDoesNotExist_ShouldThrowPriceNotFoundException() {
         when(priceRepository.findById(priceId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> getPriceUseCase.execute(priceId))
+        assertThatThrownBy(() -> getPlanPriceUseCase.execute(priceId))
                 .isInstanceOf(PriceNotFoundException.class);
     }
 }

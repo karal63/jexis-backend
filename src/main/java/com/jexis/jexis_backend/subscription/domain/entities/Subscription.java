@@ -3,6 +3,8 @@ package com.jexis.jexis_backend.subscription.domain.entities;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.jexis.jexis_backend.account.domain.entities.Account;
+import com.jexis.jexis_backend.plan.domain.entities.Plan;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -36,6 +38,14 @@ public class Subscription {
     private User user;
 
     @ManyToOne
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
+
+    @ManyToOne
+    @JoinColumn(name = "plan_id", nullable = false)
+    private Plan plan;
+
+    @ManyToOne
     @JoinColumn(name = "price_id", nullable = false)
     private Price price;
 
@@ -62,4 +72,16 @@ public class Subscription {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public Subscription(User user, Account account, Plan plan, Price price, String stripeSubscriptionId, String status, LocalDateTime currentPeriodStart, LocalDateTime currentPeriodEnd, boolean cancelAtPeriodEnd) {
+        this.user = user;
+        this.account = account;
+        this.plan = plan;
+        this.price = price;
+        this.stripeSubscriptionId = stripeSubscriptionId;
+        this.status = status;
+        this.currentPeriodStart = currentPeriodStart;
+        this.currentPeriodEnd = currentPeriodEnd;
+        this.cancelAtPeriodEnd = cancelAtPeriodEnd;
+    }
 }

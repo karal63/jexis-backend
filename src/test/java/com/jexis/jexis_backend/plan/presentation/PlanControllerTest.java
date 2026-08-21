@@ -53,7 +53,7 @@ class PlanControllerTest {
     @Mock
     private CreatePriceUseCase createPriceUseCase;
     @Mock
-    private GetPriceUseCase getPriceUseCase;
+    private GetPlanPriceUseCase getPlanPriceUseCase;
     @Mock
     private UpdatePriceUseCase updatePriceUseCase;
 
@@ -135,13 +135,13 @@ class PlanControllerTest {
 
     @Test
     void getPrice_ShouldReturnPriceById() throws Exception {
-        when(getPriceUseCase.execute(priceId)).thenReturn(price);
+        when(getPlanPriceUseCase.execute(priceId)).thenReturn(price);
 
         mockMvc.perform(get("/admin/plans/prices/{priceId}", priceId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(priceId.toString()));
 
-        verify(getPriceUseCase).execute(priceId);
+        verify(getPlanPriceUseCase).execute(priceId);
     }
 
     @Test

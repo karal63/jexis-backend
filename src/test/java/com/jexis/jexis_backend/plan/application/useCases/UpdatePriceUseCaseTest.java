@@ -27,7 +27,7 @@ class UpdatePriceUseCaseTest {
     private PriceRepository priceRepository;
 
     @Mock
-    private GetPriceUseCase getPriceUseCase;
+    private GetPlanPriceUseCase getPlanPriceUseCase;
 
     @Mock
     private UpdateStripePriceUseCase updateStripePriceUseCase;
@@ -51,13 +51,13 @@ class UpdatePriceUseCaseTest {
     void execute_WhenPriceExists_ShouldUpdateActiveAndStripe() {
         UpdatePriceDto dto = new UpdatePriceDto(false);
 
-        when(getPriceUseCase.execute(priceId)).thenReturn(price);
+        when(getPlanPriceUseCase.execute(priceId)).thenReturn(price);
         when(priceRepository.save(any(Price.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Price result = updatePriceUseCase.execute(priceId, dto);
 
         assertThat(result.isActive()).isFalse();
-        verify(getPriceUseCase).execute(priceId);
+        verify(getPlanPriceUseCase).execute(priceId);
         verify(updateStripePriceUseCase).execute("price_stripe_123", dto);
         verify(priceRepository).save(price);
     }
@@ -66,7 +66,7 @@ class UpdatePriceUseCaseTest {
     void execute_WhenPriceNotFound_ShouldPropagateException() {
         UpdatePriceDto dto = new UpdatePriceDto(false);
 
-        when(getPriceUseCase.execute(priceId)).thenThrow(new PriceNotFoundException());
+        when(getPlanPriceUseCase.execute(priceId)).thenThrow(new PriceNotFoundException());
 
         assertThatThrownBy(() -> updatePriceUseCase.execute(priceId, dto))
                 .isInstanceOf(PriceNotFoundException.class);
