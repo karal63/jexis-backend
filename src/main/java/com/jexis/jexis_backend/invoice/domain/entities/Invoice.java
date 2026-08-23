@@ -3,18 +3,12 @@ package com.jexis.jexis_backend.invoice.domain.entities;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.jexis.jexis_backend.invoice.domain.enums.InvoiceStatus;
+import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.jexis.jexis_backend.subscription.domain.entities.Subscription;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -43,7 +37,8 @@ public class Invoice {
     private String currency;
 
     @Column(nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private InvoiceStatus status;
 
     private String invoicePdf;
 
@@ -52,4 +47,14 @@ public class Invoice {
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    public Invoice(Subscription subscription, String stripeInvoiceId, Long amountPaid, String currency, InvoiceStatus status, String invoicePdf, String hostedInvoiceUrl) {
+        this.subscription = subscription;
+        this.stripeInvoiceId = stripeInvoiceId;
+        this.amountPaid = amountPaid;
+        this.currency = currency;
+        this.status = status;
+        this.invoicePdf = invoicePdf;
+        this.hostedInvoiceUrl = hostedInvoiceUrl;
+    }
 }

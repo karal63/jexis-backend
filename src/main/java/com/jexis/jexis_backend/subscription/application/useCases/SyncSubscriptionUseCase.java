@@ -12,6 +12,8 @@ import com.jexis.jexis_backend.subscription.infrastructure.SubscriptionRepositor
 import com.jexis.jexis_backend.subscription.infrastructure.stripe.SubscriptionMapper;
 import com.jexis.jexis_backend.user.application.useCases.GetUserUseCase;
 import com.jexis.jexis_backend.user.domain.entities.User;
+import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -20,6 +22,7 @@ import java.time.ZoneOffset;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class SyncSubscriptionUseCase {
     private final SubscriptionRepository subscriptionRepository;
     private final GetUserUseCase getUserUseCase;
@@ -27,17 +30,14 @@ public class SyncSubscriptionUseCase {
     private final GetPlanUseCase getPlanUseCase;
     private final GetPriceByStripeIdUseCase getPriceByStripeIdUseCase;
     private final SubscriptionMapper subscriptionMapper;
+    private final EntityManager entityManager;
 
-    public SyncSubscriptionUseCase(SubscriptionRepository subscriptionRepository, GetUserUseCase getUserUseCase, GetAccountUseCase getAccountUseCase, GetPlanUseCase getPlanUseCase, GetPriceByStripeIdUseCase getPriceByStripeIdUseCase, SubscriptionMapper subscriptionMapper) {
-        this.subscriptionRepository = subscriptionRepository;
-        this.getUserUseCase = getUserUseCase;
-        this.getAccountUseCase = getAccountUseCase;
-        this.getPlanUseCase = getPlanUseCase;
-        this.getPriceByStripeIdUseCase = getPriceByStripeIdUseCase;
-        this.subscriptionMapper = subscriptionMapper;
-    }
+    public Subscription execute(com.stripe.model.Subscription stripeSub) {
+        entityManager.createNativeQuery(
+                        "SELECT pg_advisory_xact_lock(hashtext(?1))")
+                .setParameter(1, stripeSub.getId())
+                .getSingleResult();
 
-    public void execute(com.stripe.model.Subscription stripeSub) {
         Subscription subscription = subscriptionRepository
                 .findByStripeSubscriptionId(stripeSub.getId())
                 .orElseGet(Subscription::new);
@@ -90,6 +90,6 @@ public class SyncSubscriptionUseCase {
         subscription.setCancelAtPeriodEnd(stripeSub.getCancelAtPeriodEnd());
         subscription.setCanceledAt(convertedCanceledAt);
 
-        subscriptionRepository.save(subscription);
+        return subscriptionRepository.save(subscription);
     }
 }
