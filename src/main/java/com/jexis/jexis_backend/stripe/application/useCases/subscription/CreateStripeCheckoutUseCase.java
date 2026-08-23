@@ -17,7 +17,7 @@ public class CreateStripeCheckoutUseCase {
     private String origin;
     private final StripeClient client;
 
-    public String execute(UUID planId, String stripePriceId, UUID userId, UUID accountId) {
+    public String execute(UUID planId, String stripePriceId, UUID userId, UUID accountId, String stripeAccountId) {
         try {
             SessionCreateParams params = SessionCreateParams.builder()
                     .addLineItem(
@@ -27,6 +27,7 @@ public class CreateStripeCheckoutUseCase {
                                     .build()
                     )
                     .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
+                    .setCustomer(stripeAccountId)
                     .setClientReferenceId(userId.toString())
                     .setSubscriptionData(
                             SessionCreateParams.SubscriptionData.builder()
@@ -43,7 +44,6 @@ public class CreateStripeCheckoutUseCase {
 
             return session.getUrl();
         } catch (StripeException e) {
-            System.out.println(e.getMessage());
             throw new RuntimeException("Failed to create Stripe checkout session", e);
         }
     }
