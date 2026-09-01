@@ -5,7 +5,9 @@ import java.util.UUID;
 
 import com.jexis.jexis_backend.auth.application.dto.AuthUser;
 import com.jexis.jexis_backend.subscription.application.dto.CreateCheckoutDto;
+import com.jexis.jexis_backend.subscription.application.dto.CreateSubscriptionDto;
 import com.jexis.jexis_backend.subscription.application.useCases.CreateCheckoutUseCase;
+import com.jexis.jexis_backend.subscription.application.useCases.CreateSubscriptionUseCase;
 import com.jexis.jexis_backend.subscription.application.useCases.GetSubscriptionUseCase;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,6 +25,7 @@ public class SubscriptionController {
     private final GetAllSubscriptionsUseCase getAllSubscriptionsUseCase;
     private final CreateCheckoutUseCase createCheckoutUseCase;
     private final GetSubscriptionUseCase getSubscriptionUseCase;
+    private final CreateSubscriptionUseCase createSubscriptionUseCase;
 
     @GetMapping("/admin/subscriptions")
     @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
@@ -40,5 +43,11 @@ public class SubscriptionController {
     @PreAuthorize("@subscriptionAuthorization.canCheckout(authentication.principal.id(), #dto.accountId)")
     public String createCheckoutSession(@Valid @RequestBody CreateCheckoutDto dto, @AuthenticationPrincipal AuthUser user) {
         return createCheckoutUseCase.execute(dto, user.id());
+    }
+
+    @PostMapping("/subscriptions/create")
+    @PreAuthorize("@subscriptionAuthorization.canCheckout(authentication.principal.id(), #dto.accountId)")
+    public void create(@Valid @RequestBody CreateSubscriptionDto dto, @AuthenticationPrincipal AuthUser user) {
+        createSubscriptionUseCase.execute(dto, user.id());
     }
 }

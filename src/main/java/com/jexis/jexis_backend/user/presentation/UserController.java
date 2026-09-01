@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
+import com.jexis.jexis_backend.auth.application.dto.AuthUser;
 import com.jexis.jexis_backend.user.application.dto.*;
 import com.jexis.jexis_backend.user.application.useCases.*;
 import com.jexis.jexis_backend.user.domain.entities.User;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
@@ -49,6 +51,7 @@ public class UserController {
     private final RequestPasswordChangeUseCase requestPasswordChangeUseCase;
     private final SendActivationLinkUseCase sendActivationLinkUseCase;
     private final ActivateUserUseCase activateUserUseCase;
+    private final GetPaymentMethodsUseCase getPaymentMethodsUseCase;
     private @Value("${application.origin}") String applicationOrigin;
 
     /**
@@ -168,6 +171,11 @@ public class UserController {
 
         String redirectUrl = "%s/dashboard".formatted(applicationOrigin);
         return ResponseEntity.status(302).location(URI.create(redirectUrl)).build();
+    }
+
+    @GetMapping("/me/payment_methods")
+    public List<PaymentMethodResponseDto> getPaymentMethods(@AuthenticationPrincipal AuthUser user) {
+        return getPaymentMethodsUseCase.execute(user.id());
     }
 
     private UserPageAdminResponseDto mapToPageAdminResponse(org.springframework.data.domain.Page<com.jexis.jexis_backend.user.domain.entities.User> usersPage, int page, int pageSize) {

@@ -67,9 +67,6 @@ public class Account {
     @Column(nullable = false, unique = true)
     private String connectAccountId;
 
-    @Column(unique = true)
-    private String stripeCustomerId;
-
     @Column(nullable = false, unique = true)
     private String accountLink;
 
