@@ -4,17 +4,15 @@ import java.util.List;
 import java.util.UUID;
 
 import com.jexis.jexis_backend.auth.application.dto.AuthUser;
+import com.jexis.jexis_backend.subscription.application.dto.SetSubscriptionPaymentMethodDto;
 import com.jexis.jexis_backend.subscription.application.dto.CreateCheckoutDto;
 import com.jexis.jexis_backend.subscription.application.dto.CreateSubscriptionDto;
-import com.jexis.jexis_backend.subscription.application.useCases.CreateCheckoutUseCase;
-import com.jexis.jexis_backend.subscription.application.useCases.CreateSubscriptionUseCase;
-import com.jexis.jexis_backend.subscription.application.useCases.GetSubscriptionUseCase;
+import com.jexis.jexis_backend.subscription.application.useCases.*;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import com.jexis.jexis_backend.subscription.application.useCases.GetAllSubscriptionsUseCase;
 import com.jexis.jexis_backend.subscription.domain.entities.Subscription;
 
 import lombok.RequiredArgsConstructor;
@@ -26,6 +24,7 @@ public class SubscriptionController {
     private final CreateCheckoutUseCase createCheckoutUseCase;
     private final GetSubscriptionUseCase getSubscriptionUseCase;
     private final CreateSubscriptionUseCase createSubscriptionUseCase;
+    private final SetSubscriptionPaymentMethodUseCase setSubscriptionPaymentMethodUseCase;
 
     @GetMapping("/admin/subscriptions")
     @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
@@ -46,8 +45,14 @@ public class SubscriptionController {
     }
 
     @PostMapping("/subscriptions/create")
-    @PreAuthorize("@subscriptionAuthorization.canCheckout(authentication.principal.id(), #dto.accountId)")
+    @PreAuthorize("@subscriptionAuthorization.canCreate(authentication.principal.id(), #dto.accountId)")
     public void create(@Valid @RequestBody CreateSubscriptionDto dto, @AuthenticationPrincipal AuthUser user) {
         createSubscriptionUseCase.execute(dto, user.id());
+    }
+
+    @PostMapping("/subscriptions/{id}/payment-method")
+    @PreAuthorize("@subscriptionAuthorization.canUpdate(authentication.principal.id(), #id)")
+    public void changePaymentMethod(@PathVariable UUID id, @Valid @RequestBody SetSubscriptionPaymentMethodDto dto, @AuthenticationPrincipal AuthUser user) {
+        setSubscriptionPaymentMethodUseCase.execute(id, dto, user.id());
     }
 }

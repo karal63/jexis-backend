@@ -31,6 +31,18 @@ public class SubscriptionAuthorization {
                 || hasRoleUseCase.execute(userId, accountId, Role.ADMIN);
     }
 
+    public boolean canCreate(UUID userId, UUID accountId) {
+        return hasRoleUseCase.execute(userId, accountId, Role.OWNER)
+                || hasRoleUseCase.execute(userId, accountId, Role.ADMIN);
+    }
+
+    public boolean canUpdate(UUID userId, UUID accountId) {
+        Subscription subscription = getSubscriptionUseCase.execute(accountId);
+
+        return hasRoleUseCase.execute(userId, subscription.getAccount().getId(), Role.OWNER)
+                || hasRoleUseCase.execute(userId, subscription.getAccount().getId(), Role.ADMIN);
+    }
+
     public boolean canView(UUID userId, UUID subscriptionId) {
         Subscription subscription = getSubscriptionUseCase.execute(subscriptionId);
 
