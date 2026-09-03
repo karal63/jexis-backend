@@ -47,6 +47,8 @@ public class Subscription {
     @Column(nullable = false, unique = true)
     private String stripeSubscriptionId;
 
+    private String stripePaymentMethodId;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private SubscriptionStatus status;

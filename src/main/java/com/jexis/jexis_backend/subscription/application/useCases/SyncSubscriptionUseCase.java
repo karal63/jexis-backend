@@ -84,6 +84,7 @@ public class SyncSubscriptionUseCase {
         subscription.setPlan(plan);
         subscription.setPrice(price);
         subscription.setStripeSubscriptionId(stripeSub.getId());
+        subscription.setStripePaymentMethodId(stripeSub.getDefaultPaymentMethod());
         subscription.setStatus(subscriptionMapper.mapSubscriptionStatus(stripeSub.getStatus()));
         subscription.setCurrentPeriodStart(convertedPeriodStart);
         subscription.setCurrentPeriodEnd(convertedPeriodEnd);

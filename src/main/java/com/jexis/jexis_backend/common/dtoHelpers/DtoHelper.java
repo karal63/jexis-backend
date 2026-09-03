@@ -2,6 +2,10 @@ package com.jexis.jexis_backend.common.dtoHelpers;
 
 import com.jexis.jexis_backend.plan.application.dto.PlanResponseDto;
 import com.jexis.jexis_backend.plan.domain.entities.Plan;
+import com.jexis.jexis_backend.subscription.application.dto.SubscriptionResponseDto;
+import com.jexis.jexis_backend.subscription.domain.entities.Subscription;
+import com.jexis.jexis_backend.user.application.dto.PaymentMethodResponseDto;
+import com.jexis.jexis_backend.user.application.useCases.GetPaymentMethodUseCase;
 import org.springframework.stereotype.Service;
 
 import com.jexis.jexis_backend.account.application.dto.AccountAdminResponseDto;
@@ -37,6 +41,12 @@ import com.jexis.jexis_backend.wallet.domain.entities.Wallet;
 
 @Service
 public class DtoHelper {
+    private final GetPaymentMethodUseCase getPaymentMethodUseCase;
+
+    public DtoHelper(GetPaymentMethodUseCase getPaymentMethodUseCase) {
+        this.getPaymentMethodUseCase = getPaymentMethodUseCase;
+    }
+
     public UserResponseDto toUserDto(User user) {
         return new UserResponseDto(
                 user.getId(),
@@ -362,6 +372,39 @@ public class DtoHelper {
                 plan.isActive(),
                 plan.getCreatedAt(),
                 plan.getDefaultPrice()
+        );
+    }
+
+    public PaymentMethodResponseDto toPaymentMethodDto(com.stripe.model.PaymentMethod paymentMethod) {
+        return new PaymentMethodResponseDto(
+                paymentMethod.getId(),
+                paymentMethod.getCard().getBrand(),
+                paymentMethod.getCard().getLast4(),
+                String.valueOf(paymentMethod.getCard().getExpMonth()),
+                String.valueOf(paymentMethod.getCard().getExpYear())
+        );
+    }
+
+    public SubscriptionResponseDto toSubscriptionDto(Subscription subscription) {
+        com.stripe.model.PaymentMethod paymentMethod = getPaymentMethodUseCase.execute(
+                subscription.getUser().getStripeCustomerId(),
+                subscription.getStripePaymentMethodId()
+        );
+
+        return new SubscriptionResponseDto(
+                subscription.getId(),
+                subscription.getUser(),
+                subscription.getAccount(),
+                subscription.getPlan(),
+                subscription.getPrice(),
+                toPaymentMethodDto(paymentMethod),
+                subscription.getStatus(),
+                subscription.getCurrentPeriodStart(),
+                subscription.getCurrentPeriodEnd(),
+                subscription.isCancelAtPeriodEnd(),
+                subscription.getCanceledAt(),
+                subscription.getCreatedAt(),
+                subscription.getUpdatedAt()
         );
     }
 }

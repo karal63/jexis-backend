@@ -8,6 +8,7 @@ import com.jexis.jexis_backend.auth.application.dto.AuthUser;
 import com.jexis.jexis_backend.user.application.dto.*;
 import com.jexis.jexis_backend.user.application.useCases.*;
 import com.jexis.jexis_backend.user.domain.entities.User;
+import com.stripe.model.PaymentMethod;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -175,7 +176,8 @@ public class UserController {
 
     @GetMapping("/me/payment_methods")
     public List<PaymentMethodResponseDto> getPaymentMethods(@AuthenticationPrincipal AuthUser user) {
-        return getPaymentMethodsUseCase.execute(user.id());
+        List<PaymentMethod> paymentMethods = getPaymentMethodsUseCase.execute(user.id());
+        return paymentMethods.stream().map(dtoHelper::toPaymentMethodDto).toList();
     }
 
     private UserPageAdminResponseDto mapToPageAdminResponse(org.springframework.data.domain.Page<com.jexis.jexis_backend.user.domain.entities.User> usersPage, int page, int pageSize) {
