@@ -27,6 +27,7 @@ public class SubscriptionController {
     private final GetSubscriptionUseCase getSubscriptionUseCase;
     private final CreateSubscriptionUseCase createSubscriptionUseCase;
     private final SetSubscriptionPaymentMethodUseCase setSubscriptionPaymentMethodUseCase;
+    private final ScheduleSubscriptionCancellationUseCase scheduleSubscriptionCancellationUseCase;
     private final GetPaymentMethodUseCase getPaymentMethodUseCase;
     private final DtoHelper dtoHelper;
 
@@ -60,5 +61,9 @@ public class SubscriptionController {
         setSubscriptionPaymentMethodUseCase.execute(id, dto, user.id());
     }
 
-
+    @PostMapping("/subscriptions/{id}/cancel")
+    @PreAuthorize("@subscriptionAuthorization.canUpdate(authentication.principal.id(), #id)")
+    public void cancel(@PathVariable UUID id) {
+        scheduleSubscriptionCancellationUseCase.execute(id);
+    }
 }

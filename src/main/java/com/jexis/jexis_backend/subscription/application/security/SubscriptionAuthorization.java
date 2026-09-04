@@ -28,19 +28,22 @@ public class SubscriptionAuthorization {
 
     public boolean canCheckout(UUID userId, UUID accountId) {
         return hasRoleUseCase.execute(userId, accountId, Role.OWNER)
-                || hasRoleUseCase.execute(userId, accountId, Role.ADMIN);
+                || hasRoleUseCase.execute(userId, accountId, Role.ADMIN)
+                || isAdmin(userId);
     }
 
     public boolean canCreate(UUID userId, UUID accountId) {
         return hasRoleUseCase.execute(userId, accountId, Role.OWNER)
-                || hasRoleUseCase.execute(userId, accountId, Role.ADMIN);
+                || hasRoleUseCase.execute(userId, accountId, Role.ADMIN)
+                || isAdmin(userId);
     }
 
     public boolean canUpdate(UUID userId, UUID accountId) {
         Subscription subscription = getSubscriptionUseCase.execute(accountId);
 
         return hasRoleUseCase.execute(userId, subscription.getAccount().getId(), Role.OWNER)
-                || hasRoleUseCase.execute(userId, subscription.getAccount().getId(), Role.ADMIN);
+                || hasRoleUseCase.execute(userId, subscription.getAccount().getId(), Role.ADMIN)
+                || isAdmin(userId);
     }
 
     public boolean canView(UUID userId, UUID subscriptionId) {
