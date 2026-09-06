@@ -8,7 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.jexis.jexis_backend.plan.application.dto.CreatePriceDto;
 import com.jexis.jexis_backend.plan.domain.entities.Plan;
 import com.jexis.jexis_backend.plan.domain.entities.Price;
+import com.jexis.jexis_backend.plan.infrastructure.PlanRepository;
 import com.jexis.jexis_backend.plan.infrastructure.PriceRepository;
+import com.jexis.jexis_backend.stripe.application.useCases.plan.price.SetStripeDefaultPriceUseCase;
 import com.jexis.jexis_backend.stripe.application.useCases.plan.price.CreateStripePriceUseCase;
 
 import lombok.RequiredArgsConstructor;
@@ -17,8 +19,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CreatePriceUseCase {
     private final PriceRepository priceRepository;
+    private final PlanRepository planRepository;
     private final GetPlanUseCase getPlanUseCase;
     private final CreateStripePriceUseCase createStripePriceUseCase;
+    private final SetStripeDefaultPriceUseCase setStripeDefaultPriceUseCase;
 
     @Transactional
     public Price execute(UUID planId, CreatePriceDto dto) {
@@ -38,7 +42,15 @@ public class CreatePriceUseCase {
                 dto.isActive()
         );
 
-        return priceRepository.save(price);
+        Price savedPrice = priceRepository.save(price);
+
+        if (plan.getDefaultPrice() == null) {
+            plan.setDefaultPrice(savedPrice);
+            planRepository.save(plan);
+            setStripeDefaultPriceUseCase.execute(plan.getStripePlanId(), savedPrice.getStripePriceId());
+        }
+
+        return savedPrice;
     }
 
     private String normalizeInterval(String interval) {

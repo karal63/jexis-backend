@@ -1,6 +1,7 @@
 package com.jexis.jexis_backend.plan.application.useCases;
 
 import com.jexis.jexis_backend.stripe.application.useCases.plan.product.CreateStripeProductUseCase;
+import com.jexis.jexis_backend.plan.domain.enums.PlanStatus;
 import com.stripe.model.Product;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +26,8 @@ public class CreatePlanUseCase {
                 dto.getName(),
                 dto.getCode(),
                 dto.getDescription(),
-                dto.isActive());
+                dto.isActive(),
+                PlanStatus.DRAFT);
         return planRepository.save(plan);
     }
 }

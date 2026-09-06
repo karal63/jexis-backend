@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.jexis.jexis_backend.plan.domain.enums.PlanStatus;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -38,6 +38,10 @@ public class Plan {
     @Column(nullable = false)
     private boolean active = true;
 
+    @Enumerated(EnumType.STRING)
+    @Column
+    private PlanStatus status = PlanStatus.DRAFT;
+
     @OneToMany(
             mappedBy = "plan",
             cascade = CascadeType.ALL,
@@ -55,11 +59,20 @@ public class Plan {
     @JoinColumn(name = "default_price_id", referencedColumnName = "id")
     private Price defaultPrice;
 
-    public Plan(String stripePlanId, String name, String code, String description, boolean active) {
+    public Plan(String stripePlanId, String name, String code, String description, boolean active, PlanStatus status) {
         this.stripePlanId = stripePlanId;
         this.name = name;
         this.code = code;
         this.description = description;
         this.active = active;
+        this.status = status;
+    }
+
+    public boolean isPublishable() {
+        return this.defaultPrice != null;
+    }
+
+    public boolean isPubliclyAvailable() {
+        return this.active && this.defaultPrice != null && (this.status == PlanStatus.PUBLISHED || this.status == null);
     }
 }

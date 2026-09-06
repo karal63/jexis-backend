@@ -4,6 +4,7 @@ import com.jexis.jexis_backend.account.application.useCases.GetAccountUseCase;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.plan.application.useCases.GetPlanUseCase;
 import com.jexis.jexis_backend.plan.domain.entities.Plan;
+import com.jexis.jexis_backend.plan.domain.exceptions.PlanNotPublishedException;
 import com.jexis.jexis_backend.stripe.application.useCases.CreateStripeCustomerUseCase;
 import com.jexis.jexis_backend.stripe.application.useCases.subscription.CreateStripeCheckoutUseCase;
 import com.jexis.jexis_backend.subscription.application.dto.CreateCheckoutDto;
@@ -28,6 +29,9 @@ public class CreateCheckoutUseCase {
 
     public String execute(CreateCheckoutDto dto, UUID userId) {
         Plan plan = getPlanUseCase.execute(dto.getPlanId());
+        if (!plan.isPubliclyAvailable()) {
+            throw new PlanNotPublishedException();
+        }
         Account account = getAccountUseCase.execute(dto.getAccountId());
         User user = getUserUseCase.execute(userId);
 

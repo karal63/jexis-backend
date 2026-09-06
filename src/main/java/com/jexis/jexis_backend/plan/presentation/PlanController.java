@@ -32,6 +32,7 @@ public class PlanController {
     private final UpdatePriceUseCase updatePriceUseCase;
     private final DtoHelper dtoHelper;
     private final SetDefaultPriceUseCase setDefaultPriceUseCase;
+    private final PublishPlanUseCase publishPlanUseCase;
 
     @PostMapping
     public Plan create(@Valid @RequestBody CreatePlanDto dto) {
@@ -52,6 +53,11 @@ public class PlanController {
     @PatchMapping("/{id}")
     public Plan update(@PathVariable UUID id, @Valid @RequestBody UpdatePlanDto dto) {
         return updatePlanUseCase.execute(id, dto);
+    }
+
+    @PatchMapping("/{id}/publish")
+    public Plan publish(@PathVariable UUID id) {
+        return publishPlanUseCase.execute(id);
     }
 
     @PatchMapping("/{planId}/set-default-price")

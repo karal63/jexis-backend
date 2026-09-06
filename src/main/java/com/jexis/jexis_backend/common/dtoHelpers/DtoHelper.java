@@ -2,6 +2,7 @@ package com.jexis.jexis_backend.common.dtoHelpers;
 
 import com.jexis.jexis_backend.plan.application.dto.PlanResponseDto;
 import com.jexis.jexis_backend.plan.domain.entities.Plan;
+import com.jexis.jexis_backend.plan.domain.enums.PlanStatus;
 import com.jexis.jexis_backend.subscription.application.dto.SubscriptionResponseDto;
 import com.jexis.jexis_backend.subscription.domain.entities.Subscription;
 import com.jexis.jexis_backend.user.application.dto.PaymentMethodResponseDto;
@@ -364,12 +365,16 @@ public class DtoHelper {
     }
 
     public PlanResponseDto toPlanDto(Plan plan) {
+        PlanStatus status = plan.getStatus() == null ? PlanStatus.PUBLISHED : plan.getStatus();
+
         return new PlanResponseDto(
                 plan.getId(),
                 plan.getName(),
                 plan.getCode(),
                 plan.getDescription(),
                 plan.isActive(),
+                status,
+                status == PlanStatus.DRAFT && plan.isPublishable(),
                 plan.getCreatedAt(),
                 plan.getDefaultPrice()
         );

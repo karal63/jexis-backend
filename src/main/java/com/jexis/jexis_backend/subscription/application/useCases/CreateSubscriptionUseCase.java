@@ -2,6 +2,7 @@ package com.jexis.jexis_backend.subscription.application.useCases;
 
 import com.jexis.jexis_backend.plan.application.useCases.GetPlanUseCase;
 import com.jexis.jexis_backend.plan.domain.entities.Plan;
+import com.jexis.jexis_backend.plan.domain.exceptions.PlanNotPublishedException;
 import com.jexis.jexis_backend.stripe.application.useCases.subscription.CreateStripeSubscriptionUseCase;
 import com.jexis.jexis_backend.subscription.application.dto.CreateSubscriptionDto;
 import com.jexis.jexis_backend.subscription.domain.exceptions.ForbiddenException;
@@ -25,6 +26,9 @@ public class CreateSubscriptionUseCase {
     public void execute(CreateSubscriptionDto dto, UUID userId) {
         User user = getUserUseCase.execute(userId);
         Plan plan = getPlanUseCase.execute(dto.getPlanId());
+        if (!plan.isPubliclyAvailable()) {
+            throw new PlanNotPublishedException();
+        }
 
         PaymentMethod paymentMethod = getPaymentMethodUseCase.execute(user.getStripeCustomerId(), dto.getPaymentMethodId());
         if (paymentMethod.getCustomer().equals(user.getStripeCustomerId())) {
