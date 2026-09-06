@@ -13,6 +13,4 @@ public class UpdatePlanDto {
     private String code;
 
     private String description;
-
-    private UUID defaultPriceId;
 }
