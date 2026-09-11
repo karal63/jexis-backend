@@ -1,8 +1,11 @@
 package com.jexis.jexis_backend.subscription.domain.entities;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.plan.domain.entities.Plan;
 import com.jexis.jexis_backend.subscription.domain.enums.SubscriptionStatus;
@@ -63,6 +66,15 @@ public class Subscription {
     private boolean cancelAtPeriodEnd = false;
 
     private LocalDateTime canceledAt;
+
+    @OneToMany(
+            mappedBy = "subscription",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    @JsonIgnore
+    private List<SubscriptionEntitlement> entitlements = new ArrayList<>();
 
     @Column(nullable = false, updatable = false)
     @CreationTimestamp

@@ -9,7 +9,9 @@ import com.jexis.jexis_backend.subscription.application.dto.SetSubscriptionPayme
 import com.jexis.jexis_backend.subscription.application.dto.SubscriptionResponseDto;
 import com.jexis.jexis_backend.subscription.application.dto.CreateCheckoutDto;
 import com.jexis.jexis_backend.subscription.application.dto.CreateSubscriptionDto;
+import com.jexis.jexis_backend.subscription.application.dto.SaveSubscriptionEntitlementDto;
 import com.jexis.jexis_backend.subscription.application.useCases.*;
+import com.jexis.jexis_backend.subscription.domain.entities.SubscriptionEntitlement;
 import com.jexis.jexis_backend.user.application.useCases.GetPaymentMethodUseCase;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,6 +30,8 @@ public class SubscriptionController {
     private final CreateSubscriptionUseCase createSubscriptionUseCase;
     private final SetSubscriptionPaymentMethodUseCase setSubscriptionPaymentMethodUseCase;
     private final ScheduleSubscriptionCancellationUseCase scheduleSubscriptionCancellationUseCase;
+    private final GetSubscriptionEntitlementsUseCase getSubscriptionEntitlementsUseCase;
+    private final SaveSubscriptionEntitlementsUseCase saveSubscriptionEntitlementsUseCase;
     private final GetPaymentMethodUseCase getPaymentMethodUseCase;
     private final DtoHelper dtoHelper;
 
@@ -35,6 +39,18 @@ public class SubscriptionController {
     @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
     public List<SubscriptionResponseDto> list() {
         return getAllSubscriptionsUseCase.execute().stream().map(dtoHelper::toSubscriptionDto).toList();
+    }
+
+    @GetMapping("/admin/subscriptions/{id}/entitlements")
+    @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
+    public List<SubscriptionEntitlement> listEntitlements(@PathVariable UUID id) {
+        return getSubscriptionEntitlementsUseCase.execute(id);
+    }
+
+    @PostMapping("/admin/subscriptions/{id}/entitlements")
+    @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
+    public List<SubscriptionEntitlement> saveEntitlements(@PathVariable UUID id, @Valid @RequestBody List<SaveSubscriptionEntitlementDto> dtos) {
+        return saveSubscriptionEntitlementsUseCase.execute(id, dtos);
     }
 
     @GetMapping("/subscriptions/{id}")
