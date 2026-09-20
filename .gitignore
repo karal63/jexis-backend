@@ -9,6 +9,7 @@ TODO.md
 LEARN.md
 application.yml
 application.properties
+/.env
 
 ### STS ###
 .apt_generated
