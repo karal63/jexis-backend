@@ -54,6 +54,12 @@ public class SubscriptionAuthorization {
                 || isAdmin(userId);
     }
 
+    public boolean canViewActive(UUID userId, UUID accountId) {
+        return hasRoleUseCase.execute(userId, accountId, Role.OWNER)
+                || hasRoleUseCase.execute(userId, accountId, Role.ADMIN)
+                || isAdmin(userId);
+    }
+
     private boolean isAdmin(UUID userId) {
         User user = getUserUseCase.execute(userId);
         return userAuthorization.isAdmin(user.getRoles());

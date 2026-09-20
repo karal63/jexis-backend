@@ -34,6 +34,8 @@ public class SubscriptionController {
     private final SaveSubscriptionEntitlementsUseCase saveSubscriptionEntitlementsUseCase;
     private final GetPaymentMethodUseCase getPaymentMethodUseCase;
     private final DtoHelper dtoHelper;
+    private final GetMySubscriptionsUseCase getMySubscriptionsUseCase;
+    private final GetActiveAccountSubscriptionUseCase getActiveAccountSubscriptionUseCase;
 
     @GetMapping("/admin/subscriptions")
     @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
@@ -81,5 +83,29 @@ public class SubscriptionController {
     @PreAuthorize("@subscriptionAuthorization.canUpdate(authentication.principal.id(), #id)")
     public void cancel(@PathVariable UUID id) {
         scheduleSubscriptionCancellationUseCase.execute(id);
+    }
+
+    /**
+     * Get all subscriptions of the authenticated user
+     *
+     * @param user user dto
+     * @return subscription list
+     */
+    @GetMapping("/me/subscriptions")
+    public List<SubscriptionResponseDto> getMySubscriptions(@AuthenticationPrincipal AuthUser user) {
+        return getMySubscriptionsUseCase.execute(user.id()).stream().map(dtoHelper::toSubscriptionDto).toList();
+    }
+
+    /**
+     * Get active account subscription
+     *
+     * @param accountId account id
+     * @return active subscription
+     */
+    @GetMapping("/accounts/{accountId}/active-subscription")
+    @PreAuthorize("@subscriptionAuthorization.canViewActive(authentication.principal.id(), #accountId)")
+    public SubscriptionResponseDto getAccountSubscription(@PathVariable UUID accountId) {
+        return dtoHelper.toSubscriptionDto(getActiveAccountSubscriptionUseCase.execute(accountId));
+
     }
 }
