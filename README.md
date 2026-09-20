@@ -45,20 +45,16 @@ Before you begin, ensure you have the following installed:
    - Stripe API keys and webhook secrets
    - Mail server credentials
 
-3. **Start Infrastructure:**
-   Use Docker Compose to start RabbitMQ:
+3. **Start Infrastructure + Backend + Caddy:**
+   Use Docker Compose to start PostgreSQL, RabbitMQ, backend API, and Caddy:
    ```bash
    docker-compose up -d
    ```
 
-4. **Database Setup:**
-   Ensure a PostgreSQL database named `jexis` exists locally or update the connection string in `application.properties`.
-
-5. **Run the Application:**
-   ```bash
-   ./gradlew bootRun
-   ```
-   The server will start on `http://localhost:3000/api`.
+4. **Access the Application:**
+   - API via Caddy: `http://localhost/api`
+   - Swagger UI via Caddy: `http://localhost/api/swagger-ui/index.html`
+   - Direct backend (inside compose published port not required): `backend:3000`
 
 ## 📖 API Documentation
 
