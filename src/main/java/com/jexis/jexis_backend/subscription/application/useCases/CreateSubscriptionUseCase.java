@@ -1,11 +1,15 @@
 package com.jexis.jexis_backend.subscription.application.useCases;
 
+import com.jexis.jexis_backend.account.application.useCases.GetAccountUseCase;
+import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.plan.application.useCases.GetPlanUseCase;
 import com.jexis.jexis_backend.plan.domain.entities.Plan;
 import com.jexis.jexis_backend.plan.domain.exceptions.PlanNotPublishedException;
 import com.jexis.jexis_backend.stripe.application.useCases.subscription.CreateStripeSubscriptionUseCase;
 import com.jexis.jexis_backend.subscription.application.dto.CreateSubscriptionDto;
+import com.jexis.jexis_backend.subscription.domain.entities.Subscription;
 import com.jexis.jexis_backend.subscription.domain.exceptions.ForbiddenException;
+import com.jexis.jexis_backend.subscription.domain.exceptions.SubscriptionExistsForAccountException;
 import com.jexis.jexis_backend.user.application.useCases.GetPaymentMethodUseCase;
 import com.jexis.jexis_backend.user.application.useCases.GetUserUseCase;
 import com.jexis.jexis_backend.user.domain.entities.User;
@@ -22,12 +26,23 @@ public class CreateSubscriptionUseCase {
     private final GetUserUseCase getUserUseCase;
     private final GetPlanUseCase getPlanUseCase;
     private final GetPaymentMethodUseCase getPaymentMethodUseCase;
+    private final GetActiveAccountSubscriptionUseCase getActiveAccountSubscriptionUseCase;
+    private final GetAccountUseCase getAccountUseCase;
 
     public void execute(CreateSubscriptionDto dto, UUID userId) {
         User user = getUserUseCase.execute(userId);
         Plan plan = getPlanUseCase.execute(dto.getPlanId());
+        Account account = getAccountUseCase.execute(dto.getAccountId());
+
         if (!plan.isPubliclyAvailable()) {
             throw new PlanNotPublishedException();
+        }
+
+        // check if account has active subscription with the same plan
+        // @TODO add upgrading/downgrading subscription here
+        Subscription activeSubscription = getActiveAccountSubscriptionUseCase.execute(account.getId());
+        if (activeSubscription != null && activeSubscription.getPlan().getId().equals(plan.getId())) {
+            throw new SubscriptionExistsForAccountException();
         }
 
         PaymentMethod paymentMethod = getPaymentMethodUseCase.execute(user.getStripeCustomerId(), dto.getPaymentMethodId());
@@ -38,7 +53,7 @@ public class CreateSubscriptionUseCase {
                     plan.getDefaultPrice().getStripePriceId(),
                     user.getId(),
                     dto.getAccountId(),
-                    dto.getPlanId()
+                    plan.getId()
             );
         } else {
             throw new ForbiddenException();
