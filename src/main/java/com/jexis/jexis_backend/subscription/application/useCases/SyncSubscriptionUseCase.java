@@ -2,12 +2,12 @@ package com.jexis.jexis_backend.subscription.application.useCases;
 
 import com.jexis.jexis_backend.account.application.useCases.GetAccountUseCase;
 import com.jexis.jexis_backend.account.domain.entities.Account;
+import com.jexis.jexis_backend.plan.application.useCases.GetPlanByStripeIdUseCase;
 import com.jexis.jexis_backend.plan.application.useCases.GetPlanUseCase;
 import com.jexis.jexis_backend.plan.application.useCases.GetPriceByStripeIdUseCase;
 import com.jexis.jexis_backend.plan.domain.entities.Plan;
 import com.jexis.jexis_backend.plan.domain.entities.Price;
 import com.jexis.jexis_backend.subscription.domain.entities.Subscription;
-import com.jexis.jexis_backend.subscription.domain.enums.SubscriptionStatus;
 import com.jexis.jexis_backend.subscription.infrastructure.SubscriptionRepository;
 import com.jexis.jexis_backend.subscription.infrastructure.stripe.SubscriptionMapper;
 import com.jexis.jexis_backend.user.application.useCases.GetUserUseCase;
@@ -31,6 +31,7 @@ public class SyncSubscriptionUseCase {
     private final GetPriceByStripeIdUseCase getPriceByStripeIdUseCase;
     private final SubscriptionMapper subscriptionMapper;
     private final EntityManager entityManager;
+    private final GetPlanByStripeIdUseCase getPlanByStripeIdUseCase;
 
     public Subscription execute(com.stripe.model.Subscription stripeSub) {
         entityManager.createNativeQuery(
@@ -44,25 +45,22 @@ public class SyncSubscriptionUseCase {
 
         String userId = stripeSub.getMetadata().get("userId");
         String accountId = stripeSub.getMetadata().get("accountId");
-        String planId = stripeSub.getMetadata().get("planId");
+//        String planId = stripeSub.getMetadata().get("planId");
 
         User user = getUserUseCase.execute(UUID.fromString(userId));
         Account account = getAccountUseCase.execute(UUID.fromString(accountId));
-        Plan plan = getPlanUseCase.execute(UUID.fromString(planId));
 
         var subscriptionItem = stripeSub
                 .getItems()
                 .getData()
                 .get(0);
 
+
         Long currentPeriodStart = subscriptionItem.getCurrentPeriodStart();
         Long currentPeriodEnd = subscriptionItem.getCurrentPeriodEnd();
 
-        String stripePriceId = subscriptionItem
-                .getPrice()
-                .getId();
-
-        Price price = getPriceByStripeIdUseCase.execute(stripePriceId);
+        Price price = getPriceByStripeIdUseCase.execute(subscriptionItem.getPrice().getId());
+        Plan plan = getPlanByStripeIdUseCase.execute(subscriptionItem.getPlan().getId());
 
         LocalDateTime convertedPeriodStart = Instant
                 .ofEpochSecond(currentPeriodStart)

@@ -8,8 +8,8 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.plan.domain.entities.Plan;
+import com.jexis.jexis_backend.subscription.domain.enums.SubscriptionChangeType;
 import com.jexis.jexis_backend.subscription.domain.enums.SubscriptionStatus;
-import com.stripe.param.SubscriptionUpdateParams;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -93,5 +93,14 @@ public class Subscription {
         this.currentPeriodStart = currentPeriodStart;
         this.currentPeriodEnd = currentPeriodEnd;
         this.cancelAtPeriodEnd = cancelAtPeriodEnd;
+    }
+
+    public SubscriptionChangeType determineChange(Plan newPlan) {
+        if (price.getUnitAmount() < newPlan.getDefaultPrice().getUnitAmount()) {
+            return SubscriptionChangeType.UPGRADE;
+        } else if (price.getUnitAmount() > newPlan.getDefaultPrice().getUnitAmount()) {
+            return SubscriptionChangeType.DOWNGRADE;
+        }
+        return null;
     }
 }

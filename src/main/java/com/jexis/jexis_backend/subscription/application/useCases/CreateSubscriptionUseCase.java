@@ -28,6 +28,7 @@ public class CreateSubscriptionUseCase {
     private final GetPaymentMethodUseCase getPaymentMethodUseCase;
     private final GetActiveAccountSubscriptionUseCase getActiveAccountSubscriptionUseCase;
     private final GetAccountUseCase getAccountUseCase;
+    private final HandleExistingSubscriptionUseCase handleExistingSubscriptionUseCase;
 
     public void execute(CreateSubscriptionDto dto, UUID userId) {
         User user = getUserUseCase.execute(userId);
@@ -38,25 +39,25 @@ public class CreateSubscriptionUseCase {
             throw new PlanNotPublishedException();
         }
 
-        // check if account has active subscription with the same plan
-        // @TODO add upgrading/downgrading subscription here
         Subscription activeSubscription = getActiveAccountSubscriptionUseCase.execute(account.getId());
-        if (activeSubscription != null && activeSubscription.getPlan().getId().equals(plan.getId())) {
-            throw new SubscriptionExistsForAccountException();
-        }
 
-        PaymentMethod paymentMethod = getPaymentMethodUseCase.execute(user.getStripeCustomerId(), dto.getPaymentMethodId());
-        if (paymentMethod.getCustomer().equals(user.getStripeCustomerId())) {
-            createStripeSubscriptionUseCase.execute(
-                    user.getStripeCustomerId(),
-                    dto.getPaymentMethodId(),
-                    plan.getDefaultPrice().getStripePriceId(),
-                    user.getId(),
-                    dto.getAccountId(),
-                    plan.getId()
-            );
+        // check if account has active subscription with the same plan
+        if (activeSubscription != null) {
+            handleExistingSubscriptionUseCase.execute(activeSubscription, plan);
         } else {
-            throw new ForbiddenException();
+            PaymentMethod paymentMethod = getPaymentMethodUseCase.execute(user.getStripeCustomerId(), dto.getPaymentMethodId());
+            if (paymentMethod.getCustomer().equals(user.getStripeCustomerId())) {
+                createStripeSubscriptionUseCase.execute(
+                        user.getStripeCustomerId(),
+                        dto.getPaymentMethodId(),
+                        plan.getDefaultPrice().getStripePriceId(),
+                        user.getId(),
+                        dto.getAccountId(),
+                        plan.getId()
+                );
+            } else {
+                throw new ForbiddenException();
+            }
         }
     }
 }
