@@ -22,6 +22,7 @@ public record SubscriptionResponseDto(
         LocalDateTime currentPeriodEnd,
         boolean cancelAtPeriodEnd,
         LocalDateTime canceledAt,
+        Plan scheduledPlan,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {

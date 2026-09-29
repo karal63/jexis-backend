@@ -10,6 +10,7 @@ import com.jexis.jexis_backend.account.domain.entities.Account;
 import com.jexis.jexis_backend.plan.domain.entities.Plan;
 import com.jexis.jexis_backend.subscription.domain.enums.SubscriptionChangeType;
 import com.jexis.jexis_backend.subscription.domain.enums.SubscriptionStatus;
+import com.jexis.jexis_backend.subscription.domain.exceptions.PlansNotComparableException;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -67,6 +68,12 @@ public class Subscription {
 
     private LocalDateTime canceledAt;
 
+    @ManyToOne
+    @JoinColumn(name = "scheduled_plan_id")
+    private Plan scheduledPlan;
+
+    private String stripeScheduleId;
+
     @OneToMany(
             mappedBy = "subscription",
             cascade = CascadeType.ALL,
@@ -96,11 +103,43 @@ public class Subscription {
     }
 
     public SubscriptionChangeType determineChange(Plan newPlan) {
-        if (price.getUnitAmount() < newPlan.getDefaultPrice().getUnitAmount()) {
+        Price newPrice = newPlan.getDefaultPrice();
+        if (price == null || newPrice == null
+                || price.getCurrency() == null || newPrice.getCurrency() == null
+                || !price.getCurrency().equalsIgnoreCase(newPrice.getCurrency())
+                || price.getIntervalCount() == null || price.getIntervalCount() <= 0
+                || newPrice.getIntervalCount() == null || newPrice.getIntervalCount() <= 0) {
+            throw new PlansNotComparableException();
+        }
+
+        long currentMultiplier = annualIntervalMultiplier(price.getInterval());
+        long newMultiplier = annualIntervalMultiplier(newPrice.getInterval());
+        java.math.BigInteger currentCost = java.math.BigInteger.valueOf(price.getUnitAmount())
+                .multiply(java.math.BigInteger.valueOf(currentMultiplier))
+                .multiply(java.math.BigInteger.valueOf(newPrice.getIntervalCount()));
+        java.math.BigInteger newCost = java.math.BigInteger.valueOf(newPrice.getUnitAmount())
+                .multiply(java.math.BigInteger.valueOf(newMultiplier))
+                .multiply(java.math.BigInteger.valueOf(price.getIntervalCount()));
+
+        int comparison = currentCost.compareTo(newCost);
+        if (comparison < 0) {
             return SubscriptionChangeType.UPGRADE;
-        } else if (price.getUnitAmount() > newPlan.getDefaultPrice().getUnitAmount()) {
+        } else if (comparison > 0) {
             return SubscriptionChangeType.DOWNGRADE;
         }
-        return null;
+        throw new PlansNotComparableException();
+    }
+
+    private long annualIntervalMultiplier(String interval) {
+        if (interval == null) {
+            throw new PlansNotComparableException();
+        }
+        return switch (interval.toLowerCase(java.util.Locale.ROOT)) {
+            case "day" -> 365L;
+            case "week" -> 52L;
+            case "month" -> 12L;
+            case "year" -> 1L;
+            default -> throw new PlansNotComparableException();
+        };
     }
 }

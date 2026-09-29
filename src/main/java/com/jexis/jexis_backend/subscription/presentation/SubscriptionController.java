@@ -8,6 +8,7 @@ import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
 import com.jexis.jexis_backend.subscription.application.dto.SetSubscriptionPaymentMethodDto;
 import com.jexis.jexis_backend.subscription.application.dto.SubscriptionResponseDto;
 import com.jexis.jexis_backend.subscription.application.dto.CreateCheckoutDto;
+import com.jexis.jexis_backend.subscription.application.dto.CreateCheckoutResult;
 import com.jexis.jexis_backend.subscription.application.dto.CreateSubscriptionDto;
 import com.jexis.jexis_backend.subscription.application.dto.SaveSubscriptionEntitlementDto;
 import com.jexis.jexis_backend.subscription.application.useCases.*;
@@ -17,6 +18,7 @@ import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 
 
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ public class SubscriptionController {
     private final CreateSubscriptionUseCase createSubscriptionUseCase;
     private final SetSubscriptionPaymentMethodUseCase setSubscriptionPaymentMethodUseCase;
     private final ScheduleSubscriptionCancellationUseCase scheduleSubscriptionCancellationUseCase;
+    private final CancelScheduledDowngradeUseCase cancelScheduledDowngradeUseCase;
     private final GetSubscriptionEntitlementsUseCase getSubscriptionEntitlementsUseCase;
     private final SaveSubscriptionEntitlementsUseCase saveSubscriptionEntitlementsUseCase;
     private final GetPaymentMethodUseCase getPaymentMethodUseCase;
@@ -63,8 +66,12 @@ public class SubscriptionController {
 
     @PostMapping("/subscriptions/checkout")
     @PreAuthorize("@subscriptionAuthorization.canCheckout(authentication.principal.id(), #dto.accountId)")
-    public String createCheckoutSession(@Valid @RequestBody CreateCheckoutDto dto, @AuthenticationPrincipal AuthUser user) {
-        return createCheckoutUseCase.execute(dto, user.id());
+    public ResponseEntity<String> createCheckoutSession(@Valid @RequestBody CreateCheckoutDto dto, @AuthenticationPrincipal AuthUser user) {
+        CreateCheckoutResult result = createCheckoutUseCase.execute(dto, user.id());
+        if (result.directSubscriptionChange()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(result.checkoutUrl());
     }
 
     @PostMapping("/subscriptions/create")
@@ -83,6 +90,12 @@ public class SubscriptionController {
     @PreAuthorize("@subscriptionAuthorization.canUpdate(authentication.principal.id(), #id)")
     public void cancel(@PathVariable UUID id) {
         scheduleSubscriptionCancellationUseCase.execute(id);
+    }
+
+    @PostMapping({"/subscriptions/{id}/cancel-downgrade", "/subscriptions/{id}/cancel-scheduled-downgrade"})
+    @PreAuthorize("@subscriptionAuthorization.canUpdate(authentication.principal.id(), #id)")
+    public void cancelDowngrade(@PathVariable UUID id) {
+        cancelScheduledDowngradeUseCase.execute(id);
     }
 
     /**

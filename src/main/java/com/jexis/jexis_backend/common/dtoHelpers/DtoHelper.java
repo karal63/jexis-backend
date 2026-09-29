@@ -408,6 +408,7 @@ public class DtoHelper {
                 subscription.getCurrentPeriodEnd(),
                 subscription.isCancelAtPeriodEnd(),
                 subscription.getCanceledAt(),
+                subscription.getScheduledPlan(),
                 subscription.getCreatedAt(),
                 subscription.getUpdatedAt()
         );

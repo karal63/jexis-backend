@@ -8,8 +8,8 @@ import com.jexis.jexis_backend.plan.domain.exceptions.PlanNotPublishedException;
 import com.jexis.jexis_backend.stripe.application.useCases.CreateStripeCustomerUseCase;
 import com.jexis.jexis_backend.stripe.application.useCases.subscription.CreateStripeCheckoutUseCase;
 import com.jexis.jexis_backend.subscription.application.dto.CreateCheckoutDto;
+import com.jexis.jexis_backend.subscription.application.dto.CreateCheckoutResult;
 import com.jexis.jexis_backend.subscription.domain.entities.Subscription;
-import com.jexis.jexis_backend.subscription.domain.exceptions.SubscriptionExistsForAccountException;
 import com.jexis.jexis_backend.user.application.useCases.GetUserUseCase;
 import com.jexis.jexis_backend.user.domain.entities.User;
 import com.jexis.jexis_backend.user.infrastructure.UserRepository;
@@ -29,35 +29,36 @@ public class CreateCheckoutUseCase {
     private final GetUserUseCase getUserUseCase;
     private final UserRepository userRepository;
     private final GetActiveAccountSubscriptionUseCase getActiveAccountSubscriptionUseCase;
+    private final HandleExistingSubscriptionUseCase handleExistingSubscriptionUseCase;
 
-    public String execute(CreateCheckoutDto dto, UUID userId) {
+    public CreateCheckoutResult execute(CreateCheckoutDto dto, UUID userId) {
         Plan plan = getPlanUseCase.execute(dto.getPlanId());
         if (!plan.isPubliclyAvailable()) {
             throw new PlanNotPublishedException();
         }
         Account account = getAccountUseCase.execute(dto.getAccountId());
 
-        // check if account has active subscription with the same plan
-        // @TODO add upgrading/downgrading subscription here
         Subscription activeSubscription = getActiveAccountSubscriptionUseCase.execute(account.getId());
-        if (activeSubscription != null && activeSubscription.getPlan().getId().equals(plan.getId())) {
-            throw new SubscriptionExistsForAccountException();
+
+        if (activeSubscription != null) {
+            handleExistingSubscriptionUseCase.execute(activeSubscription, plan);
+            return CreateCheckoutResult.changedSubscription();
+        } else {
+            User user = getUserUseCase.execute(userId);
+
+            if (user.getStripeCustomerId() == null) {
+                Customer customer = createStripeCustomerUseCase.execute(user);
+                user.setStripeCustomerId(customer.getId());
+                userRepository.save(user);
+            }
+
+            return CreateCheckoutResult.checkoutCreated(createStripeCheckoutUseCase.execute(
+                    plan.getId(),
+                    plan.getDefaultPrice().getStripePriceId(),
+                    userId,
+                    account.getId(),
+                    user.getStripeCustomerId()
+            ));
         }
-
-        User user = getUserUseCase.execute(userId);
-
-        if (user.getStripeCustomerId() == null) {
-            Customer customer = createStripeCustomerUseCase.execute(user);
-            user.setStripeCustomerId(customer.getId());
-            userRepository.save(user);
-        }
-
-        return createStripeCheckoutUseCase.execute(
-                plan.getId(),
-                plan.getDefaultPrice().getStripePriceId(),
-                userId,
-                account.getId(),
-                user.getStripeCustomerId()
-        );
     }
 }

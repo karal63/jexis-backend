@@ -10,12 +10,16 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class UpgradeOrDowngradeSubUseCase {
+public class UpgradeStripeSubscriptionUseCase {
     private final StripeClient client;
 
     public void execute(String stripeSubscriptionId, String newStripePriceId) {
         try {
             Subscription subscription = client.v1().subscriptions().retrieve(stripeSubscriptionId);
+
+            if (subscription.getSchedule() != null) {
+                client.v1().subscriptionSchedules().release(subscription.getSchedule());
+            }
 
             SubscriptionItem subscriptionItem = client.v1().subscriptionItems().retrieve(subscription.getItems().getData().get(0).getId());
 
@@ -35,7 +39,7 @@ public class UpgradeOrDowngradeSubUseCase {
                     params
             );
         } catch (StripeException e) {
-            throw new RuntimeException("Failed to update subscription", e);
+            throw new RuntimeException("Failed to upgrade subscription", e);
         }
     }
 }
