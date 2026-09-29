@@ -32,7 +32,6 @@ public class PlanEntitlement {
 
     @ManyToOne
     @JoinColumn(name = "plan_id", nullable = false)
-    @JsonBackReference
     private Plan plan;
 
     @ManyToOne

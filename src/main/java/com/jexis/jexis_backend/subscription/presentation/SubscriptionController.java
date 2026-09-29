@@ -7,6 +7,7 @@ import com.jexis.jexis_backend.auth.application.dto.AuthUser;
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
 import com.jexis.jexis_backend.subscription.application.dto.SetSubscriptionPaymentMethodDto;
 import com.jexis.jexis_backend.subscription.application.dto.SubscriptionResponseDto;
+import com.jexis.jexis_backend.subscription.application.dto.EffectiveSubscriptionEntitlementDto;
 import com.jexis.jexis_backend.subscription.application.dto.CreateCheckoutDto;
 import com.jexis.jexis_backend.subscription.application.dto.CreateCheckoutResult;
 import com.jexis.jexis_backend.subscription.application.dto.CreateSubscriptionDto;
@@ -34,6 +35,7 @@ public class SubscriptionController {
     private final ScheduleSubscriptionCancellationUseCase scheduleSubscriptionCancellationUseCase;
     private final CancelScheduledDowngradeUseCase cancelScheduledDowngradeUseCase;
     private final GetSubscriptionEntitlementsUseCase getSubscriptionEntitlementsUseCase;
+    private final GetEffectiveSubscriptionEntitlementsUseCase getEffectiveSubscriptionEntitlementsUseCase;
     private final SaveSubscriptionEntitlementsUseCase saveSubscriptionEntitlementsUseCase;
     private final GetPaymentMethodUseCase getPaymentMethodUseCase;
     private final DtoHelper dtoHelper;
@@ -62,6 +64,12 @@ public class SubscriptionController {
     @PreAuthorize("@subscriptionAuthorization.canView(authentication.principal.id(), #id)")
     public SubscriptionResponseDto get(@PathVariable UUID id) {
         return dtoHelper.toSubscriptionDto(getSubscriptionUseCase.execute(id));
+    }
+
+    @GetMapping("/subscriptions/{id}/entitlements")
+    @PreAuthorize("@subscriptionAuthorization.canView(authentication.principal.id(), #id)")
+    public List<EffectiveSubscriptionEntitlementDto> listEffectiveEntitlements(@PathVariable UUID id) {
+        return getEffectiveSubscriptionEntitlementsUseCase.execute(id);
     }
 
     @PostMapping("/subscriptions/checkout")
