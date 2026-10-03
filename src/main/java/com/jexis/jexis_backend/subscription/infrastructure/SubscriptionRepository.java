@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.repository.query.Param;
@@ -27,7 +29,7 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, UUID
             List<SubscriptionStatus> statuses);
     Optional<Subscription> findByStripeSubscriptionId(String stripeSubscriptionId);
 
-    List<Subscription> findByUserId(UUID userId);
+    Page<Subscription> findByUserId(UUID userId, Pageable pageable);
 
     @Query("""
                 SELECT s

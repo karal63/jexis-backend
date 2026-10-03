@@ -1,7 +1,7 @@
 package com.jexis.jexis_backend.subscription.application.useCases;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,7 +16,7 @@ public class GetAllSubscriptionsUseCase {
     private final SubscriptionRepository subscriptionRepository;
 
     @Transactional(readOnly = true)
-    public List<Subscription> execute() {
-        return subscriptionRepository.findAll();
+    public Page<Subscription> execute(int page, int pageSize) {
+        return subscriptionRepository.findAll(PageRequest.of(Math.max(0, page - 1), pageSize));
     }
 }

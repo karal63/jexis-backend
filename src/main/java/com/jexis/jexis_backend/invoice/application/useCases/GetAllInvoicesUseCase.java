@@ -1,7 +1,7 @@
 package com.jexis.jexis_backend.invoice.application.useCases;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,7 +16,7 @@ public class GetAllInvoicesUseCase {
     private final InvoiceRepository invoiceRepository;
 
     @Transactional(readOnly = true)
-    public List<Invoice> execute() {
-        return invoiceRepository.findAll();
+    public Page<Invoice> execute(int page, int pageSize) {
+        return invoiceRepository.findAll(PageRequest.of(Math.max(0, page - 1), pageSize));
     }
 }
