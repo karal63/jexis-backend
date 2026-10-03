@@ -18,7 +18,7 @@ No production data or plan values are automatically modified by this change. Exi
 
 `GET /accounts/{accountId}/limits/cards?additionalQuantity=2`
 
-Use `members` for the member limit. Quantity defaults to 1; 0 asks whether current usage fits. Account-view authorization is required. The endpoint is advisory: creation repeats the check under a database lock.
+Use `members` for the member limit or `cardholders` for the cardholder limit. Both use the effective `max_members` entitlement, with separate usage counts: a value of 30 permits up to 30 members and up to 30 non-deleted cardholders. Active and inactive cardholders both count. Quantity defaults to 1; 0 asks whether current usage fits. Account-view authorization is required. The endpoint is advisory: creation repeats the check under a database lock before calling Stripe.
 
 Example response:
 

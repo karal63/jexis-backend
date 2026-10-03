@@ -4,7 +4,8 @@ import com.jexis.jexis_backend.account.domain.exception.ResourceLimitException;
 
 public enum AccountResource {
     CARDS("cards", "max_cards"),
-    MEMBERS("members", "max_members");
+    MEMBERS("members", "max_members"),
+    CARDHOLDERS("cardholders", "max_members");
 
     private final String path;
     private final String entitlementKey;
@@ -20,6 +21,6 @@ public enum AccountResource {
         for (AccountResource resource : values()) {
             if (resource.path.equals(path)) return resource;
         }
-        throw new ResourceLimitException(400, "INVALID_RESOURCE", "Resource must be cards or members");
+        throw new ResourceLimitException(400, "INVALID_RESOURCE", "Resource must be cards, members or cardholders");
     }
 }

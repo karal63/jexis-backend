@@ -10,6 +10,9 @@ import com.jexis.jexis_backend.card.application.dto.ReplaceCardDto;
 import com.jexis.jexis_backend.card.application.dto.CreateCardDto;
 import com.jexis.jexis_backend.card.application.dto.EditCardDto;
 import com.jexis.jexis_backend.cardholder.application.useCases.GetCardHolderUseCase;
+import com.jexis.jexis_backend.cardholder.application.useCases.CreateCardHolderUseCase;
+import com.jexis.jexis_backend.cardholder.application.dto.CreateCardHolderDto;
+import com.jexis.jexis_backend.common.logging.AsyncLogger;
 import com.jexis.jexis_backend.cardholder.infrastructure.CardHolderRepository;
 import com.jexis.jexis_backend.wallet.application.useCases.GetWalletUseCase;
 import com.jexis.jexis_backend.wallet.infrastructure.WalletRepository;
@@ -73,7 +76,7 @@ class ResourceLimitsDatabaseTest {
             CheckAccountResourceLimitUseCase.class, AddMemberUseCase.class, GetLockedCardUseCase.class,
             CardReplacementTransactions.class, ReplaceCardUseCase.class, CreateCardUseCase.class,
             GetCardHolderUseCase.class, GetWalletUseCase.class, CanAccessUseCase.class,
-            GetCardUseCase.class, EditCardUseCase.class, DeleteCardUseCase.class})
+            GetCardUseCase.class, EditCardUseCase.class, DeleteCardUseCase.class, CreateCardHolderUseCase.class})
     static class Config {
         @Bean DataSource dataSource() {
             return new DriverManagerDataSource("jdbc:h2:mem:limits;MODE=PostgreSQL;NON_KEYWORDS=KEY,VALUE,INTERVAL;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=10000", "sa", "");
@@ -90,6 +93,8 @@ class ResourceLimitsDatabaseTest {
         @Bean CreateStripeCardUseCase stripeCreate() { return mock(CreateStripeCardUseCase.class); }
         @Bean EditCardStatusUseCase stripeEdit() { return mock(EditCardStatusUseCase.class); }
         @Bean SetCardLimitsUseCase stripeLimits() { return mock(SetCardLimitsUseCase.class); }
+        @Bean CreateStripeHolderUseCase stripeHolder() { return mock(CreateStripeHolderUseCase.class); }
+        @Bean AsyncLogger logger() { return mock(AsyncLogger.class); }
     }
     @PersistenceContext EntityManager em;
     @Autowired PlatformTransactionManager manager;
@@ -103,13 +108,15 @@ class ResourceLimitsDatabaseTest {
     @Autowired DeleteCardUseCase deleteCard;
     @Autowired CreateStripeCardUseCase stripeCreate;
     @Autowired EditCardStatusUseCase stripeEdit;
+    @Autowired CreateCardHolderUseCase createHolder;
+    @Autowired CreateStripeHolderUseCase stripeHolder;
     TransactionTemplate tx;
     UUID accountId, userId, subscriptionId;
     static UUID cardEntitlementId, memberEntitlementId;
 
     @BeforeEach void setup() {
         tx = new TransactionTemplate(manager);
-        reset(stripeCreate, stripeEdit);
+        reset(stripeCreate, stripeEdit, stripeHolder);
         tx.executeWithoutResult(s -> {
             User owner = user();
             Account account = new Account("account@example.com", UUID.randomUUID().toString(), UUID.randomUUID().toString(), owner);
@@ -135,6 +142,72 @@ class ResourceLimitsDatabaseTest {
             em.persist(new PlanEntitlement(plan, em.find(Entitlement.class, memberEntitlementId), "2"));
         });
     }
+    @Test void cardholdersUsePlanMemberLimitAndExcludeDeletedAndOtherAccounts() {
+        tx.executeWithoutResult(s -> {
+            Account account = em.find(Account.class, accountId);
+            holder(account, account.getOwner(), CardHolderStatus.active, false);
+            holder(account, user(), CardHolderStatus.inactive, false);
+            holder(account, user(), CardHolderStatus.active, true);
+            Account other = new Account("other@example.com", UUID.randomUUID().toString(), UUID.randomUUID().toString(), account.getOwner());
+            em.persist(other);
+            holder(other, account.getOwner(), CardHolderStatus.active, false);
+        });
+        var result = checker.execute(accountId, AccountResource.CARDHOLDERS, 1);
+        assertThat(result.used()).isEqualTo(2);
+        assertThat(result.limit()).isEqualTo(2);
+        assertThat(result.reason()).isEqualTo("LIMIT_EXCEEDED");
+        assertThat(checker.execute(accountId, AccountResource.MEMBERS, 1).allowed()).isTrue();
+    }
+
+    @Test void concurrentCardholderCreationAllowsThirtiethButDeniesThirtyFirstBeforeStripe() throws Exception {
+        List<UUID> candidates = tx.execute(s -> {
+            Account account = em.find(Account.class, accountId);
+            for (int i = 0; i < 29; i++) holder(account, user(), CardHolderStatus.active, false);
+            User first = user(), second = user();
+            em.persist(new Member(account, first, Role.ADMIN));
+            em.persist(new Member(account, second, Role.ADMIN));
+            em.persist(new SubscriptionEntitlement(em.find(Subscription.class, subscriptionId),
+                    em.find(Entitlement.class, memberEntitlementId), "30"));
+            return List.of(first.getId(), second.getId());
+        });
+        when(stripeHolder.execute(any(), any())).thenAnswer(invocation -> {
+            var holder = new com.stripe.model.issuing.Cardholder();
+            holder.setId(UUID.randomUUID().toString()); holder.setStatus("active");
+            return holder;
+        });
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        CountDownLatch ready = new CountDownLatch(2), start = new CountDownLatch(1);
+        try {
+            List<Future<Boolean>> results = new ArrayList<>();
+            for (UUID candidate : candidates) results.add(executor.submit(() -> {
+                ready.countDown();
+                if (!start.await(5, TimeUnit.SECONDS)) throw new AssertionError("start timed out");
+                try {
+                    createHolder.execute(new CreateCardHolderDto(accountId, candidate, "Street", "City", "State", "US", "12345"),
+                            new org.springframework.mock.web.MockHttpServletRequest());
+                    return true;
+                } catch (ResourceLimitException ex) {
+                    assertThat(ex.getCode()).isEqualTo("LIMIT_EXCEEDED");
+                    assertThat(ex.getStatus()).isEqualTo(403);
+                    return false;
+                }
+            }));
+            assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue(); start.countDown();
+            assertThat(List.of(results.get(0).get(15, TimeUnit.SECONDS), results.get(1).get(15, TimeUnit.SECONDS)))
+                    .containsExactlyInAnyOrder(true, false);
+            assertThat(checker.execute(accountId, AccountResource.CARDHOLDERS, 0).used()).isEqualTo(30);
+            verify(stripeHolder, times(1)).execute(any(), any());
+        } finally { executor.shutdownNow(); }
+    }
+
+    CardHolder holder(Account account, User user, CardHolderStatus status, boolean deleted) {
+        CardHolder holder = new CardHolder(UUID.randomUUID().toString(), account, user,
+                "Test", "Street", "City", "State", "US", "12345", status);
+        holder.setIsDeleted(deleted);
+        em.persist(holder);
+        return holder;
+    }
+
     User user() {
         String unique = UUID.randomUUID().toString();
         User user = new User("Test", "User", unique + "@example.com", unique, "password", null, List.of());

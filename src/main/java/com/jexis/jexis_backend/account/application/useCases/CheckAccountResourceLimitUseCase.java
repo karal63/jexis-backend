@@ -5,6 +5,7 @@ import com.jexis.jexis_backend.account.domain.enums.AccountResource;
 import com.jexis.jexis_backend.account.domain.exception.ResourceLimitException;
 import com.jexis.jexis_backend.card.domain.enums.CardStatus;
 import com.jexis.jexis_backend.card.infrastructure.CardRepository;
+import com.jexis.jexis_backend.cardholder.infrastructure.CardHolderRepository;
 import com.jexis.jexis_backend.member.infrastructure.MemberRepository;
 import com.jexis.jexis_backend.subscription.application.useCases.GetEffectiveSubscriptionEntitlementsUseCase;
 import com.jexis.jexis_backend.subscription.domain.entities.Subscription;
@@ -28,6 +29,7 @@ public class CheckAccountResourceLimitUseCase {
     private final GetEffectiveSubscriptionEntitlementsUseCase getEntitlements;
     private final CardRepository cardRepository;
     private final MemberRepository memberRepository;
+    private final CardHolderRepository cardHolderRepository;
 
     public AccountResourceLimitDto execute(UUID accountId, AccountResource resource, long additionalQuantity) {
         if (additionalQuantity < 0) {
@@ -37,6 +39,7 @@ public class CheckAccountResourceLimitUseCase {
         long used = switch (resource) {
             case CARDS -> cardRepository.countResourceUsage(accountId, List.of(CardStatus.active, CardStatus.inactive));
             case MEMBERS -> memberRepository.countByAccountId(accountId);
+            case CARDHOLDERS -> cardHolderRepository.countByAccountIdAndIsDeletedFalse(accountId);
         };
         List<Subscription> subscriptions = eligibleSubscriptions(accountId);
         if (subscriptions.isEmpty()) return denied(used, additionalQuantity, "NO_ELIGIBLE_SUBSCRIPTION");
