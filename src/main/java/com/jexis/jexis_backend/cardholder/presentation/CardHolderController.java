@@ -77,7 +77,7 @@ public class CardHolderController {
         return dtoHelper.toCardHolderDto(cardHolder);
     }
 
-    @GetMapping("/account/{id}/card-holders")
+    @GetMapping("/accounts/{id}/card-holders")
     @PreAuthorize("@cardHolderAuthorization.canView(authentication.principal.id(), #id)")
     public CardHolderPageResponseDto getCardHoldersByAccount(
             @PathVariable UUID id,

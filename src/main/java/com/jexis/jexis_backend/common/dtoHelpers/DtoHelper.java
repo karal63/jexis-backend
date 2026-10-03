@@ -7,6 +7,7 @@ import com.jexis.jexis_backend.subscription.application.dto.SubscriptionResponse
 import com.jexis.jexis_backend.subscription.domain.entities.Subscription;
 import com.jexis.jexis_backend.user.application.dto.PaymentMethodResponseDto;
 import com.jexis.jexis_backend.user.application.useCases.GetPaymentMethodUseCase;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import com.jexis.jexis_backend.account.application.dto.AccountAdminResponseDto;
@@ -41,6 +42,7 @@ import com.jexis.jexis_backend.wallet.application.dto.WalletResponseDto;
 import com.jexis.jexis_backend.wallet.domain.entities.Wallet;
 
 @Service
+@Slf4j
 public class DtoHelper {
     private final GetPaymentMethodUseCase getPaymentMethodUseCase;
 
@@ -396,13 +398,48 @@ public class DtoHelper {
                 subscription.getStripePaymentMethodId()
         );
 
+        return toSubscriptionDto(subscription, toPaymentMethodDto(paymentMethod));
+    }
+
+    public SubscriptionResponseDto toSubscriptionDtoWithOptionalPaymentMethod(Subscription subscription) {
+        String paymentMethodId = subscription.getStripePaymentMethodId();
+        String customerId = subscription.getUser() == null
+                ? null
+                : subscription.getUser().getStripeCustomerId();
+
+        if (paymentMethodId == null || paymentMethodId.isBlank()
+                || customerId == null || customerId.isBlank()) {
+            return toSubscriptionDto(subscription, null);
+        }
+
+        try {
+            com.stripe.model.PaymentMethod paymentMethod = getPaymentMethodUseCase.execute(
+                    customerId,
+                    paymentMethodId
+            );
+            return toSubscriptionDto(subscription, toPaymentMethodDto(paymentMethod));
+        } catch (RuntimeException exception) {
+            log.warn(
+                    "Could not enrich subscription {} with Stripe payment method {}; returning it without payment details",
+                    subscription.getId(),
+                    paymentMethodId,
+                    exception
+            );
+            return toSubscriptionDto(subscription, null);
+        }
+    }
+
+    private SubscriptionResponseDto toSubscriptionDto(
+            Subscription subscription,
+            PaymentMethodResponseDto paymentMethod
+    ) {
         return new SubscriptionResponseDto(
                 subscription.getId(),
                 subscription.getUser(),
                 subscription.getAccount(),
                 subscription.getPlan(),
                 subscription.getPrice(),
-                toPaymentMethodDto(paymentMethod),
+                paymentMethod,
                 subscription.getStatus(),
                 subscription.getCurrentPeriodStart(),
                 subscription.getCurrentPeriodEnd(),

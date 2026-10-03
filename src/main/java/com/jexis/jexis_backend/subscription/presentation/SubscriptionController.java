@@ -14,7 +14,6 @@ import com.jexis.jexis_backend.subscription.application.dto.CreateSubscriptionDt
 import com.jexis.jexis_backend.subscription.application.dto.SaveSubscriptionEntitlementDto;
 import com.jexis.jexis_backend.subscription.application.useCases.*;
 import com.jexis.jexis_backend.subscription.domain.entities.SubscriptionEntitlement;
-import com.jexis.jexis_backend.user.application.useCases.GetPaymentMethodUseCase;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -37,7 +36,6 @@ public class SubscriptionController {
     private final GetSubscriptionEntitlementsUseCase getSubscriptionEntitlementsUseCase;
     private final GetEffectiveSubscriptionEntitlementsUseCase getEffectiveSubscriptionEntitlementsUseCase;
     private final SaveSubscriptionEntitlementsUseCase saveSubscriptionEntitlementsUseCase;
-    private final GetPaymentMethodUseCase getPaymentMethodUseCase;
     private final DtoHelper dtoHelper;
     private final GetMySubscriptionsUseCase getMySubscriptionsUseCase;
     private final GetActiveAccountSubscriptionUseCase getActiveAccountSubscriptionUseCase;
@@ -45,7 +43,9 @@ public class SubscriptionController {
     @GetMapping("/admin/subscriptions")
     @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
     public List<SubscriptionResponseDto> list() {
-        return getAllSubscriptionsUseCase.execute().stream().map(dtoHelper::toSubscriptionDto).toList();
+        return getAllSubscriptionsUseCase.execute().stream()
+                .map(dtoHelper::toSubscriptionDtoWithOptionalPaymentMethod)
+                .toList();
     }
 
     @GetMapping("/admin/subscriptions/{id}/entitlements")
@@ -63,7 +63,7 @@ public class SubscriptionController {
     @GetMapping("/subscriptions/{id}")
     @PreAuthorize("@subscriptionAuthorization.canView(authentication.principal.id(), #id)")
     public SubscriptionResponseDto get(@PathVariable UUID id) {
-        return dtoHelper.toSubscriptionDto(getSubscriptionUseCase.execute(id));
+        return dtoHelper.toSubscriptionDtoWithOptionalPaymentMethod(getSubscriptionUseCase.execute(id));
     }
 
     @GetMapping("/subscriptions/{id}/entitlements")
@@ -114,7 +114,7 @@ public class SubscriptionController {
      */
     @GetMapping("/me/subscriptions")
     public List<SubscriptionResponseDto> getMySubscriptions(@AuthenticationPrincipal AuthUser user) {
-        return getMySubscriptionsUseCase.execute(user.id()).stream().map(dtoHelper::toSubscriptionDto).toList();
+        return getMySubscriptionsUseCase.execute(user.id()).stream().map(dtoHelper::toSubscriptionDtoWithOptionalPaymentMethod).toList();
     }
 
     /**
@@ -126,7 +126,6 @@ public class SubscriptionController {
     @GetMapping("/accounts/{accountId}/active-subscription")
     @PreAuthorize("@subscriptionAuthorization.canViewActive(authentication.principal.id(), #accountId)")
     public SubscriptionResponseDto getAccountSubscription(@PathVariable UUID accountId) {
-        return dtoHelper.toSubscriptionDto(getActiveAccountSubscriptionUseCase.execute(accountId));
-
+        return dtoHelper.toSubscriptionDtoWithOptionalPaymentMethod(getActiveAccountSubscriptionUseCase.execute(accountId));
     }
 }
