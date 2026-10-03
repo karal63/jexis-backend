@@ -9,8 +9,9 @@ import org.springframework.stereotype.Service;
 
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
 import com.jexis.jexis_backend.common.logging.AsyncLogger;
-import com.jexis.jexis_backend.member.application.dto.CreateMemberDto;
-import com.jexis.jexis_backend.member.application.useCases.AddMemberUseCase;
+import com.jexis.jexis_backend.member.domain.entities.Member;
+import com.jexis.jexis_backend.member.infrastructure.MemberRepository;
+import org.springframework.transaction.annotation.Transactional;
 import com.jexis.jexis_backend.member.domain.enums.Role;
 import com.jexis.jexis_backend.stripe.application.useCases.CreateConnectUseCase;
 import com.jexis.jexis_backend.stripe.application.useCases.CreateLinkUseCase;
@@ -36,7 +37,7 @@ public class CreateAccountUseCase {
     private final CreateConnectUseCase createConnectUseCase;
     private final CreateLinkUseCase createLinkUseCase;
     private final DtoHelper dtoHelper;
-    private final AddMemberUseCase addMemberUseCase;
+    private final MemberRepository memberRepository;
     private final GetUserUseCase getUserUseCase;
 
     /**
@@ -46,6 +47,7 @@ public class CreateAccountUseCase {
      * @param authUser passed by controller payload containing account creation data
      * @return the newly created account
      */
+    @Transactional
     public AccountResponseDto execute(AuthUser authUser) {
         User user = getUserUseCase.execute(authUser.id());
 
@@ -63,8 +65,13 @@ public class CreateAccountUseCase {
         Account saved = repo.save(account);
         logger.info("ACCOUNT", "Account created successfully: " + saved.getFirstName() + " " + saved.getLastName());
 
-        addMemberUseCase.execute(new CreateMemberDto(account.getId(), user.getId(), Role.OWNER));
+        initializeOwner(saved, user);
         logger.info("MEMBER", "Initial member created successfully");
         return dtoHelper.toAccountDto(saved);
+    }
+
+    // Only account creation can bootstrap its first member before subscribing.
+    private void initializeOwner(Account account, User owner) {
+        memberRepository.save(new Member(account, owner, Role.OWNER));
     }
 }

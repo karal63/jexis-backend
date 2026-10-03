@@ -3,10 +3,11 @@ package com.jexis.jexis_backend.cardholder.application.dto;
 import java.util.UUID;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record CreateCardHolderDto(
-        @NotBlank UUID accountId,
-        @NotBlank UUID userId,
+        @NotNull UUID accountId,
+        @NotNull UUID userId,
         @NotBlank String addressLine1,
         @NotBlank String city,
         @NotBlank String state,

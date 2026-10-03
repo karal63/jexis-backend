@@ -3,6 +3,10 @@ package com.jexis.jexis_backend.cardholder.application.useCases;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.jexis.jexis_backend.account.application.useCases.LockAccountUseCase;
+import com.jexis.jexis_backend.account.application.useCases.CheckAccountResourceLimitUseCase;
+import com.jexis.jexis_backend.account.domain.enums.AccountResource;
 
 import com.jexis.jexis_backend.account.application.useCases.GetAccountUseCase;
 import com.jexis.jexis_backend.account.domain.entities.Account;
@@ -30,10 +34,15 @@ public class CreateCardHolderUseCase {
     private final CreateStripeHolderUseCase createStripeHolder;
     private final GetUserUseCase getUserUseCase;
     private final CanAccessUseCase canAccessUseCase;
+    private final LockAccountUseCase lockAccount;
+    private final CheckAccountResourceLimitUseCase checkLimit;
 
     public CreateCardHolderUseCase(CardHolderRepository repo, GetAccountUseCase getAccountUseCase,
             CreateStripeHolderUseCase createStripeHolder, GetUserUseCase getUserUseCase, AsyncLogger logger,
-            CanAccessUseCase canAccessUseCase) {
+            CanAccessUseCase canAccessUseCase, LockAccountUseCase lockAccount,
+            CheckAccountResourceLimitUseCase checkLimit) {
+        this.lockAccount = lockAccount;
+        this.checkLimit = checkLimit;
         this.repo = repo;
         this.getAccountUseCase = getAccountUseCase;
         this.createStripeHolder = createStripeHolder;
@@ -41,7 +50,9 @@ public class CreateCardHolderUseCase {
         this.canAccessUseCase = canAccessUseCase;
     }
 
+    @Transactional
     public CardHolder execute(CreateCardHolderDto body, HttpServletRequest request) {
+        lockAccount.execute(body.accountId());
         if (!canAccessUseCase.execute(body.userId(), body.accountId())) {
             throw new UserIsNotMemberException();
         }
@@ -53,6 +64,8 @@ public class CreateCardHolderUseCase {
         if (existingCardHolder.isPresent()) {
             throw new CardHolderExistsException(user.getEmail());
         }
+
+        checkLimit.requireCapacity(account.getId(), AccountResource.CARDHOLDERS, 1);
 
         Cardholder stripeCardHolder = createStripeHolder.execute(request, new CreateStripeHolderDto(
                 account.getConnectAccountId(),

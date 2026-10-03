@@ -1,15 +1,15 @@
 package com.jexis.jexis_backend.card.application.useCases;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.jexis.jexis_backend.account.domain.exception.ResourceLimitException;
+import com.jexis.jexis_backend.card.domain.enums.CardStatus;
 
 import com.jexis.jexis_backend.card.application.dto.EditCardDto;
 import com.jexis.jexis_backend.card.domain.entities.Card;
-import com.jexis.jexis_backend.card.domain.exceptions.CardNotFoundException;
 import com.jexis.jexis_backend.card.infrastructure.CardRepository;
-import com.jexis.jexis_backend.cardholder.application.useCases.GetCardHolderUseCase;
 import com.jexis.jexis_backend.stripe.application.useCases.EditCardStatusUseCase;
 import com.jexis.jexis_backend.stripe.application.useCases.SetCardLimitsUseCase;
 
@@ -25,19 +25,17 @@ import com.jexis.jexis_backend.stripe.application.useCases.SetCardLimitsUseCase;
 @Service
 public class EditCardUseCase {
     private final CardRepository repo;
-    private final GetCardHolderUseCase getCardHolderUseCase;
     private final SetCardLimitsUseCase setCardLimitsUseCase;
     private final EditCardStatusUseCase editCardStatusUseCase;
-    private final GetCardUseCase getCardUseCase;
+    private final GetLockedCardUseCase getLockedCard;
 
-    public EditCardUseCase(CardRepository repo, GetCardHolderUseCase getCardHolderUseCase,
+    public EditCardUseCase(CardRepository repo,
             SetCardLimitsUseCase setCardLimitsUseCase, EditCardStatusUseCase editCardStatusUseCase,
-                           GetCardUseCase getCardUseCase) {
+                           GetLockedCardUseCase getLockedCard) {
+        this.getLockedCard = getLockedCard;
         this.repo = repo;
-        this.getCardHolderUseCase = getCardHolderUseCase;
         this.setCardLimitsUseCase = setCardLimitsUseCase;
         this.editCardStatusUseCase = editCardStatusUseCase;
-        this.getCardUseCase = getCardUseCase;
     }
 
     /**
@@ -51,8 +49,16 @@ public class EditCardUseCase {
      * 
      * @return the updated card entity
      */
+    @Transactional
     public Card execute(UUID id, EditCardDto dto) {
-        Card card = getCardUseCase.execute(id);
+        Card card = getLockedCard.execute(id);
+
+        if (card.getIsDeleted() || card.isReplacementPending()
+                || (card.getStatus() == CardStatus.canceled
+                    && dto.status() != null && dto.status() != card.getStatus())) {
+            throw new ResourceLimitException(
+                    409, "CARD_NOT_EDITABLE", "Canceled, deleted or replacing cards cannot be reactivated or changed");
+        }
 
         if (dto.status() != null) {
             editCardStatusUseCase.execute(card.getCardHolder().getAccount().getConnectAccountId(),

@@ -5,11 +5,11 @@ import java.util.UUID;
 
 import com.jexis.jexis_backend.card.domain.enums.CardStatus;
 import com.jexis.jexis_backend.stripe.application.useCases.EditCardStatusUseCase;
-import com.stripe.param.issuing.CardUpdateParams;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.jexis.jexis_backend.account.domain.exception.ResourceLimitException;
 
 import com.jexis.jexis_backend.card.domain.entities.Card;
-import com.jexis.jexis_backend.card.domain.exceptions.CardNotFoundException;
 import com.jexis.jexis_backend.card.infrastructure.CardRepository;
 
 /**
@@ -26,12 +26,13 @@ import com.jexis.jexis_backend.card.infrastructure.CardRepository;
 public class DeleteCardUseCase {
     private final CardRepository repo;
     private final EditCardStatusUseCase editCardStatusUseCase;
-    private final GetCardUseCase getCardUseCase;
+    private final GetLockedCardUseCase getLockedCard;
 
-    public DeleteCardUseCase(CardRepository repo, EditCardStatusUseCase editCardStatusUseCase, GetCardUseCase getCardUseCase) {
+    public DeleteCardUseCase(CardRepository repo, EditCardStatusUseCase editCardStatusUseCase,
+            GetLockedCardUseCase getLockedCard) {
+        this.getLockedCard = getLockedCard;
         this.repo = repo;
         this.editCardStatusUseCase = editCardStatusUseCase;
-        this.getCardUseCase = getCardUseCase;
     }
 
     /**
@@ -41,8 +42,13 @@ public class DeleteCardUseCase {
      *
      * @param cardId id of the card we want to delete
      */
+    @Transactional
     public void execute(UUID cardId) {
-        Card card = getCardUseCase.execute(cardId);
+        Card card = getLockedCard.execute(cardId);
+        if (card.isReplacementPending()) {
+            throw new ResourceLimitException(
+                    409, "CARD_REPLACEMENT_PENDING", "Complete the pending replacement before deleting this card");
+        }
 
         editCardStatusUseCase.execute(
                 card.getCardHolder().getAccount().getConnectAccountId(),
@@ -51,6 +57,7 @@ public class DeleteCardUseCase {
         );
 
         card.setIsDeleted(true);
+        card.setStatus(CardStatus.canceled);
         card.setDeletedAt(LocalDateTime.now());
 
         repo.save(card);

@@ -4,3 +4,15 @@ Simulating methods:
 
 Enable tunnel:
 cloudflared tunnel --url http://localhost:3000
+
+
+To run app in dev mode we need:
+- Run only docker and rabbitmq Docker containers
+
+- Add localhost port to access Docker postgres container
+- Replace postgres host to localhost inside URL connection in .env file
+
+- Add localhost port to access Docker rabbitmq container
+- Replace rabbitmq host to localhost in .env file
+
+- Don't forget to rebuild Docker images

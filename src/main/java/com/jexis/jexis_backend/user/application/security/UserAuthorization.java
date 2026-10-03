@@ -41,4 +41,9 @@ public class UserAuthorization {
     public boolean isAdmin(List<UserRole> roles) {
         return roles.contains(UserRole.ADMIN);
     }
+
+    public boolean isAdmin(UUID userId) {
+        User user = getUserUseCase.execute(userId);
+        return isAdmin(user.getRoles());
+    }
 }

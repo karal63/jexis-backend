@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -27,40 +28,29 @@ import jakarta.persistence.*;
  */
 @Entity
 @Table(name = "users")
+@Getter
+@Setter
+@NoArgsConstructor
 public class User {
-    @Getter
-    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Getter
-    @Setter
     @Column(nullable = false)
     private String firstName;
 
-    @Getter
-    @Setter
     @Column(nullable = false)
     private String lastName;
 
-    @Getter
-    @Setter
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Getter
-    @Setter
     @Column(nullable = false, unique = true)
     private String phoneNumber;
 
-    @Getter
-    @Setter
     @Column(nullable = false)
     private String password;
 
-    @Getter
-    @Setter
     @ElementCollection(targetClass = UserRole.class, fetch = FetchType.EAGER)
     @CollectionTable(
             name = "user_roles",
@@ -70,38 +60,26 @@ public class User {
     @Column(name = "role")
     private List<UserRole> roles = new ArrayList<>();
 
-    @Getter
-    @Setter
     @Column(nullable = false)
     private Boolean isActivated = false;
 
-    @Getter
-    @Setter
-    @Column()
+    @Column(unique = true)
     private String activationTokenHash;
 
-    @Getter
-    @Setter
+    @Column(unique = true)
+    private String stripeCustomerId;
+
     @Column(nullable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @Getter
-    @Setter
     @Column(nullable = false)
     private Boolean isDeleted = false;
 
-    @Getter
-    @Setter
     private LocalDateTime deletedAt;
 
-    @Getter
-    @Setter
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-
-    public User() {
-    }
 
     public User(String firstName, String lastName, String email, String phoneNumber, String password, String activationTokenHash, List<UserRole> roles) {
         this.firstName = firstName;

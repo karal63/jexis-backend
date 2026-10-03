@@ -6,6 +6,7 @@ import com.stripe.StripeClient;
 import com.stripe.model.issuing.Card;
 import com.stripe.net.RequestOptions;
 import com.stripe.param.issuing.CardCreateParams;
+import com.stripe.param.issuing.CardListParams;
 import com.jexis.jexis_backend.card.domain.enums.CardReplacementReason;
 
 @Service
@@ -22,7 +23,27 @@ public class CreateStripeCardUseCase {
 
     public Card execute(String cardholderId, String financialAccountId, String connectedAccountId, String replacementFor,
             CardReplacementReason replacementReason) {
+        return execute(cardholderId, financialAccountId, connectedAccountId, replacementFor, replacementReason, null);
+    }
+
+    public Card execute(String cardholderId, String financialAccountId, String connectedAccountId, String replacementFor,
+            CardReplacementReason replacementReason, String idempotencyKey) {
         try {
+            // Recover a prior successful issuance even if its local commit failed.
+            // This also avoids relying solely on Stripe's finite idempotency retention.
+            if (replacementFor != null && idempotencyKey != null) {
+                var existing = client.v1().issuing().cards().list(
+                        CardListParams.builder().setCardholder(cardholderId).build(),
+                        RequestOptions.builder().setStripeAccount(connectedAccountId).build());
+                Card recovered = null;
+                for (Card candidate : existing.autoPagingIterable()) {
+                    if (replacementFor.equals(candidate.getReplacementFor())) {
+                        if (recovered != null) throw new IllegalStateException("Multiple Stripe replacements require reconciliation");
+                        recovered = candidate;
+                    }
+                }
+                if (recovered != null) return recovered;
+            }
             CardCreateParams.Builder builder = CardCreateParams.builder()
                     .setCardholder(cardholderId)
                     .setFinancialAccount(financialAccountId)
@@ -40,7 +61,9 @@ public class CreateStripeCardUseCase {
 
             CardCreateParams params = builder.build();
 
-            RequestOptions requestOptions = RequestOptions.builder().setStripeAccount(connectedAccountId).build();
+            RequestOptions.RequestOptionsBuilder options = RequestOptions.builder().setStripeAccount(connectedAccountId);
+            if (idempotencyKey != null) options.setIdempotencyKey(idempotencyKey);
+            RequestOptions requestOptions = options.build();
 
             Card card = client.v1().issuing().cards().create(params, requestOptions);
             return card;

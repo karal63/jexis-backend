@@ -14,6 +14,8 @@ import com.jexis.jexis_backend.cardholder.domain.entities.CardHolder;
 import com.jexis.jexis_backend.cardholder.domain.enums.CardHolderStatus;
 
 public interface CardHolderRepository extends JpaRepository<CardHolder, UUID> {
+    long countByAccountIdAndIsDeletedFalse(UUID accountId);
+
     Optional<CardHolder> findByUserEmailAndAccountId(String email, UUID accountId);
 
     List<CardHolder> findAllByAccountIdAndIsDeletedFalse(UUID accountId);

@@ -1,6 +1,11 @@
 package com.jexis.jexis_backend.card.application.useCases;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.jexis.jexis_backend.account.application.useCases.LockAccountUseCase;
+import com.jexis.jexis_backend.account.application.useCases.CheckAccountResourceLimitUseCase;
+import com.jexis.jexis_backend.account.domain.enums.AccountResource;
+import com.jexis.jexis_backend.account.domain.exception.ResourceLimitException;
 
 import com.jexis.jexis_backend.account.application.useCases.GetAccountUseCase;
 import com.jexis.jexis_backend.account.domain.entities.Account;
@@ -39,11 +44,16 @@ public class CreateCardUseCase {
     private final GetAccountUseCase getAccountUseCase;
     private final GetUserUseCase getUserUseCase;
     private final CanAccessUseCase canAccessUseCase;
+    private final LockAccountUseCase lockAccount;
+    private final CheckAccountResourceLimitUseCase checkLimit;
 
     public CreateCardUseCase(CardRepository cardRepo, UserRepository userRepo,
             CreateStripeCardUseCase createStripeCard, GetCardHolderUseCase getCardHolderUseCase,
             GetWalletUseCase getWalletUseCase,
-            GetAccountUseCase getAccountUseCase, GetUserUseCase getUserUseCase, CanAccessUseCase canAccessUseCase) {
+            GetAccountUseCase getAccountUseCase, GetUserUseCase getUserUseCase, CanAccessUseCase canAccessUseCase,
+            LockAccountUseCase lockAccount, CheckAccountResourceLimitUseCase checkLimit) {
+        this.lockAccount = lockAccount;
+        this.checkLimit = checkLimit;
         this.cardRepo = cardRepo;
         this.createStripeCard = createStripeCard;
         this.getCardHolderUseCase = getCardHolderUseCase;
@@ -62,7 +72,9 @@ public class CreateCardUseCase {
      * @param dto the data transfer object containing card creation details
      * @return the created card entity
      */
+    @Transactional
     public Card execute(CreateCardDto dto) {
+        lockAccount.execute(dto.getAccountId());
         if (!canAccessUseCase.execute(dto.getUserId(), dto.getAccountId())) {
             throw new UserIsNotMemberException();
         }
@@ -71,6 +83,12 @@ public class CreateCardUseCase {
         Wallet wallet = getWalletUseCase.execute(dto.getWalletId());
         Account connectAccount = getAccountUseCase.execute(dto.getAccountId());
         User user = getUserUseCase.execute(dto.getUserId());
+
+        if (!cardHolder.getAccount().getId().equals(dto.getAccountId())
+                || !wallet.getAccount().getId().equals(dto.getAccountId())) {
+            throw new ResourceLimitException(403, "ACCOUNT_RESOURCE_MISMATCH", "Wallet and cardholder must belong to the account");
+        }
+        checkLimit.requireCapacity(dto.getAccountId(), AccountResource.CARDS, 1);
 
         com.stripe.model.issuing.Card stripeCard = createStripeCard.execute(cardHolder.getStripeCardHolderId(),
                 wallet.getStripeFinancialAccountId(),
