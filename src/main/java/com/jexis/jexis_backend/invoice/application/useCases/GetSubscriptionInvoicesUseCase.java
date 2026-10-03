@@ -1,8 +1,9 @@
 package com.jexis.jexis_backend.invoice.application.useCases;
 
-import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,7 +18,10 @@ public class GetSubscriptionInvoicesUseCase {
     private final InvoiceRepository invoiceRepository;
 
     @Transactional(readOnly = true)
-    public List<Invoice> execute(UUID subscriptionId) {
-        return invoiceRepository.findBySubscriptionId(subscriptionId);
+    public Page<Invoice> execute(UUID subscriptionId, int page, int pageSize) {
+        return invoiceRepository.findBySubscriptionId(
+                subscriptionId,
+                PageRequest.of(Math.max(0, page - 1), pageSize)
+        );
     }
 }

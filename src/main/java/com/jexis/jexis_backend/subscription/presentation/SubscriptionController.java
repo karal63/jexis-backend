@@ -6,6 +6,8 @@ import java.util.UUID;
 import com.jexis.jexis_backend.auth.application.dto.AuthUser;
 import com.jexis.jexis_backend.common.dtoHelpers.DtoHelper;
 import com.jexis.jexis_backend.subscription.application.dto.SetSubscriptionPaymentMethodDto;
+import com.jexis.jexis_backend.subscription.application.dto.SubscriptionPageAdminResponseDto;
+import com.jexis.jexis_backend.subscription.application.dto.SubscriptionPageResponseDto;
 import com.jexis.jexis_backend.subscription.application.dto.SubscriptionResponseDto;
 import com.jexis.jexis_backend.subscription.application.dto.EffectiveSubscriptionEntitlementDto;
 import com.jexis.jexis_backend.subscription.application.dto.CreateCheckoutDto;
@@ -13,9 +15,11 @@ import com.jexis.jexis_backend.subscription.application.dto.CreateCheckoutResult
 import com.jexis.jexis_backend.subscription.application.dto.CreateSubscriptionDto;
 import com.jexis.jexis_backend.subscription.application.dto.SaveSubscriptionEntitlementDto;
 import com.jexis.jexis_backend.subscription.application.useCases.*;
+import com.jexis.jexis_backend.subscription.domain.entities.Subscription;
 import com.jexis.jexis_backend.subscription.domain.entities.SubscriptionEntitlement;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
@@ -42,10 +46,10 @@ public class SubscriptionController {
 
     @GetMapping("/admin/subscriptions")
     @PreAuthorize("@userAuthorization.isAdmin(authentication.principal.roles())")
-    public List<SubscriptionResponseDto> list() {
-        return getAllSubscriptionsUseCase.execute().stream()
-                .map(dtoHelper::toSubscriptionDtoWithOptionalPaymentMethod)
-                .toList();
+    public SubscriptionPageAdminResponseDto list(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int pageSize) {
+        return mapToPageAdminResponse(getAllSubscriptionsUseCase.execute(page, pageSize));
     }
 
     @GetMapping("/admin/subscriptions/{id}/entitlements")
@@ -113,8 +117,11 @@ public class SubscriptionController {
      * @return subscription list
      */
     @GetMapping("/me/subscriptions")
-    public List<SubscriptionResponseDto> getMySubscriptions(@AuthenticationPrincipal AuthUser user) {
-        return getMySubscriptionsUseCase.execute(user.id()).stream().map(dtoHelper::toSubscriptionDtoWithOptionalPaymentMethod).toList();
+    public SubscriptionPageResponseDto getMySubscriptions(
+            @AuthenticationPrincipal AuthUser user,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int pageSize) {
+        return mapToPageResponse(getMySubscriptionsUseCase.execute(user.id(), page, pageSize));
     }
 
     /**
@@ -127,5 +134,31 @@ public class SubscriptionController {
     @PreAuthorize("@subscriptionAuthorization.canViewActive(authentication.principal.id(), #accountId)")
     public SubscriptionResponseDto getAccountSubscription(@PathVariable UUID accountId) {
         return dtoHelper.toSubscriptionDtoWithOptionalPaymentMethod(getActiveAccountSubscriptionUseCase.execute(accountId));
+    }
+
+    private SubscriptionPageResponseDto mapToPageResponse(Page<Subscription> subscriptionsPage) {
+        List<SubscriptionResponseDto> items = subscriptionsPage.getContent().stream()
+                .map(dtoHelper::toSubscriptionDtoWithOptionalPaymentMethod)
+                .toList();
+        return new SubscriptionPageResponseDto(
+                items,
+                subscriptionsPage.getNumber(),
+                subscriptionsPage.getSize(),
+                subscriptionsPage.getTotalElements(),
+                subscriptionsPage.getTotalPages()
+        );
+    }
+
+    private SubscriptionPageAdminResponseDto mapToPageAdminResponse(Page<Subscription> subscriptionsPage) {
+        List<SubscriptionResponseDto> items = subscriptionsPage.getContent().stream()
+                .map(dtoHelper::toSubscriptionDtoWithOptionalPaymentMethod)
+                .toList();
+        return new SubscriptionPageAdminResponseDto(
+                items,
+                subscriptionsPage.getNumber(),
+                subscriptionsPage.getSize(),
+                subscriptionsPage.getTotalElements(),
+                subscriptionsPage.getTotalPages()
+        );
     }
 }
