@@ -54,6 +54,15 @@ class AccountResourceLimitControllerTest {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.allowed").value(true))
                 .andExpect(jsonPath("$.limit").value(10)).andExpect(jsonPath("$.used").value(8));
     }
+    @Test void walletsRouteUsesWalletResource() throws Exception {
+        when(authorization.canView(userId, accountId)).thenReturn(true);
+        when(checker.execute(accountId, AccountResource.WALLETS, 1))
+                .thenReturn(new AccountResourceLimitDto(false, 2, 2L, 0, 1, "LIMIT_EXCEEDED"));
+        mvc.perform(get("/accounts/{id}/limits/wallets", accountId))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.allowed").value(false))
+                .andExpect(jsonPath("$.reason").value("LIMIT_EXCEEDED"));
+    }
+
     @Test void unrelatedAccountCannotInspectUsage() throws Exception {
         mvc.perform(get("/accounts/{id}/limits/members", accountId)).andExpect(status().isForbidden());
         verifyNoInteractions(checker);

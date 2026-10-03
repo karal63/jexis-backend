@@ -41,6 +41,7 @@ import com.jexis.jexis_backend.user.application.useCases.GetUserUseCase;
 import com.jexis.jexis_backend.user.domain.entities.User;
 import com.jexis.jexis_backend.user.infrastructure.UserRepository;
 import com.jexis.jexis_backend.wallet.domain.entities.Wallet;
+import com.jexis.jexis_backend.wallet.application.useCases.CreateWalletUseCase;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -76,7 +77,8 @@ class ResourceLimitsDatabaseTest {
             CheckAccountResourceLimitUseCase.class, AddMemberUseCase.class, GetLockedCardUseCase.class,
             CardReplacementTransactions.class, ReplaceCardUseCase.class, CreateCardUseCase.class,
             GetCardHolderUseCase.class, GetWalletUseCase.class, CanAccessUseCase.class,
-            GetCardUseCase.class, EditCardUseCase.class, DeleteCardUseCase.class, CreateCardHolderUseCase.class})
+            GetCardUseCase.class, EditCardUseCase.class, DeleteCardUseCase.class, CreateCardHolderUseCase.class,
+            CreateWalletUseCase.class})
     static class Config {
         @Bean DataSource dataSource() {
             return new DriverManagerDataSource("jdbc:h2:mem:limits;MODE=PostgreSQL;NON_KEYWORDS=KEY,VALUE,INTERVAL;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=10000", "sa", "");
@@ -95,6 +97,7 @@ class ResourceLimitsDatabaseTest {
         @Bean SetCardLimitsUseCase stripeLimits() { return mock(SetCardLimitsUseCase.class); }
         @Bean CreateStripeHolderUseCase stripeHolder() { return mock(CreateStripeHolderUseCase.class); }
         @Bean AsyncLogger logger() { return mock(AsyncLogger.class); }
+        @Bean CreateTreasuryAccount stripeTreasury() { return mock(CreateTreasuryAccount.class); }
     }
     @PersistenceContext EntityManager em;
     @Autowired PlatformTransactionManager manager;
@@ -110,13 +113,15 @@ class ResourceLimitsDatabaseTest {
     @Autowired EditCardStatusUseCase stripeEdit;
     @Autowired CreateCardHolderUseCase createHolder;
     @Autowired CreateStripeHolderUseCase stripeHolder;
+    @Autowired CreateTreasuryAccount stripeTreasury;
+    @Autowired CreateWalletUseCase createWallet;
     TransactionTemplate tx;
     UUID accountId, userId, subscriptionId;
     static UUID cardEntitlementId, memberEntitlementId;
 
     @BeforeEach void setup() {
         tx = new TransactionTemplate(manager);
-        reset(stripeCreate, stripeEdit, stripeHolder);
+        reset(stripeCreate, stripeEdit, stripeHolder, stripeTreasury);
         tx.executeWithoutResult(s -> {
             User owner = user();
             Account account = new Account("account@example.com", UUID.randomUUID().toString(), UUID.randomUUID().toString(), owner);
@@ -206,6 +211,59 @@ class ResourceLimitsDatabaseTest {
         holder.setIsDeleted(deleted);
         em.persist(holder);
         return holder;
+    }
+
+    @Test void walletLimitsApplyOverridesAndSerializeCreationBeforeStripe() throws Exception {
+        Account account = tx.execute(s -> em.find(Account.class, accountId));
+        assertThatThrownBy(() -> createWallet.execute(account, "Missing limit"))
+                .isInstanceOf(ResourceLimitException.class);
+        verifyNoInteractions(stripeTreasury);
+        UUID entitlementId = tx.execute(s -> {
+            Account current = em.find(Account.class, accountId);
+            Entitlement entitlement = new Entitlement("max_wallets", "limit", null);
+            em.persist(entitlement);
+            em.persist(new PlanEntitlement(em.find(Subscription.class, subscriptionId).getPlan(), entitlement, "2"));
+            em.persist(new Wallet("Existing", "fa_" + UUID.randomUUID(), current));
+            Wallet deleted = new Wallet("Deleted", "fa_" + UUID.randomUUID(), current);
+            deleted.setIsDeleted(true); em.persist(deleted);
+            Account other = new Account("other@example.com", UUID.randomUUID().toString(), UUID.randomUUID().toString(), current.getOwner());
+            em.persist(other); em.persist(new Wallet("Other account", "fa_" + UUID.randomUUID(), other));
+            return entitlement.getId();
+        });
+        var decision = checker.execute(accountId, AccountResource.WALLETS, 1);
+        assertThat(decision.used()).isEqualTo(1);
+        assertThat(decision.limit()).isEqualTo(2);
+        assertThat(decision.allowed()).isTrue();
+        tx.executeWithoutResult(s -> em.persist(new SubscriptionEntitlement(em.find(Subscription.class, subscriptionId),
+                em.find(Entitlement.class, entitlementId), "1")));
+        assertThatThrownBy(() -> createWallet.execute(account, "Overridden limit"))
+                .isInstanceOf(ResourceLimitException.class);
+        verifyNoInteractions(stripeTreasury);
+        tx.executeWithoutResult(s -> em.createQuery("update SubscriptionEntitlement e set e.value = '2' where e.subscription.id = :id")
+                .setParameter("id", subscriptionId).executeUpdate());
+        when(stripeTreasury.execute(any(), any())).thenAnswer(invocation -> {
+            var financialAccount = new com.stripe.model.treasury.FinancialAccount();
+            financialAccount.setId("fa_" + UUID.randomUUID()); return financialAccount;
+        });
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        CountDownLatch ready = new CountDownLatch(2), start = new CountDownLatch(1);
+        Callable<Boolean> add = () -> {
+            ready.countDown();
+            if (!start.await(5, TimeUnit.SECONDS)) throw new AssertionError("start timed out");
+            try { createWallet.execute(account, "New wallet"); return true; }
+            catch (ResourceLimitException ex) {
+                assertThat(ex.getCode()).isEqualTo("LIMIT_EXCEEDED");
+                assertThat(ex.getStatus()).isEqualTo(403); return false;
+            }
+        };
+        try {
+            Future<Boolean> first = executor.submit(add), second = executor.submit(add);
+            assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue(); start.countDown();
+            assertThat(List.of(first.get(15, TimeUnit.SECONDS), second.get(15, TimeUnit.SECONDS)))
+                    .containsExactlyInAnyOrder(true, false);
+            verify(stripeTreasury, times(1)).execute(account.getConnectAccountId(), "New wallet");
+            assertThat(checker.execute(accountId, AccountResource.WALLETS, 0).used()).isEqualTo(2);
+        } finally { executor.shutdownNow(); }
     }
 
     User user() {

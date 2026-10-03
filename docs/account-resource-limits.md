@@ -39,6 +39,13 @@ Internally, use `CheckAccountResourceLimitUseCase.execute(accountId, AccountReso
 
 ## Counting and replacements
 
+Wallets (Stripe Treasury financial accounts) use the `max_wallets` entitlement, with subscription overrides taking
+precedence over plan values. Configure a nonnegative integer value on the plan or subscription before creating wallets.
+`GET /accounts/{accountId}/limits/wallets?additionalQuantity=1` checks capacity. All non-deleted wallets belonging to
+that account count. Wallet creation checks capacity before calling Stripe and holds the account lock through saving
+the wallet, so concurrent requests cannot claim the same slot. Missing limits deny creation. External bank accounts
+are separate resources and are not subject to this wallet limit.
+
 Cards count across all account wallets through the cardholder's account: active and inactive cards count; deleted and canceled cards do not. All members count, including owners. Card creation validates both the wallet's and cardholder's account.
 
 Pending replacements reserve one slot, which is included in `used`. Preparation cancels the original in Stripe and commits the canceled status, original reason, and reservation. Issuance then runs in a separate transaction under the same account lock. Failure keeps the reservation; retry the same replacement endpoint with the same reason.

@@ -13,6 +13,8 @@ import org.springframework.data.repository.query.Param;
 import com.jexis.jexis_backend.wallet.domain.entities.Wallet;
 
 public interface WalletRepository extends JpaRepository<Wallet, UUID> {
+    long countByAccountIdAndIsDeletedFalse(UUID accountId);
+
     List<Wallet> findAllByAccountIdAndIsDeletedFalse(UUID accountId);
 
     Optional<Wallet> findByIdAndIsDeletedFalse(UUID accountId);
