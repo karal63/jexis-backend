@@ -74,7 +74,7 @@ class PlanControllerTest {
         objectMapper = new ObjectMapper();
 
         planId = UUID.randomUUID();
-        plan = new Plan("price_123", "Basic", "BASIC", "Description", true);
+        plan = new Plan("price_123", "Basic", "BASIC", "Description", true, com.jexis.jexis_backend.plan.domain.enums.PlanStatus.DRAFT);
         plan.setId(planId);
 
         priceId = UUID.randomUUID();

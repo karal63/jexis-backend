@@ -1,6 +1,5 @@
 package com.jexis.jexis_backend.card.domain.entities;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -16,6 +15,10 @@ import com.jexis.jexis_backend.common.dto.SpendingLimit;
 import com.jexis.jexis_backend.user.domain.entities.User;
 import com.jexis.jexis_backend.wallet.domain.entities.Wallet;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jexis.jexis_backend.card.domain.enums.CardReplacementReason;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -94,6 +97,26 @@ public class Card {
     private boolean isDeleted = false;
 
     private LocalDateTime deletedAt;
+
+    @JsonIgnore
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean replacementPending = false;
+
+    @JsonIgnore
+    @Enumerated(EnumType.STRING)
+    private CardReplacementReason replacementReason;
+
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "replacement_card_id", unique = true)
+    private Card replacementCard;
+
+    public boolean isReplacementPending() { return replacementPending; }
+    public void setReplacementPending(boolean value) { replacementPending = value; }
+    public CardReplacementReason getReplacementReason() { return replacementReason; }
+    public void setReplacementReason(CardReplacementReason value) { replacementReason = value; }
+    public Card getReplacementCard() { return replacementCard; }
+    public void setReplacementCard(Card value) { replacementCard = value; }
 
     public Card() {
     }

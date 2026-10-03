@@ -8,10 +8,23 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.query.Param;
+import com.jexis.jexis_backend.subscription.domain.enums.SubscriptionStatus;
 import com.jexis.jexis_backend.subscription.domain.entities.Subscription;
 
 @Repository
 public interface SubscriptionRepository extends JpaRepository<Subscription, UUID> {
+    @Query("""
+            select s from Subscription s where s.account.id = :accountId
+              and s.currentPeriodStart <= :now and s.currentPeriodEnd > :now
+              and s.status in :statuses
+            order by s.currentPeriodStart desc, s.id desc
+            """)
+    List<Subscription> findEligibleForResourceLimits(
+            @Param("accountId") UUID accountId,
+            @Param("now") LocalDateTime now,
+            @Param("statuses")
+            List<SubscriptionStatus> statuses);
     Optional<Subscription> findByStripeSubscriptionId(String stripeSubscriptionId);
 
     List<Subscription> findByUserId(UUID userId);

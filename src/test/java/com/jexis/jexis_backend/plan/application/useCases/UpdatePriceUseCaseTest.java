@@ -41,7 +41,7 @@ class UpdatePriceUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        plan = new Plan("prod_123", "Basic", "BASIC", "Description", true);
+        plan = new Plan("prod_123", "Basic", "BASIC", "Description", true, com.jexis.jexis_backend.plan.domain.enums.PlanStatus.DRAFT);
         priceId = UUID.randomUUID();
         price = new Price(plan, "price_stripe_123", "usd", 1000L, "month", 1, true);
         price.setId(priceId);

@@ -33,7 +33,7 @@ class GetPlanPricesUseCaseTest {
     @BeforeEach
     void setUp() {
         planId = UUID.randomUUID();
-        Plan plan = new Plan("prod_123", "Basic", "BASIC", "Description", true);
+        Plan plan = new Plan("prod_123", "Basic", "BASIC", "Description", true, com.jexis.jexis_backend.plan.domain.enums.PlanStatus.DRAFT);
         plan.setId(planId);
 
         price1 = new Price(plan, "price_1", "usd", 1000L, "month", 1, true);

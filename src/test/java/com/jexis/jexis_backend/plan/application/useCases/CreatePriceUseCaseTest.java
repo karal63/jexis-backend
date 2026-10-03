@@ -27,6 +27,12 @@ class CreatePriceUseCaseTest {
     private PriceRepository priceRepository;
 
     @Mock
+    private com.jexis.jexis_backend.plan.infrastructure.PlanRepository planRepository;
+
+    @Mock
+    private com.jexis.jexis_backend.stripe.application.useCases.plan.price.SetStripeDefaultPriceUseCase setStripeDefaultPriceUseCase;
+
+    @Mock
     private GetPlanUseCase getPlanUseCase;
 
     @Mock
@@ -42,7 +48,7 @@ class CreatePriceUseCaseTest {
     @BeforeEach
     void setUp() {
         planId = UUID.randomUUID();
-        plan = new Plan("prod_123", "Pro", "PRO", "Pro Plan", true);
+        plan = new Plan("prod_123", "Pro", "PRO", "Pro Plan", true, com.jexis.jexis_backend.plan.domain.enums.PlanStatus.DRAFT);
         plan.setId(planId);
 
         stripePrice = new com.stripe.model.Price();

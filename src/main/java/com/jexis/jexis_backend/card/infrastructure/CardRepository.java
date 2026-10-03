@@ -14,6 +14,16 @@ import com.jexis.jexis_backend.card.domain.entities.Card;
 import com.jexis.jexis_backend.card.domain.enums.CardStatus;
 
 public interface CardRepository extends JpaRepository<Card, UUID> {
+    @Query("select c.cardHolder.account.id from Card c where c.id = :id")
+    Optional<UUID> findAccountId(@Param("id") UUID id);
+    // Pending replacements retain their slot until the replacement is persisted.
+    @Query("""
+            select count(c) from Card c where c.cardHolder.account.id = :accountId
+              and (c.replacementPending = true or
+                   (c.isDeleted = false and c.status in :statuses))
+            """)
+    long countResourceUsage(@Param("accountId") UUID accountId,
+                            @Param("statuses") List<CardStatus> statuses);
     List<Card> findByCardHolderAccountIdAndIsDeletedFalse(UUID accountId);
 
     Optional<Card> findByIdAndIsDeletedFalse(UUID id);
